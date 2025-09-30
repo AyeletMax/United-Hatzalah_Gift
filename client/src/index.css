@@ -1,0 +1,4 @@
+/* Simplified base styles; the app theme is in theme.css */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; }
