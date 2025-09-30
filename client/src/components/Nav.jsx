@@ -14,7 +14,7 @@ const items = [
 export default function Nav() {
   return (
     <nav className="nav-root">
-      <div className="container nav-inner">
+      <div className="nav-inner">
         {items.map((label) => (
           <a key={label} href="#" className="nav-link" onMouseDown={(e)=>e.currentTarget.classList.add('active')} onMouseUp={(e)=>e.currentTarget.classList.remove('active')}>
             <span>{label}</span>
