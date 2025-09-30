@@ -35,6 +35,7 @@ export const pool = mysql.createPool({
   connectionLimit: Number(DB_CONN_LIMIT),
   queueLimit: Number(DB_QUEUE_LIMIT),
   charset: "utf8mb4",
+  multipleStatements: true,
 });
 
 export async function pingDatabase() {

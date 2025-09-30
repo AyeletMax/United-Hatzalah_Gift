@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS `question_options` (
   `question_id` BIGINT UNSIGNED NOT NULL,
   `option_text` VARCHAR(255) NOT NULL,
   `option_value` VARCHAR(64) NULL,
+  `display_order` INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `ix_question_options_question_id` (`question_id`),
   CONSTRAINT `fk_question_options_question` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
@@ -90,6 +91,7 @@ CREATE TABLE IF NOT EXISTS `question_options` (
 CREATE TABLE IF NOT EXISTS `product_questions` (
   `product_id` BIGINT UNSIGNED NOT NULL,
   `question_id` BIGINT UNSIGNED NOT NULL,
+  `display_order` INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`product_id`, `question_id`),
   KEY `ix_product_questions_question_id` (`question_id`),
   CONSTRAINT `fk_product_questions_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -121,15 +123,7 @@ CREATE TABLE IF NOT EXISTS `response_answers` (
   CONSTRAINT `fk_ra_option` FOREIGN KEY (`option_id`) REFERENCES `question_options` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Helpful composite indexes for reporting (use DROP IF EXISTS to allow re-runs)
-DROP INDEX IF EXISTS `ix_products_category_brand` ON `products`;
-CREATE INDEX `ix_products_category_brand` ON `products` (`category_id`, `brand_id`);
-
-DROP INDEX IF EXISTS `ix_question_options_display_order` ON `question_options`;
-CREATE INDEX `ix_question_options_display_order` ON `question_options` (`question_id`, `display_order`);
-
-DROP INDEX IF EXISTS `ix_product_questions_display_order` ON `product_questions`;
-CREATE INDEX `ix_product_questions_display_order` ON `product_questions` (`product_id`, `display_order`);
+-- Indexes are created by init-db.js conditionally to avoid duplicate errors
 
 COMMIT;
 
