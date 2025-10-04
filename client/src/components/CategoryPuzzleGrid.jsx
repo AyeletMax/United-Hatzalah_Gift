@@ -1,17 +1,20 @@
+import React from 'react'
 import CategoryCard from './CategoryCard.jsx';
 
 export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
   return (
-    <section id="categories" className="container" style={{ padding: '40px 0 80px' }}>
-      <h2 className="section-title">קטגוריות מתנות</h2>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-        gap: 16
-      }}>
+    <section id="categories" style={{ padding: '40px 0 80px', background: 'none' }}>
+      <h2 className="section-title" style={{ color: 'var(--uh-orange)', textAlign: 'center', fontWeight: 900, fontSize: 32, marginBottom: 32 }}>קטגוריות מתנות</h2>
+      <div className="uh-category-grid">
         {categories.map((c) => (
-          <CategoryCard key={c.id} title={c.title} icon={c.icon} color={c.color}
-                        onClick={() => onSelect?.(c)} />
+          <CategoryCard 
+            key={c.id} 
+            title={c.title} 
+            icon={c.icon} 
+            description={c.description}
+            color={c.color}
+            onClick={() => onSelect?.(c)} 
+          />
         ))}
       </div>
     </section>
