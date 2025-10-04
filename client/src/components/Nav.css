@@ -2,12 +2,12 @@
 /* הגריד בתחתית נשאר עם עיצוב קבוע */
 /* הגריד של הקטגוריות מוצג כ-section רגיל */
 .category-grid-bottom {
-  margin: 48px auto 0 auto;
-  max-width: 1200px;
-  background: rgba(255,255,255,0.97);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  padding: 2em 2vw 2em 2vw;
-  border-radius: 18px;
+  margin: 0;
+  max-width: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
 }
 /* גריד של קטגוריות */
 .category-grid {

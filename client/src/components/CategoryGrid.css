@@ -1,6 +1,6 @@
 .uh-section {
-  background: #f8f9fa;
-  padding: 60px 0 100px;
+  background: none;
+  padding: 0;
 }
 
 .uh-section-title {
@@ -14,9 +14,11 @@
 .uh-category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: 0;
   gap: 0;
   width: 100%;
+  background: none;
+  box-shadow: none;
 }
