@@ -117,6 +117,69 @@
   transform: translateX(0);
 }
 
+/* Home button - cute pill CTA */
+.nav-home-btn {
+  background: transparent; /* transparent background */
+  color: #ffffff; /* icon color by default */
+  border-radius: 8px; /* subtle rounding for focus ring */
+  padding: 10px 12px; /* a bit more room for larger icon */
+  box-shadow: none;
+  transition: color .2s ease, transform .15s ease;
+}
+
+/* prevent default hover highlight */
+.nav-home-btn:hover,
+.nav-home-btn:focus {
+  background: transparent;
+  color: var(--uh-orange);
+}
+
+.nav-home-btn:active {
+  background: transparent;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* disable the sweeping background effect for Home */
+.nav-home-btn::before {
+  display: none;
+}
+
+/* hide arrow for home */
+.nav-home-btn .nav-arrow {
+  display: none;
+}
+
+/* House emoji icon */
+.nav-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Inline SVG house icon */
+.nav-home-icon {
+  width: 26px;
+  height: 26px;
+  display: inline-block;
+}
+
+/* Icon image for Home link */
+.nav-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.2));
+}
+
+@media (max-width: 768px) {
+  .nav-icon-img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
 /* Hamburger Menu */
 .nav-hamburger {
   display: none;

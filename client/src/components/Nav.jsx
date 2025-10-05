@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 const items = [
+  { label: 'עמוד הבית', path: '/' },
   { label: 'מוצרים חדשים', path: '/מוצרים-חדשים' },
   { label: 'מתנות', path: '/מתנות' },
   { label: 'כלי בית', path: '/כלי-בית' },
@@ -54,13 +55,30 @@ export default function Nav() {
           <Link 
             key={item.label} 
             to={item.path} 
-            className="nav-link" 
+            className={`nav-link ${item.path === '/' ? 'nav-home-btn' : ''}`}
+            aria-label={item.path === '/' ? 'עמוד הבית' : undefined}
             onClick={() => setIsOpen(false)}
             onMouseDown={(e)=>e.currentTarget.classList.add('active')} 
             onMouseUp={(e)=>e.currentTarget.classList.remove('active')}
           >
-            <span>{item.label}</span>
-            <span aria-hidden="true" className="nav-arrow">❯</span>
+            {item.path === '/' ? (
+              <svg
+                className="nav-home-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path d="M12 3.172l7 6.222V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-4H11v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9.394l7-6.222zm0-2.121L2.293 9.293a1 1 0 1 0 1.414 1.414L12 2.414l8.293 8.293a1 1 0 0 0 1.414-1.414L12 1.05z"/>
+              </svg>
+            ) : (
+              <span>{item.label}</span>
+            )}
+            {item.path !== '/' && (
+              <span aria-hidden="true" className="nav-arrow">❯</span>
+            )}
           </Link>
         ))}
       </div>
