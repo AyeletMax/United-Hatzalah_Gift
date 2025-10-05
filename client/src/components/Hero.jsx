@@ -1,3 +1,4 @@
+import React from 'react'
 import logo from '../assets/לוגו_איחוד_חדש_002.png';
 import './Hero.css';
 

@@ -18,5 +18,3 @@ export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
     </section>
   );
 }
-
-
