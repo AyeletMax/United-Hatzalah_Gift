@@ -16,7 +16,7 @@
   }
   
   #categories > div {
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
   }
 }
