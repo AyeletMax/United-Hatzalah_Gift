@@ -77,4 +77,73 @@
   transform: translateX(0);
 }
 
+/* Hamburger Menu */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.nav-hamburger span {
+  width: 25px;
+  height: 3px;
+  background: var(--uh-orange);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.nav-overlay {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-hamburger {
+    display: flex;
+    margin-right: 15px;
+  }
+  
+  .nav-inner {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: #000000;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 80px 20px 20px;
+    gap: 0;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  .nav-inner.nav-open {
+    right: 0;
+  }
+  
+  .nav-link {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(243, 108, 33, 0.2);
+  }
+  
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+}
 

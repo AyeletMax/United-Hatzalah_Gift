@@ -1,4 +1,5 @@
 import logo from '../assets/לוגו_איחוד_חדש_002.png';
+import './Hero.css';
 
 export default function Hero() {
   return (
@@ -6,7 +7,7 @@ export default function Hero() {
       background: 'linear-gradient(135deg, var(--uh-navy), #0f1a24)',
       color: 'var(--white)'
     }}>
-      <div className="container" style={{
+      <div className="container hero-grid" style={{
         display: 'grid',
         gridTemplateColumns: '1.2fr 1fr',
         gap: 24,
@@ -14,7 +15,7 @@ export default function Hero() {
         padding: '64px 0'
       }}>
         <div>
-          <h1 style={{ fontSize: 40, margin: 0, lineHeight: 1.1 }}>מתנה שמצילה את היום</h1>
+          <h1 className="hero-title" style={{ fontSize: 40, margin: 0, lineHeight: 1.1 }}>מתנה שמצילה את היום</h1>
           <div style={{ marginTop: 20 }}>
             <a className="btn-primary" href="#categories">גללו לקטגוריות</a>
           </div>

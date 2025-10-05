@@ -1,4 +1,5 @@
 import CategoryCard from './CategoryCard.jsx';
+import './CategoryPuzzleGrid.css';
 
 export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
   return (

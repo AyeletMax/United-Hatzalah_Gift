@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed-data.js",
     "db:ping": "node scripts/ping.js",
     "db:smoke": "node scripts/smoke.js"
   },
