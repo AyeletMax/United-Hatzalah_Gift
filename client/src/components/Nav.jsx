@@ -17,13 +17,27 @@ const items = [
 
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState(null);
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout) clearTimeout(hoverTimeout);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => setIsOpen(false), 200);
+    setHoverTimeout(timeout);
+  };
 
   return (
     <nav className="nav-root">
       <button 
         className="nav-hamburger" 
-        onClick={() => setIsOpen(!isOpen)}
-        onMouseEnter={() => setIsOpen(true)}
+        onMouseEnter={handleMouseEnter}
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }}
         aria-label="תפריט"
       >
         <span></span>
@@ -33,7 +47,8 @@ export default function Nav() {
       
       <div 
         className={`nav-inner ${isOpen ? 'nav-open' : ''}`}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {items.map((item) => (
           <Link 
@@ -50,7 +65,7 @@ export default function Nav() {
         ))}
       </div>
       
-      {isOpen && <div className="nav-overlay" onClick={() => setIsOpen(false)} onMouseEnter={() => setIsOpen(false)} />}
+      {isOpen && <div className="nav-overlay" onClick={() => setIsOpen(false)} />}
     </nav>
   );
 }
