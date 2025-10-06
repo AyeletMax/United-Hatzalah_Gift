@@ -6,7 +6,7 @@ import Hero from "./components/Hero.jsx";
 import CategoryPuzzleGrid from "./components/CategoryPuzzleGrid.jsx";
 import ProductList from "./components/ProductList.jsx";
 import { useProducts } from "./components/ProductsContext.jsx";
-import { Routes, Route, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
@@ -56,6 +56,40 @@ function CategoryPage() {
   );
 }
 
+function SearchPage() {
+  const [searchParams] = useSearchParams();
+  const { products, loading, error } = useProducts();
+  const query = searchParams.get('q') || '';
+  
+  const filteredProducts = query
+    ? products.filter((p) =>
+        p.name.toLowerCase().includes(query.toLowerCase()) ||
+        (p.description && p.description.toLowerCase().includes(query.toLowerCase()))
+      )
+    : [];
+  
+  return (
+    <>
+      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+        תוצאות חיפוש עבור: "{query}"
+      </h2>
+      {loading ? (
+        <div style={{ textAlign: "center", margin: 40 }}>טוען מוצרים...</div>
+      ) : error ? (
+        <div style={{ textAlign: "center", color: "red", margin: 40 }}>
+          שגיאה: {error}
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div style={{ textAlign: "center", margin: 40 }}>
+          לא נמצאו מוצרים
+        </div>
+      ) : (
+        <ProductList products={filteredProducts} />
+      )}
+    </>
+  );
+}
+
 function HomePage() {
   const navigate = useNavigate();
   
@@ -78,6 +112,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/search" element={<SearchPage />} />
       <Route path="/:slug" element={<CategoryPage />} />
     </Routes>
   );

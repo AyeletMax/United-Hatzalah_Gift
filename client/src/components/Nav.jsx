@@ -1,6 +1,7 @@
 import './Nav.css'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import SearchBar from './SearchBar.jsx';
 
 const items = [
   { label: 'עמוד הבית', path: '/' },
@@ -19,6 +20,15 @@ const items = [
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
+  const navigate = useNavigate();
+
+  const handleSearch = (term) => {
+    if (term.trim()) {
+      navigate(`/search?q=${encodeURIComponent(term)}`);
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleMouseEnter = () => {
     if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -32,6 +42,9 @@ export default function Nav() {
 
   return (
     <nav className="nav-root">
+      <div className="nav-search-wrapper">
+        <SearchBar onSearch={handleSearch} />
+      </div>
       <button 
         className="nav-hamburger" 
         onMouseEnter={handleMouseEnter}
