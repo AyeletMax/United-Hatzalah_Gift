@@ -17,8 +17,8 @@
   max-width: none;
   margin: 0;
   padding: 0;
-  gap: 0;
+  gap: 8px;
   width: 100%;
-  background: none;
+  background: #ffffff;
   box-shadow: none;
 }

@@ -13,12 +13,12 @@ const categories = [
   { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff" },
   { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff" },
   { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0" },
-  { id: 5, key: "new", title: "מוצרים חדשים", slug: "מוצרים-חדשים", icon: "✨", color: "#fff9e9" },
+  { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff" },
   { id: 6, key: "gifts", title: "מתנות", slug: "מתנות", icon: "🎁", color: "#ffe9f0" },
   { id: 7, key: "summer", title: "מוצרי קיץ", slug: "מוצרי-קיץ", icon: "☀️", color: "#fff4e9" },
-  { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff" },
   { id: 9, key: "outdoor", title: 'אביזרי יח"צ', slug: "אביזרי-יחץ", icon: "🏕️", color: "#f0ffe9" },
   { id: 10, key: "bags", title: "תיקים", slug: "תיקים", icon: "👜", color: "#f9e9ff" },
+  { id: 5, key: "new", title: "מוצרים חדשים", slug: "מוצרים-חדשים", icon: "✨", color: "#fff9e9" },
 ];
 
 function CategoryPage() {

@@ -1,16 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ProductList.css";
+import ProductModal from "./ProductModal.jsx";
 
 export default function ProductList({ products = [] }) {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
   if (!products.length) {
     return (
       <div className="product-list-empty">לא נמצאו מוצרים בקטגוריה זו.</div>
     );
   }
+  
   return (
-    <div className="product-list-grid">
-      {products.map((p) => (
-        <div className="product-card" key={p.id}>
+    <>
+      <div className="product-list-grid">
+        {products.map((p) => (
+          <div className="product-card" key={p.id} onClick={() => handleProductClick(p)}>
           {p.image_url && (
             <img 
               src={p.image_url} 
@@ -34,8 +50,14 @@ export default function ProductList({ products = [] }) {
               <div className="product-category">{p.category_name}</div>
             )}
           </div>
-        </div>
-      ))}
-    </div>
+          </div>
+        ))}
+      </div>
+      <ProductModal 
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
+    </>
   );
 }

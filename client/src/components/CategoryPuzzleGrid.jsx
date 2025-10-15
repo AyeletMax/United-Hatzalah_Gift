@@ -2,7 +2,7 @@ import CategoryCard from './CategoryCard.jsx';
 import './CategoryPuzzleGrid.css';
 
 export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
-  const sizes = ['medium', 'small', 'small', 'large', 'small', 'medium', 'small', 'small', 'medium', 'small'];
+  const sizes = ['medium', 'small', 'small', 'large', 'winter-tall', 'medium', 'small', 'extra-wide', 'medium', 'small'];
   
   return (
     <section id="categories">
