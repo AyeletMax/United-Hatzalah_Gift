@@ -5,6 +5,7 @@ import "./responsive.css";
 import Hero from "./components/Hero.jsx";
 import CategoryPuzzleGrid from "./components/CategoryPuzzleGrid.jsx";
 import ProductList from "./components/ProductList.jsx";
+import AdminPanel from "./components/AdminPanel.jsx";
 import { useProducts } from "./components/ProductsContext.jsx";
 import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
@@ -113,6 +114,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/admin" element={<AdminPanel />} />
       <Route path="/:slug" element={<CategoryPage />} />
     </Routes>
   );
