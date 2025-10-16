@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import brandRoutes from "./routes/brandRoutes.js";
@@ -10,17 +11,15 @@ import { pool } from "./db.js";
 
 const app = express();
 
-// CORS middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+// CORS configuration
+app.use(cors({
+  origin: [
+    'https://hatzalah-gift.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 
