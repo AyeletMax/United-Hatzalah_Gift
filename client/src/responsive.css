@@ -1,0 +1,60 @@
+/* Global Responsive Styles */
+
+/* Viewport meta tag should be in index.html */
+
+/* Prevent horizontal scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Touch-friendly tap targets */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive text */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 28px;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+  
+  h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  h2 {
+    font-size: 20px;
+  }
+  
+  h3 {
+    font-size: 18px;
+  }
+}
