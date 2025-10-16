@@ -12,9 +12,11 @@ export function ProductsProvider({ children }) {
       setLoading(true);
       setError(null);
       try {
+        console.log('Fetching from:', `${import.meta.env.VITE_API_URL}/api/products`);
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
+        console.log('Products received:', data);
         setProducts(data);
       } catch (err) {
         setError(err.message);
