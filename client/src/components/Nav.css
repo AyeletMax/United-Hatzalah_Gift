@@ -1,0 +1,277 @@
+/* גריד קטגוריות בתחתית הדף */
+/* הגריד בתחתית נשאר עם עיצוב קבוע */
+/* הגריד של הקטגוריות מוצג כ-section רגיל */
+.category-grid-bottom {
+  margin: 0;
+  max-width: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+/* גריד של קטגוריות */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1.2em;
+  margin-top: 2em;
+  padding: 0 0.5em;
+}
+
+.category-card {
+  background: #fff3e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 1.2em 0.5em;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.05em;
+  color: #ff9800;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.category-card:hover {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+  background: #ffe0b2;
+}
+.nav-root {
+  background: #000000;
+  color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  border-bottom: 2px solid var(--uh-orange);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+}
+
+.nav-search-wrapper {
+  position: absolute;
+  left: 20px;
+  bottom: 8px;
+  z-index: 1001;
+}
+
+.nav-inner {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 28px;
+  padding: 14px 50px 14px 0;
+  direction: rtl;
+  flex-wrap: wrap;
+  margin-right: 10px;
+  width: 100%;
+}
+
+
+
+.nav-link:hover,
+.nav-link:focus,
+.nav-link.active {
+  background: rgba(243, 108, 33, .12); /* soft UH orange */
+  color: var(--uh-orange);
+}
+
+.nav-arrow {
+  color: var(--uh-orange);
+  font-size: 16px;
+  line-height: 1;
+}
+
+
+
+
+
+
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  text-decoration: none;
+  color: #ffffff;
+  background: transparent;
+  border: none; /* no border as requested */
+  border-radius: 12px;
+  padding: 8px 12px;
+  transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.15s;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+
+.nav-link::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(243, 108, 33, 0.22);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  z-index: 0;
+}
+
+.nav-link.active::before,
+.nav-link:active::before {
+  transform: translateX(0);
+}
+
+/* Home button - cute pill CTA */
+.nav-home-btn {
+  background: transparent; /* transparent background */
+  color: #ffffff; /* icon color by default */
+  border-radius: 8px; /* subtle rounding for focus ring */
+  padding: 10px 12px; /* a bit more room for larger icon */
+  box-shadow: none;
+  transition: color .2s ease, transform .15s ease;
+}
+
+/* prevent default hover highlight */
+.nav-home-btn:hover,
+.nav-home-btn:focus {
+  background: transparent;
+  color: var(--uh-orange);
+}
+
+.nav-home-btn:active {
+  background: transparent;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* disable the sweeping background effect for Home */
+.nav-home-btn::before {
+  display: none;
+}
+
+/* hide arrow for home */
+.nav-home-btn .nav-arrow {
+  display: none;
+}
+
+/* House emoji icon */
+.nav-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Inline SVG house icon */
+.nav-home-icon {
+  width: 26px;
+  height: 26px;
+  display: inline-block;
+}
+
+/* Icon image for Home link */
+.nav-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.2));
+}
+
+@media (max-width: 768px) {
+  .nav-icon-img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Hamburger Menu */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.nav-hamburger span {
+  width: 25px;
+  height: 3px;
+  background: var(--uh-orange);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.nav-overlay {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-search-wrapper {
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .nav-hamburger {
+    display: flex;
+    margin-right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-search-wrapper {
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .nav-inner {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: #000000;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 60px 0 20px;
+    gap: 0;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+  
+  .nav-inner.nav-open {
+    right: 0;
+  }
+  
+  .nav-link {
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(243, 108, 33, 0.2);
+    font-size: 13px;
+  }
+  
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+}
+
