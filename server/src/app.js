@@ -11,15 +11,41 @@ import { pool } from "./db.js";
 
 const app = express();
 
+// Handle preflight requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(cors({
-  origin: true,
-  credentials: true
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 
 app.use(express.json());
 
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} from ${req.get('origin') || 'unknown'}`);
+  next();
+});
+
 app.get('/', (req, res) => {
   res.json({ message: 'United Hatzalah Gift Server is running!' });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 app.use("/api/products", productRoutes);
