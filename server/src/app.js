@@ -11,13 +11,9 @@ import { pool } from "./db.js";
 
 const app = express();
 
-// CORS configuration
+// CORS configuration - allow all origins temporarily
 app.use(cors({
-  origin: [
-    'https://hatzalah-gift.netlify.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
+  origin: true,
   credentials: true
 }));
 
