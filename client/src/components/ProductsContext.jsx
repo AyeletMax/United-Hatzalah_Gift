@@ -12,8 +12,12 @@ export function ProductsProvider({ children }) {
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching from:', `${import.meta.env.VITE_API_URL}/api/products`);
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+        const baseUrl = import.meta.env.VITE_API_URL;
+        const fullUrl = baseUrl.includes("localhost")
+          ? `${baseUrl}/api/products`
+          : `${baseUrl}.onrender.com/api/products`;
+        console.log('Fetching from:', fullUrl);
+        const res = await fetch(fullUrl);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
         console.log('Products received:', data);

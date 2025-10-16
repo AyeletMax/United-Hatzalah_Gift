@@ -22,9 +22,17 @@ const AdminPanel = () => {
 
   const loadData = async () => {
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const productsUrl = baseUrl.includes("localhost")
+        ? `${baseUrl}/api/products`
+        : `${baseUrl}.onrender.com/api/products`;
+      const categoriesUrl = baseUrl.includes("localhost")
+        ? `${baseUrl}/api/categories`
+        : `${baseUrl}.onrender.com/api/categories`;
+      
       const [productsRes, categoriesRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/categories')
+        fetch(productsUrl),
+        fetch(categoriesUrl)
       ]);
       setProducts(await productsRes.json());
       setCategories(await categoriesRes.json());
@@ -36,7 +44,11 @@ const AdminPanel = () => {
   const saveProduct = async (productData) => {
     try {
       const method = selectedProduct ? 'PUT' : 'POST';
-      const url = selectedProduct ? `/api/products/${selectedProduct.id}` : '/api/products';
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const endPath = selectedProduct ? `api/products/${selectedProduct.id}` : 'api/products';
+      const url = baseUrl.includes("localhost")
+        ? `${baseUrl}/${endPath}`
+        : `${baseUrl}.onrender.com/${endPath}`;
       
       await fetch(url, {
         method,
@@ -55,7 +67,11 @@ const AdminPanel = () => {
   const deleteProduct = async (id) => {
     if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
       try {
-        await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        const baseUrl = import.meta.env.VITE_API_URL;
+        const url = baseUrl.includes("localhost")
+          ? `${baseUrl}/api/products/${id}`
+          : `${baseUrl}.onrender.com/api/products/${id}`;
+        await fetch(url, { method: 'DELETE' });
         loadData();
       } catch (error) {
         console.error('שגיאה במחיקת מוצר:', error);
