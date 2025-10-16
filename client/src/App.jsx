@@ -37,6 +37,7 @@ function CategoryPage() {
   
   return (
     <>
+    {console.log("היי מה קורה")}
       <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
         {category ? category.title : 'קטגוריה'}
       </h2>
