@@ -1,9 +1,10 @@
 .puzzle-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(3, 150px);
+  grid-template-rows: repeat(3, calc((100vh - 120px) / 3));
   gap: 0;
   width: 100vw;
+  height: calc(100vh - 120px);
   margin: 0;
   background: #1a1a1a;
 }
@@ -13,6 +14,7 @@
   max-width: none !important;
   margin: 0 !important;
   width: 100vw;
+  height: 100vh;
   margin-left: calc(-50vw + 50%);
   overflow: hidden;
 }
@@ -20,27 +22,27 @@
 @media (max-width: 1200px) {
   .puzzle-grid {
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(4, 140px);
+    grid-template-rows: repeat(4, calc((100vh - 120px) / 4));
   }
 }
 
 @media (max-width: 1024px) {
   .puzzle-grid {
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(5, 130px);
+    grid-template-rows: repeat(5, calc((100vh - 120px) / 5));
   }
 }
 
 @media (max-width: 768px) {
   .puzzle-grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(6, 120px);
+    grid-template-rows: repeat(6, calc((100vh - 120px) / 6));
   }
 }
 
 @media (max-width: 480px) {
   .puzzle-grid {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(8, 110px);
+    grid-template-rows: repeat(8, calc((100vh - 120px) / 8));
   }
 }

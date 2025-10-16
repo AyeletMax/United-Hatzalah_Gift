@@ -1,14 +1,15 @@
 .category-box {
   background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 12px;
+  border: 2px solid #333;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .category-box.small {
@@ -36,33 +37,17 @@
   grid-column: span 2;
 }
 
-.category-box::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #f4a261 0%, #e76f51 50%, #e9c46a 100%);
-  opacity: 0;
-  transition: all 0.4s ease;
-}
 
-.category-box:nth-child(odd)::before {
-  background: linear-gradient(135deg, #f4a261 0%, #e9c46a 50%, #f76c6c 100%);
-}
-
-.category-box:nth-child(even)::before {
-  background: linear-gradient(135deg, #e76f51 0%, #f4a261 50%, #ff9f1c 100%);
-}
-
-.category-box:hover::before {
-  opacity: 0.9;
-  transform: rotate(2deg) scale(1.05);
-}
 
 .category-box:hover {
   border-color: #f4a261;
-  transform: scale(1.03) translateY(-2px);
+  border-width: 3px;
+  transform: scale(1.05) translateY(-4px);
   z-index: 10;
-  box-shadow: 0 8px 25px rgba(244, 162, 97, 0.3);
+  box-shadow: 
+    0 20px 40px rgba(244, 162, 97, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .category-content {
@@ -72,22 +57,22 @@
   padding: 20px;
 }
 
-.category-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 10px;
-  transition: transform 0.3s ease;
-}
 
-.category-box:hover .category-icon {
-  transform: scale(1.1);
-}
 
 .category-title {
-  color: #fff;
+  color: #f4a261;
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+}
+
+.category-box:hover .category-title {
+  color: #ffffff;
+  font-weight: 700;
+  transform: translateY(-2px);
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 1024px) {
@@ -106,9 +91,7 @@
     grid-column: span 2;
   }
   
-  .category-icon {
-    font-size: 2rem;
-  }
+
   
   .category-title {
     font-size: 0.9rem;
@@ -122,9 +105,7 @@
     grid-column: span 1;
   }
   
-  .category-icon {
-    font-size: 1.5rem;
-  }
+
   
   .category-title {
     font-size: 0.8rem;
