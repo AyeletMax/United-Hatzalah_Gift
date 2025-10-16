@@ -17,7 +17,11 @@ export function ProductsProvider({ children }) {
           ? `${baseUrl}/api/products`
           : `${baseUrl}.onrender.com/api/products`;
         console.log('Fetching from:', fullUrl);
-        const res = await fetch(fullUrl);
+        const res = await fetch(fullUrl, {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
         console.log('Products received:', data);
