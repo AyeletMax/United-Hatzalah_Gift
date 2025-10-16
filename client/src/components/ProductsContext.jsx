@@ -12,8 +12,7 @@ export function ProductsProvider({ children }) {
       setLoading(true);
       setError(null);
       try {
-        // שנה את ה-URL לפי ה-API שלך
-        const res = await fetch("/api/products");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         if (!res.ok) throw new Error("Failed to fetch products");
         const data = await res.json();
         setProducts(data);
