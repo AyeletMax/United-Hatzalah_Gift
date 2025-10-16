@@ -11,37 +11,27 @@ import { pool } from "./db.js";
 
 const app = express();
 
-// CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000',
-      'https://united-hatzalah-gift.onrender.com',
-      'https://hatzalah-gift.netlify.app'
+// ✅ הדפסת ה-Origin בפועל כדי לבדוק מה Netlify שולח
+app.use((req, res, next) => {
+  console.log("🔍 Origin from request:", req.headers.origin);
+  next();
+});
 
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: false,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-app.use(cors(corsOptions));
+// ✅ CORS פשוט וברור
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://hatzalah-gift.netlify.app"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.use(express.json());
 
+// ✅ נתיבי ה-API
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/brands", brandRoutes);
@@ -49,24 +39,25 @@ app.use("/api/catalogs", catalogRoutes);
 app.use("/api/surveys", surveyRoutes);
 app.use("/api/questions", questionRoutes);
 
-// Error handling middleware
+// ✅ Middleware לשגיאות
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('[server] SIGTERM received, shutting down gracefully');
+// ✅ סגירה מסודרת של חיבורי DB
+process.on("SIGTERM", async () => {
+  console.log("[server] SIGTERM received, shutting down gracefully");
   await pool.end();
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-  console.log('[server] SIGINT received, shutting down gracefully');
+process.on("SIGINT", async () => {
+  console.log("[server] SIGINT received, shutting down gracefully");
   await pool.end();
   process.exit(0);
 });
 
+// ✅ בדיקת חיבור למסד הנתונים
 const connectWithRetry = async (retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
