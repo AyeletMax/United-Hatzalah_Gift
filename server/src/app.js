@@ -11,9 +11,24 @@ import { pool } from "./db.js";
 
 const app = express();
 
-// ====== ✅ CORS פתוח לצורך בדיקה ======
-app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
-app.options('*', cors()); // תמיכה בבקשות OPTIONS
+// ====== ✅ טיפול ידני ב-OPTIONS (Preflight) ======
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://hatzalah-gift.netlify.app"); // דומיין ה-Frontend שלך
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200); // עוצר את הבקשה כאן ומחזיר OK
+  }
+
+  next();
+});
+
+// ====== ✅ CORS רגיל לגיבוי ======
+app.use(cors({
+  origin: "https://hatzalah-gift.netlify.app",
+  credentials: true,
+}));
 
 app.use(express.json());
 
