@@ -13,12 +13,13 @@ const app = express();
 
 // ====== ✅ טיפול ידני ב-OPTIONS (Preflight) ======
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://hatzalah-gift.netlify.app"); // דומיין ה-Frontend שלך
+  res.header("Access-Control-Allow-Origin", "https://hatzalah-gift.netlify.app");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // עוצר את הבקשה כאן ומחזיר OK
+    return res.sendStatus(200);
   }
 
   next();
