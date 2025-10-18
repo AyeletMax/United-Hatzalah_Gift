@@ -10,25 +10,13 @@ import errorHandler from "./middleware/errorHandler.js";
 import { pool } from "./db.js";
 
 const app = express();
-
-// ====== ✅ טיפול ידני ב-OPTIONS (Preflight) ======
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://hatzalah-gift.netlify.app");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
-// ====== ✅ CORS רגיל לגיבוי ======
+{console.log("1")}
+// ====== ✅ CORS ======
 app.use(cors({
   origin: "https://hatzalah-gift.netlify.app",
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
