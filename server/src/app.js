@@ -11,36 +11,13 @@ import { pool } from "./db.js";
 
 const app = express();
 
-// CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000',
-      'https://united-hatzalah-gift.onrender.com',
-      'https://hatzalah-gift.netlify.app'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-app.use(cors(corsOptions));
+// ====== ✅ CORS פתוח לצורך בדיקה ======
+app.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
+app.options('*', cors()); // תמיכה בבקשות OPTIONS
 
 app.use(express.json());
 
+// ====== ✅ Routes ======
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/brands", brandRoutes);
@@ -48,12 +25,12 @@ app.use("/api/catalogs", catalogRoutes);
 app.use("/api/surveys", surveyRoutes);
 app.use("/api/questions", questionRoutes);
 
-// Error handling middleware
+// ====== ✅ Error Handler ======
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-// ✅ סגירה מסודרת של חיבורי DB
+// ====== ✅ Graceful Shutdown ======
 process.on("SIGTERM", async () => {
   console.log("[server] SIGTERM received, shutting down gracefully");
   await pool.end();
@@ -66,7 +43,7 @@ process.on("SIGINT", async () => {
   process.exit(0);
 });
 
-// ✅ בדיקת חיבור למסד הנתונים
+// ====== ✅ DB Connection Check ======
 const connectWithRetry = async (retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
