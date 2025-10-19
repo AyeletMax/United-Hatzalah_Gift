@@ -1,19 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import "./ProductList.css";
-import ProductModal from "./ProductModal.jsx";
+import { useNavigate } from "react-router-dom";
 
-export default function ProductList({ products = [] }) {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function ProductList({ products = [], categorySlug }) {
+  const navigate = useNavigate();
 
   const handleProductClick = (product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
+    const productSlug = product.name.replace(/\s+/g, '-');
+    if (categorySlug) {
+      navigate(`/${categorySlug}/${productSlug}`);
+    }
   };
 
   if (!products.length) {
@@ -23,8 +19,7 @@ export default function ProductList({ products = [] }) {
   }
   
   return (
-    <>
-      <div className="product-list-grid">
+    <div className="product-list-grid">
         {products.map((p) => (
           <div className="product-card" key={p.id} onClick={() => handleProductClick(p)}>
           {p.image_url && (
@@ -52,12 +47,6 @@ export default function ProductList({ products = [] }) {
           </div>
           </div>
         ))}
-      </div>
-      <ProductModal 
-        product={selectedProduct}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-      />
-    </>
+    </div>
   );
 }

@@ -30,10 +30,13 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
+    console.log('[createProduct] Request body:', req.body);
     const newProduct = await productService.createProduct(req.body);
+    console.log('[createProduct] Created product:', newProduct);
     res.status(201).json(newProduct);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[createProduct] Error:', err);
+    res.status(500).json({ error: err.message, details: err.stack });
   }
 };
 

@@ -23,16 +23,10 @@ const AdminPanel = () => {
   const loadData = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
-      const productsUrl = baseUrl.includes("localhost")
-        ? `${baseUrl}/api/products`
-        : `${baseUrl}.onrender.com/api/products`;
-      const categoriesUrl = baseUrl.includes("localhost")
-        ? `${baseUrl}/api/categories`
-        : `${baseUrl}.onrender.com/api/categories`;
       
       const [productsRes, categoriesRes] = await Promise.all([
-        fetch(productsUrl),
-        fetch(categoriesUrl)
+        fetch(`${baseUrl}/api/products`),
+        fetch(`${baseUrl}/api/categories`)
       ]);
       setProducts(await productsRes.json());
       setCategories(await categoriesRes.json());
@@ -46,9 +40,7 @@ const AdminPanel = () => {
       const method = selectedProduct ? 'PUT' : 'POST';
       const baseUrl = import.meta.env.VITE_API_URL;
       const endPath = selectedProduct ? `api/products/${selectedProduct.id}` : 'api/products';
-      const url = baseUrl.includes("localhost")
-        ? `${baseUrl}/${endPath}`
-        : `${baseUrl}.onrender.com/${endPath}`;
+      const url = `${baseUrl}/${endPath}`;
       
       await fetch(url, {
         method,
@@ -68,9 +60,7 @@ const AdminPanel = () => {
     if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
       try {
         const baseUrl = import.meta.env.VITE_API_URL;
-        const url = baseUrl.includes("localhost")
-          ? `${baseUrl}/api/products/${id}`
-          : `${baseUrl}.onrender.com/api/products/${id}`;
+        const url = `${baseUrl}/api/products/${id}`;
         await fetch(url, { method: 'DELETE' });
         loadData();
       } catch (error) {
@@ -144,6 +134,38 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || ''
   });
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const url = `${baseUrl}/api/upload/image`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formDataUpload
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      const fullImageUrl = `${baseUrl}${result.imageUrl}`;
+      setFormData({...formData, image_url: fullImageUrl});
+    } catch (error) {
+      console.error('שגיאה בהעלאת תמונה:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -191,12 +213,21 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             onChange={(e) => setFormData({...formData, delivery_time_days: e.target.value})}
           />
           
-          <input
-            type="url"
-            placeholder="קישור לתמונה"
-            value={formData.image_url}
-            onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-          />
+          <div className="image-upload-section">
+            <label>תמונה:</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+            />
+            {uploading && <span>מעלה תמונה...</span>}
+            {formData.image_url && (
+              <div className="image-preview">
+                <img src={formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
+              </div>
+            )}
+          </div>
           
           <div className="form-actions">
             <button type="submit">שמור</button>

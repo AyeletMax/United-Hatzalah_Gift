@@ -8,6 +8,7 @@ import ProductList from "./components/ProductList.jsx";
 import AdminPanel from "./components/AdminPanel.jsx";
 import { useProducts } from "./components/ProductsContext.jsx";
 import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import ProductModal from "./components/ProductModal.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
@@ -25,14 +26,22 @@ const categories = [
 function CategoryPage() {
   const navigate = useNavigate();
   const { products, loading, error } = useProducts();
-  const { slug } = useParams();
+  const { slug, productName } = useParams();
   const category = categories.find((c) => c.slug === slug);
   const filteredProducts = category
     ? products.filter((p) => String(p.category_id) === String(category.id))
     : [];
   
+  const selectedProduct = productName 
+    ? filteredProducts.find(p => p.name.replace(/\s+/g, '-') === productName)
+    : null;
+  
   const handleCategorySelect = (c) => {
     navigate(`/${c.slug}`);
+  };
+  
+  const closeModal = () => {
+    navigate(`/${slug}`);
   };
   
   return (
@@ -52,7 +61,14 @@ function CategoryPage() {
           אין מוצרים בקטגוריה זו
         </div>
       ) : (
-        <ProductList products={filteredProducts} />
+        <ProductList products={filteredProducts} categorySlug={slug} />
+      )}
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          isOpen={true}
+          onClose={closeModal}
+        />
       )}
     </>
   );
@@ -117,6 +133,7 @@ function App() {
       <Route path="/search" element={<SearchPage />} />
       <Route path="/admin" element={<AdminPanel />} />
       <Route path="/:slug" element={<CategoryPage />} />
+      <Route path="/:slug/:productName" element={<CategoryPage />} />
     </Routes>
   );
 }
