@@ -218,6 +218,37 @@
   color: #333;
 }
 
+.star-distribution {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.star-distribution h4 {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.star-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.star-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.star-label {
+  width: 40px;
+  text-align: right;
+  color: #666;
+  font-size: 11px;
+}
+
 .question-result {
   margin-bottom: 20px;
 }
@@ -465,6 +496,19 @@
   
   .results-summary p {
     font-size: 14px;
+  }
+  
+  .star-distribution h4 {
+    font-size: 13px;
+  }
+  
+  .star-bar {
+    font-size: 11px;
+  }
+  
+  .star-label {
+    width: 35px;
+    font-size: 10px;
   }
   
   .question-result h4 {

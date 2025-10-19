@@ -39,15 +39,42 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }
     };
     
-    setSurveyResults({
-      totalResponses: 47,
-      averageRating: 4.2,
-      questions: {
-        1: { 5: 45, 4: 30, 3: 15, 2: 7, 1: 3 },
-        2: { 5: 35, 4: 40, 3: 20, 2: 3, 1: 2 },
-        3: { 5: 50, 4: 25, 3: 15, 2: 8, 1: 2 }
-      }
-    });
+    // Load existing survey data or initialize
+    const existingSurveyData = JSON.parse(localStorage.getItem(`surveyData_${product.id}`) || 'null');
+    
+    if (existingSurveyData) {
+      setSurveyResults(existingSurveyData);
+    } else {
+      const initialData = {
+        totalResponses: 47,
+        averageRating: 4.2,
+        totalRatingSum: 197.4, // 47 * 4.2
+        questionCounts: {
+          1: { 5: 21, 4: 14, 3: 7, 2: 3, 1: 2 },
+          2: { 5: 16, 4: 19, 3: 9, 2: 2, 1: 1 },
+          3: { 5: 24, 4: 12, 3: 7, 2: 3, 1: 1 }
+        }
+      };
+      
+      // Convert counts to percentages for display
+      const questions = {};
+      Object.keys(initialData.questionCounts).forEach(qId => {
+        questions[qId] = {};
+        Object.keys(initialData.questionCounts[qId]).forEach(option => {
+          questions[qId][option] = Math.round((initialData.questionCounts[qId][option] / initialData.totalResponses) * 100);
+        });
+      });
+      
+      setSurveyResults({
+        ...initialData,
+        questions
+      });
+      
+      localStorage.setItem(`surveyData_${product.id}`, JSON.stringify({
+        ...initialData,
+        questions
+      }));
+    }
     
     checkUserResponse();
     setShowSurveyForm(false);
@@ -61,6 +88,18 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const submitSurvey = async () => {
     if (!userName.trim() || !userEmail.trim()) {
       alert('אנא מלא שם ומייל');
+      return;
+    }
+    
+    // Check if all questions are answered
+    if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
+      alert('אנא ענה על כל השאלות');
+      return;
+    }
+    
+    // Check if star rating is selected
+    if (starRating === 0) {
+      alert('אנא בחר דירוג כוכבים');
       return;
     }
     
@@ -81,40 +120,51 @@ export default function ProductModal({ product, isOpen, onClose }) {
     
     // Update results immediately with new answer data
     setSurveyResults(prev => {
-      const newQuestions = { ...prev.questions };
       const newTotalResponses = prev.totalResponses + 1;
+      const newTotalRatingSum = (prev.totalRatingSum || (prev.averageRating * prev.totalResponses)) + starRating;
+      const newAverageRating = Number((newTotalRatingSum / newTotalResponses).toFixed(1));
       
-      // Update question results based on answers
+      // Update question counts
+      const newQuestionCounts = { ...prev.questionCounts };
       Object.keys(surveyAnswers).forEach(questionId => {
         const answer = surveyAnswers[questionId];
-        const currentQ = { ...newQuestions[questionId] };
-        
-        // Convert percentages back to counts
-        const counts = {};
-        Object.keys(currentQ).forEach(key => {
-          counts[key] = Math.round((currentQ[key] * prev.totalResponses) / 100);
-        });
-        
-        // Add new answer
-        counts[answer] = (counts[answer] || 0) + 1;
-        
-        // Recalculate percentages
-        Object.keys(counts).forEach(key => {
-          newQuestions[questionId][key] = Math.round((counts[key] / newTotalResponses) * 100);
+        if (!newQuestionCounts[questionId]) {
+          newQuestionCounts[questionId] = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        }
+        newQuestionCounts[questionId][answer] = (newQuestionCounts[questionId][answer] || 0) + 1;
+      });
+      
+      // Convert counts to percentages for display
+      const newQuestions = {};
+      Object.keys(newQuestionCounts).forEach(qId => {
+        newQuestions[qId] = {};
+        Object.keys(newQuestionCounts[qId]).forEach(option => {
+          newQuestions[qId][option] = Math.round((newQuestionCounts[qId][option] / newTotalResponses) * 100);
         });
       });
       
-      return {
-        ...prev,
+      const updatedResults = {
         totalResponses: newTotalResponses,
-        averageRating: Number(((prev.averageRating * prev.totalResponses) + starRating) / newTotalResponses).toFixed(1),
+        averageRating: newAverageRating,
+        totalRatingSum: newTotalRatingSum,
+        questionCounts: newQuestionCounts,
         questions: newQuestions
       };
+      
+      // Save to localStorage
+      localStorage.setItem(`surveyData_${product.id}`, JSON.stringify(updatedResults));
+      
+      return updatedResults;
     });
     
     setHasSubmitted(true);
     setUserAlreadyAnswered(true);
     setShowSurveyForm(false);
+    
+    // Force re-render to show updated results immediately
+    setTimeout(() => {
+      setShowSurveyForm(false);
+    }, 100);
   };
 
   return (
