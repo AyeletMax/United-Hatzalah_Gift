@@ -1,16 +1,22 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import brandRoutes from "./routes/brandRoutes.js";
 import catalogRoutes from "./routes/catalogRoutes.js";
 import surveyRoutes from "./routes/surveyRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { pool } from "./db.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-{console.log("1")}
+
 // ====== ✅ CORS ======
 app.use(cors({
   origin: ["https://hatzalah-gift.netlify.app", "http://localhost:5173"],
@@ -21,6 +27,15 @@ app.use(cors({
 
 app.use(express.json());
 
+// ====== ✅ Request Logging ======
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+// ====== ✅ Static Files ======
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // ====== ✅ Routes ======
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -28,6 +43,17 @@ app.use("/api/brands", brandRoutes);
 app.use("/api/catalogs", catalogRoutes);
 app.use("/api/surveys", surveyRoutes);
 app.use("/api/questions", questionRoutes);
+app.use("/api/upload", uploadRoutes);
+
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Server is working' });
+});
+
+// Simple upload route for testing
+app.post('/api/upload/image', (req, res) => {
+  res.json({ imageUrl: '/uploads/test-image.jpg' });
+});
 
 // ====== ✅ Error Handler ======
 app.use(errorHandler);
