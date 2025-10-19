@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
   const [starRating, setStarRating] = useState(0);
@@ -27,46 +29,55 @@ export default function ProductModal({ product, isOpen, onClose }) {
     { value: 1, label: "גרוע מאוד" }
   ];
   
-  // Load survey results when modal opens
+  // Load survey results
   useEffect(() => {
     if (!product?.id) return;
     
-    // Load existing survey data or initialize
-    const existingSurveyData = JSON.parse(localStorage.getItem(`surveyData_${product.id}`) || 'null');
-    
-    if (existingSurveyData) {
-      setSurveyResults(existingSurveyData);
-    } else {
-      const initialData = {
-        totalResponses: 47,
-        averageRating: 4.2,
-        totalRatingSum: 197.4, // 47 * 4.2
-        questionCounts: {
-          1: { 5: 21, 4: 14, 3: 7, 2: 3, 1: 2 },
-          2: { 5: 16, 4: 19, 3: 9, 2: 2, 1: 1 },
-          3: { 5: 24, 4: 12, 3: 7, 2: 3, 1: 1 }
+    const loadSurveyResults = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
+        const data = await response.json();
+        
+        if (data.length > 0) {
+          const totalResponses = data.length;
+          const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
+          const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
+          
+          setSurveyResults({
+            totalResponses,
+            averageRating: parseFloat(averageRating),
+            questions: {
+              1: { 5: 45, 4: 30, 3: 15, 2: 7, 1: 3 },
+              2: { 5: 35, 4: 40, 3: 19, 2: 4, 1: 2 },
+              3: { 5: 50, 4: 25, 3: 15, 2: 7, 1: 3 }
+            }
+          });
+        } else {
+          setSurveyResults({
+            totalResponses: 0,
+            averageRating: 0,
+            questions: {
+              1: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+              2: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+              3: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+            }
+          });
         }
-      };
-      
-      // Convert counts to percentages for display
-      const questions = {};
-      Object.keys(initialData.questionCounts).forEach(qId => {
-        questions[qId] = {};
-        Object.keys(initialData.questionCounts[qId]).forEach(option => {
-          questions[qId][option] = Math.round((initialData.questionCounts[qId][option] / initialData.totalResponses) * 100);
+      } catch (error) {
+        console.error('Error loading survey results:', error);
+        setSurveyResults({
+          totalResponses: 0,
+          averageRating: 0,
+          questions: {
+            1: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+            2: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+            3: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+          }
         });
-      });
-      
-      setSurveyResults({
-        ...initialData,
-        questions
-      });
-      
-      localStorage.setItem(`surveyData_${product.id}`, JSON.stringify({
-        ...initialData,
-        questions
-      }));
-    }
+      }
+    };
+    
+    loadSurveyResults();
     
     // Reset form states
     setShowSurveyForm(false);
@@ -82,27 +93,42 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setSurveyAnswers(prev => ({ ...prev, [questionId]: value }));
   };
   
-  const checkUserAndProceed = () => {
+  const checkUserAndProceed = async () => {
     if (!userName.trim() || !userEmail.trim()) {
       alert('אנא מלא שם ומייל');
       return;
     }
     
-    // Check if this user (name + email) already rated this product
-    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-    
-    if (userResponses[userKey]) {
-      setUserAlreadyAnswered(true);
-      setShowUserForm(false);
-    } else {
-      setUserAlreadyAnswered(false);
-      setShowUserForm(false);
-      setShowSurveyForm(true);
+    try {
+      const response = await fetch(`${API_URL}/api/surveys/check/${product.id}/${encodeURIComponent(userName.trim())}/${encodeURIComponent(userEmail.trim())}`);
+      const data = await response.json();
+      
+      if (data.hasResponded) {
+        setUserAlreadyAnswered(true);
+        setShowUserForm(false);
+      } else {
+        setUserAlreadyAnswered(false);
+        setShowUserForm(false);
+        setShowSurveyForm(true);
+      }
+    } catch (error) {
+      console.error('Error checking user:', error);
+      // Fallback to localStorage check
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+      
+      if (userResponses[userKey]) {
+        setUserAlreadyAnswered(true);
+        setShowUserForm(false);
+      } else {
+        setUserAlreadyAnswered(false);
+        setShowUserForm(false);
+        setShowSurveyForm(true);
+      }
     }
   };
   
-  const submitSurvey = () => {
+  const submitSurvey = async () => {
     // Check if all questions are answered
     if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
       alert('אנא ענה על כל השאלות');
@@ -115,62 +141,64 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return;
     }
     
-    const surveyData = {
-      productId: product.id,
-      answers: surveyAnswers,
-      rating: starRating,
-      userName: userName.trim(),
-      userEmail: userEmail.trim(),
-      timestamp: new Date().toISOString()
-    };
-    
-    // Save to localStorage with name+email key
-    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-    userResponses[userKey] = surveyData;
-    localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
-    
-    // Update results immediately with new answer data
-    setSurveyResults(prev => {
-      const newTotalResponses = prev.totalResponses + 1;
-      const newTotalRatingSum = (prev.totalRatingSum || (prev.averageRating * prev.totalResponses)) + starRating;
-      const newAverageRating = Number((newTotalRatingSum / newTotalResponses).toFixed(1));
-      
-      // Update question counts
-      const newQuestionCounts = { ...prev.questionCounts };
-      Object.keys(surveyAnswers).forEach(questionId => {
-        const answer = surveyAnswers[questionId];
-        if (!newQuestionCounts[questionId]) {
-          newQuestionCounts[questionId] = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-        }
-        newQuestionCounts[questionId][answer] = (newQuestionCounts[questionId][answer] || 0) + 1;
+    try {
+      const response = await fetch(`${API_URL}/api/surveys`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+          user_name: userName.trim(),
+          user_email: userEmail.trim(),
+          rating: starRating
+        })
       });
       
-      // Convert counts to percentages for display
-      const newQuestions = {};
-      Object.keys(newQuestionCounts).forEach(qId => {
-        newQuestions[qId] = {};
-        Object.keys(newQuestionCounts[qId]).forEach(option => {
-          newQuestions[qId][option] = Math.round((newQuestionCounts[qId][option] / newTotalResponses) * 100);
-        });
-      });
+      if (response.status === 409) {
+        alert('כבר דירגת את המוצר הזה');
+        setUserAlreadyAnswered(true);
+        setShowSurveyForm(false);
+        return;
+      }
       
-      const updatedResults = {
-        totalResponses: newTotalResponses,
-        averageRating: newAverageRating,
-        totalRatingSum: newTotalRatingSum,
-        questionCounts: newQuestionCounts,
-        questions: newQuestions
+      if (!response.ok) {
+        throw new Error('שגיאה בשמירת הדירוג');
+      }
+      
+      // Save to localStorage as backup
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+      userResponses[userKey] = {
+        productId: product.id,
+        answers: surveyAnswers,
+        rating: starRating,
+        userName: userName.trim(),
+        userEmail: userEmail.trim(),
+        timestamp: new Date().toISOString()
       };
+      localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
       
-      // Save to localStorage
-      localStorage.setItem(`surveyData_${product.id}`, JSON.stringify(updatedResults));
+      // Update results immediately
+      setSurveyResults(prev => {
+        const newTotalResponses = prev.totalResponses + 1;
+        const newTotalRating = (prev.averageRating * prev.totalResponses) + starRating;
+        const newAverageRating = parseFloat((newTotalRating / newTotalResponses).toFixed(1));
+        
+        return {
+          totalResponses: newTotalResponses,
+          averageRating: newAverageRating,
+          questions: prev.questions
+        };
+      });
       
-      return updatedResults;
-    });
-    
-    setShowSurveyForm(false);
-    alert('תודה על הדירוג!');
+      setShowSurveyForm(false);
+      alert('תודה על הדירוג!');
+      
+    } catch (error) {
+      console.error('Error submitting survey:', error);
+      alert('שגיאה בשמירת הדירוג');
+    }
   };
 
   return (

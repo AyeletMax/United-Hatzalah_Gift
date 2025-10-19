@@ -35,12 +35,26 @@ const getSurveyResponsesByProduct = async (req, res) => {
   }
 };
 
+const checkUserResponse = async (req, res) => {
+  try {
+    const { productId, userName, userEmail } = req.params;
+    const hasResponded = await surveyService.checkUserResponse(productId, userName, userEmail);
+    res.json({ hasResponded });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const createSurveyResponse = async (req, res) => {
   try {
     const newResponse = await surveyService.createSurveyResponse(req.body);
     res.status(201).json(newResponse);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (err.message.includes('כבר דירג')) {
+      res.status(409).json({ error: err.message });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
 };
 
@@ -68,6 +82,7 @@ export default {
   getAllSurveyResponses,
   getSurveyResponseById,
   getSurveyResponsesByProduct,
+  checkUserResponse,
   createSurveyResponse,
   updateSurveyResponse,
   deleteSurveyResponse,
