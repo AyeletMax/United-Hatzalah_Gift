@@ -31,9 +31,26 @@ export default function ProductModal({ product, isOpen, onClose }) {
               <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
             )}
             
-            <div className="product-description">
-              <h3>פרטי המוצר</h3>
-              <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
+            <div className="product-details">
+              <div className="detail-item">
+                <h3>פרטים על המוצר</h3>
+                <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
+              </div>
+              
+              <div className="detail-item">
+                <h3>מחיר ליח' כולל מע"מ</h3>
+                <p className="price-detail">₪{product.unit_price_incl_vat || "לא צוין"}</p>
+              </div>
+              
+              <div className="detail-item">
+                <h3>זמן אספקה</h3>
+                <p>3-5 ימי עסקים</p>
+              </div>
+              
+              <div className="detail-item">
+                <h3>שם מזמין אחרון</h3>
+                <p>דוד כהן - ירושלים</p>
+              </div>
             </div>
             
             <div className="product-reviews">
