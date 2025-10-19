@@ -23,10 +23,15 @@ const AdminPanel = () => {
   const loadData = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       
       const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`${baseUrl}/api/products`),
-        fetch(`${baseUrl}/api/categories`)
+        fetch(`${apiUrl}/api/products`),
+        fetch(`${apiUrl}/api/categories`)
       ]);
       setProducts(await productsRes.json());
       setCategories(await categoriesRes.json());
@@ -39,8 +44,13 @@ const AdminPanel = () => {
     try {
       const method = selectedProduct ? 'PUT' : 'POST';
       const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       const endPath = selectedProduct ? `api/products/${selectedProduct.id}` : 'api/products';
-      const url = `${baseUrl}/${endPath}`;
+      const url = `${apiUrl}/${endPath}`;
       
       await fetch(url, {
         method,
@@ -60,7 +70,12 @@ const AdminPanel = () => {
     if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
       try {
         const baseUrl = import.meta.env.VITE_API_URL;
-        const url = `${baseUrl}/api/products/${id}`;
+        const apiUrl = baseUrl.includes("localhost")
+          ? baseUrl
+          : baseUrl.includes("onrender.com")
+          ? baseUrl
+          : `${baseUrl}.onrender.com`;
+        const url = `${apiUrl}/api/products/${id}`;
         await fetch(url, { method: 'DELETE' });
         loadData();
       } catch (error) {
@@ -146,7 +161,12 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
-      const url = `${baseUrl}/api/upload/image`;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      const url = `${apiUrl}/api/upload/image`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -158,7 +178,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       }
       
       const result = await response.json();
-      const fullImageUrl = `${baseUrl}${result.imageUrl}`;
+      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
       setFormData({...formData, image_url: fullImageUrl});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
