@@ -57,13 +57,28 @@ const getSurveyResponsesByProduct = async (productId) => {
   return rows;
 };
 
-const createSurveyResponse = async (surveyResponse) => {
-  const { product_id, rating } = surveyResponse;
-  const [result] = await pool.query(
-    "INSERT INTO product_survey_responses (product_id, rating) VALUES (?, ?)",
-    [product_id, rating]
+const checkUserResponse = async (productId, userName, userEmail) => {
+  const [rows] = await pool.query(
+    "SELECT id FROM product_survey_responses WHERE product_id = ? AND user_name = ? AND user_email = ?",
+    [productId, userName, userEmail]
   );
-  return { id: result.insertId, product_id, rating, created_at: new Date() };
+  return rows.length > 0;
+};
+
+const createSurveyResponse = async (surveyResponse) => {
+  const { product_id, user_name, user_email, rating } = surveyResponse;
+  
+  // Check if user already responded
+  const hasResponded = await checkUserResponse(product_id, user_name, user_email);
+  if (hasResponded) {
+    throw new Error('משתמש זה כבר דירג את המוצר');
+  }
+  
+  const [result] = await pool.query(
+    "INSERT INTO product_survey_responses (product_id, user_name, user_email, rating) VALUES (?, ?, ?, ?)",
+    [product_id, user_name, user_email, rating]
+  );
+  return { id: result.insertId, product_id, user_name, user_email, rating, created_at: new Date() };
 };
 
 const updateSurveyResponse = async (id, surveyResponse) => {
@@ -85,6 +100,7 @@ export default {
   getAllSurveyResponses,
   getSurveyResponseById,
   getSurveyResponsesByProduct,
+  checkUserResponse,
   createSurveyResponse,
   updateSurveyResponse,
   deleteSurveyResponse,
