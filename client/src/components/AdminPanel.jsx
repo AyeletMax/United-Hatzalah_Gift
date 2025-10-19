@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useProducts } from './ProductsContext.jsx';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [products, setProducts] = useState([]);
+  const { products, refreshProducts } = useProducts();
   const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
@@ -14,24 +15,25 @@ const AdminPanel = () => {
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      loadData();
+      loadCategories();
     } else {
       alert('סיסמה שגויה');
     }
   };
 
-  const loadData = async () => {
+  const loadCategories = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`${baseUrl}/api/products`),
-        fetch(`${baseUrl}/api/categories`)
-      ]);
-      setProducts(await productsRes.json());
+      const categoriesRes = await fetch(`${apiUrl}/api/categories`);
       setCategories(await categoriesRes.json());
     } catch (error) {
-      console.error('שגיאה בטעינת נתונים:', error);
+      console.error('שגיאה בטעינת קטגוריות:', error);
     }
   };
 
@@ -39,8 +41,13 @@ const AdminPanel = () => {
     try {
       const method = selectedProduct ? 'PUT' : 'POST';
       const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       const endPath = selectedProduct ? `api/products/${selectedProduct.id}` : 'api/products';
-      const url = `${baseUrl}/${endPath}`;
+      const url = `${apiUrl}/${endPath}`;
       
       await fetch(url, {
         method,
@@ -48,7 +55,7 @@ const AdminPanel = () => {
         body: JSON.stringify(productData)
       });
       
-      loadData();
+      refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
     } catch (error) {
@@ -60,9 +67,14 @@ const AdminPanel = () => {
     if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
       try {
         const baseUrl = import.meta.env.VITE_API_URL;
-        const url = `${baseUrl}/api/products/${id}`;
+        const apiUrl = baseUrl.includes("localhost")
+          ? baseUrl
+          : baseUrl.includes("onrender.com")
+          ? baseUrl
+          : `${baseUrl}.onrender.com`;
+        const url = `${apiUrl}/api/products/${id}`;
         await fetch(url, { method: 'DELETE' });
-        loadData();
+        refreshProducts();
       } catch (error) {
         console.error('שגיאה במחיקת מוצר:', error);
       }
@@ -91,7 +103,7 @@ const AdminPanel = () => {
       
       <div className="admin-actions">
         <button onClick={() => setShowProductForm(true)}>הוסף מוצר חדש</button>
-        <button onClick={loadData}>רענן נתונים</button>
+        <button onClick={refreshProducts}>רענן נתונים</button>
       </div>
 
       <div className="products-grid">
@@ -146,7 +158,12 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
-      const url = `${baseUrl}/api/upload/image`;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      const url = `${apiUrl}/api/upload/image`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -158,7 +175,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       }
       
       const result = await response.json();
-      const fullImageUrl = `${baseUrl}${result.imageUrl}`;
+      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
       setFormData({...formData, image_url: fullImageUrl});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);

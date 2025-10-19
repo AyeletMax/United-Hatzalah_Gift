@@ -2,11 +2,11 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(3, calc((100vh - 120px) / 3));
-  gap: 0;
+  gap: 12px;
   width: 100vw;
   height: calc(100vh - 120px);
   margin: 0;
-  background: #1a1a1a;
+
 }
 
 #categories {
@@ -35,14 +35,32 @@
 
 @media (max-width: 768px) {
   .puzzle-grid {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(6, calc((100vh - 120px) / 6));
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    height: auto;
+    min-height: calc(100vh - 120px);
+    gap: 8px;
+    padding: 10px;
+  }
+  
+  #categories {
+    height: auto;
+    min-height: 100vh;
+    padding: 10px !important;
+    margin-left: 0;
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   .puzzle-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(8, calc((100vh - 120px) / 8));
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(10, 1fr);
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  #categories {
+    padding: 8px !important;
   }
 }
