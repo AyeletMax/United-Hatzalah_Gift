@@ -15,6 +15,8 @@ export function ProductsProvider({ children }) {
         const baseUrl = import.meta.env.VITE_API_URL;
         const fullUrl = baseUrl.includes("localhost")
           ? `${baseUrl}/api/products`
+          : baseUrl.includes("onrender.com")
+          ? `${baseUrl}/api/products`
           : `${baseUrl}.onrender.com/api/products`;
         console.log('Fetching from:', fullUrl);
         const res = await fetch(fullUrl, {
