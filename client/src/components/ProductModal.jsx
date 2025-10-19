@@ -12,6 +12,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userAlreadyAnswered, setUserAlreadyAnswered] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success', 'error', 'warning'
   
   if (!isOpen || !product) return null;
 
@@ -79,6 +81,9 @@ export default function ProductModal({ product, isOpen, onClose }) {
     
     loadSurveyResults();
     
+    // Auto-refresh every 5 seconds to sync between browsers
+    const interval = setInterval(loadSurveyResults, 5000);
+    
     // Reset form states
     setShowSurveyForm(false);
     setShowUserForm(false);
@@ -87,15 +92,26 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setUserEmail('');
     setSurveyAnswers({});
     setStarRating(0);
+    
+    return () => clearInterval(interval);
   }, [product?.id]);
   
   const handleAnswerChange = (questionId, value) => {
     setSurveyAnswers(prev => ({ ...prev, [questionId]: value }));
   };
   
+  const showMessage = (text, type = 'info') => {
+    setMessage(text);
+    setMessageType(type);
+    setTimeout(() => {
+      setMessage('');
+      setMessageType('');
+    }, 3000);
+  };
+
   const checkUserAndProceed = async () => {
     if (!userName.trim() || !userEmail.trim()) {
-      alert('אנא מלא שם ומייל');
+      showMessage('אנא מלא שם ומייל', 'error');
       return;
     }
     
@@ -113,6 +129,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }
     } catch (error) {
       console.error('Error checking user:', error);
+      showMessage('שגיאה בבדיקת המשתמש', 'error');
       // Fallback to localStorage check
       const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
       const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
@@ -131,13 +148,13 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const submitSurvey = async () => {
     // Check if all questions are answered
     if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
-      alert('אנא ענה על כל השאלות');
+      showMessage('אנא ענה על כל השאלות', 'warning');
       return;
     }
     
     // Check if star rating is selected
     if (starRating === 0) {
-      alert('אנא בחר דירוג כוכבים');
+      showMessage('אנא בחר דירוג כוכבים', 'warning');
       return;
     }
     
@@ -156,7 +173,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       if (response.status === 409) {
-        alert('כבר דירגת את המוצר הזה');
+        showMessage('כבר דירגת את המוצר הזה', 'warning');
         setUserAlreadyAnswered(true);
         setShowSurveyForm(false);
         return;
@@ -193,11 +210,33 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       setShowSurveyForm(false);
-      alert('תודה על הדירוג!');
+      showMessage('תודה על הדירוג!', 'success');
+      
+      // Reload survey results to show real-time update
+      setTimeout(async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
+          const data = await response.json();
+          
+          if (data.length > 0) {
+            const totalResponses = data.length;
+            const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
+            const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
+            
+            setSurveyResults(prev => ({
+              ...prev,
+              totalResponses,
+              averageRating: parseFloat(averageRating)
+            }));
+          }
+        } catch (error) {
+          console.error('Error reloading results:', error);
+        }
+      }, 500);
       
     } catch (error) {
       console.error('Error submitting survey:', error);
-      alert('שגיאה בשמירת הדירוג');
+      showMessage('שגיאה בשמירת הדירוג', 'error');
     }
   };
 
@@ -257,6 +296,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
                 )}
               </div>
               
+
+              
               {/* תמיד להציג תוצאות */}
               {surveyResults && !showUserForm && !showSurveyForm && (
                 <div className="survey-results">
@@ -309,6 +350,13 @@ export default function ProductModal({ product, isOpen, onClose }) {
                       className="user-input"
                     />
                   </div>
+                  {/* הודעות */}
+                  {message && (
+                    <div className={`message ${messageType}`}>
+                      {message}
+                    </div>
+                  )}
+                  
                   <div className="form-buttons">
                     <button className="check-user-btn" onClick={checkUserAndProceed}>
                       המשך
@@ -377,6 +425,13 @@ export default function ProductModal({ product, isOpen, onClose }) {
                       ))}
                     </div>
                   </div>
+                  
+                  {/* הודעות */}
+                  {message && (
+                    <div className={`message ${messageType}`}>
+                      {message}
+                    </div>
+                  )}
                   
                   <div className="form-buttons">
                     <button className="submit-survey" onClick={submitSurvey}>
