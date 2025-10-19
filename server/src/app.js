@@ -13,7 +13,7 @@ const app = express();
 {console.log("1")}
 // ====== ✅ CORS ======
 app.use(cors({
-  origin: "https://hatzalah-gift.netlify.app",
+  origin: ["https://hatzalah-gift.netlify.app", "http://localhost:5173"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
