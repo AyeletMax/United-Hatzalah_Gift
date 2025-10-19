@@ -79,15 +79,42 @@ export default function ProductModal({ product, isOpen, onClose }) {
     userResponses[`${product.id}_${userName.trim()}`] = surveyData;
     localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
     
-    // Update results immediately
-    setSurveyResults(prev => ({
-      ...prev,
-      totalResponses: prev.totalResponses + 1,
-      averageRating: ((prev.averageRating * prev.totalResponses) + starRating) / (prev.totalResponses + 1)
-    }));
+    // Update results immediately with new answer data
+    setSurveyResults(prev => {
+      const newQuestions = { ...prev.questions };
+      const newTotalResponses = prev.totalResponses + 1;
+      
+      // Update question results based on answers
+      Object.keys(surveyAnswers).forEach(questionId => {
+        const answer = surveyAnswers[questionId];
+        const currentQ = { ...newQuestions[questionId] };
+        
+        // Convert percentages back to counts
+        const counts = {};
+        Object.keys(currentQ).forEach(key => {
+          counts[key] = Math.round((currentQ[key] * prev.totalResponses) / 100);
+        });
+        
+        // Add new answer
+        counts[answer] = (counts[answer] || 0) + 1;
+        
+        // Recalculate percentages
+        Object.keys(counts).forEach(key => {
+          newQuestions[questionId][key] = Math.round((counts[key] / newTotalResponses) * 100);
+        });
+      });
+      
+      return {
+        ...prev,
+        totalResponses: newTotalResponses,
+        averageRating: Number(((prev.averageRating * prev.totalResponses) + starRating) / newTotalResponses).toFixed(1),
+        questions: newQuestions
+      };
+    });
     
     setHasSubmitted(true);
     setUserAlreadyAnswered(true);
+    setShowSurveyForm(false);
   };
 
   return (
@@ -136,27 +163,20 @@ export default function ProductModal({ product, isOpen, onClose }) {
             <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
-                {!userAlreadyAnswered && !hasSubmitted && (
-                  <button 
-                    className="toggle-survey-btn"
-                    onClick={() => setShowSurveyForm(!showSurveyForm)}
-                  >
-                    {showSurveyForm ? 'חזור לתוצאות' : 'מלא סקר'}
-                  </button>
-                )}
+                <button 
+                  className="toggle-survey-btn"
+                  onClick={() => setShowSurveyForm(!showSurveyForm)}
+                >
+                  {showSurveyForm ? 'חזור לתוצאות' : 'מלא סקר'}
+                </button>
               </div>
               
-              {userAlreadyAnswered && !hasSubmitted ? (
+              {showSurveyForm && (userAlreadyAnswered || hasSubmitted) ? (
                 <div className="thank-you-message">
-                  <h4>תודה שענית על הסקר!</h4>
-                  <p>אנו מעריכים את המשוב שלך</p>
+                  <h4>כבר מילאת את הסקר</h4>
+                  <p>תודה שענית על הסקר! אנו מעריכים את המשוב שלך</p>
                 </div>
-              ) : hasSubmitted ? (
-                <div className="thank-you-message">
-                  <h4>תודה שענית על הסקר!</h4>
-                  <p>המשוב שלך נשמר בהצלחה</p>
-                </div>
-              ) : showSurveyForm ? (
+              ) : showSurveyForm && !userAlreadyAnswered && !hasSubmitted ? (
                 <div className="survey-form">
                   <div className="user-info">
                     <input
@@ -246,6 +266,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
                 </div>
                 )
               )}
+              
+
             </div>
           </div>
         </div>
