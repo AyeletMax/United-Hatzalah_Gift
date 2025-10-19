@@ -2,3 +2,26 @@
 body, .app-content {
 	padding-top: 62px;
 }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  body, .app-content {
+    padding-top: 55px;
+  }
+  
+  .section-title {
+    font-size: 20px !important;
+    margin: 20px 0 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body, .app-content {
+    padding-top: 50px;
+  }
+  
+  .section-title {
+    font-size: 18px !important;
+    margin: 15px 0 10px !important;
+  }
+}

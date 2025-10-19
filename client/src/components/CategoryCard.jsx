@@ -10,7 +10,8 @@ export default function CategoryCard({ title, icon, onClick, size = 'medium', de
       ([entry]) => {
         if (entry.isIntersecting) {
           setTimeout(() => setIsVisible(true), delay);
-          observer.disconnect();
+        } else {
+          setIsVisible(false);
         }
       },
       { threshold: 0.1 }

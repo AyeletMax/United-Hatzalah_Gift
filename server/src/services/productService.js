@@ -60,7 +60,7 @@ const createProduct = async (product) => {
   const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url } = product;
   const [result] = await pool.query(
     "INSERT INTO products (name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [name, category_id, brand_id, unit_price_incl_vat || 0, delivery_time_days, last_ordered_by_name, image_url]
+    [name, category_id, brand_id, unit_price_incl_vat || 0, delivery_time_days || null, last_ordered_by_name, image_url]
   );
   return { id: result.insertId, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url };
 };
@@ -69,7 +69,7 @@ const updateProduct = async (id, product) => {
   const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url } = product;
   const [result] = await pool.query(
     "UPDATE products SET name = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ? WHERE id = ?",
-    [name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, id]
+    [name, category_id, brand_id, unit_price_incl_vat, delivery_time_days || null, last_ordered_by_name, image_url, id]
   );
   if (result.affectedRows === 0) return null;
   return { id, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url };

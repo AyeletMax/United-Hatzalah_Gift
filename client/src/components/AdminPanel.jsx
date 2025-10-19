@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useProducts } from './ProductsContext.jsx';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [products, setProducts] = useState([]);
+  const { products, refreshProducts } = useProducts();
   const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
@@ -14,13 +15,13 @@ const AdminPanel = () => {
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      loadData();
+      loadCategories();
     } else {
       alert('סיסמה שגויה');
     }
   };
 
-  const loadData = async () => {
+  const loadCategories = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
       const apiUrl = baseUrl.includes("localhost")
@@ -29,14 +30,10 @@ const AdminPanel = () => {
         ? baseUrl
         : `${baseUrl}.onrender.com`;
       
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`${apiUrl}/api/products`),
-        fetch(`${apiUrl}/api/categories`)
-      ]);
-      setProducts(await productsRes.json());
+      const categoriesRes = await fetch(`${apiUrl}/api/categories`);
       setCategories(await categoriesRes.json());
     } catch (error) {
-      console.error('שגיאה בטעינת נתונים:', error);
+      console.error('שגיאה בטעינת קטגוריות:', error);
     }
   };
 
@@ -58,7 +55,7 @@ const AdminPanel = () => {
         body: JSON.stringify(productData)
       });
       
-      loadData();
+      refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
     } catch (error) {
@@ -77,7 +74,7 @@ const AdminPanel = () => {
           : `${baseUrl}.onrender.com`;
         const url = `${apiUrl}/api/products/${id}`;
         await fetch(url, { method: 'DELETE' });
-        loadData();
+        refreshProducts();
       } catch (error) {
         console.error('שגיאה במחיקת מוצר:', error);
       }
@@ -106,7 +103,7 @@ const AdminPanel = () => {
       
       <div className="admin-actions">
         <button onClick={() => setShowProductForm(true)}>הוסף מוצר חדש</button>
-        <button onClick={loadData}>רענן נתונים</button>
+        <button onClick={refreshProducts}>רענן נתונים</button>
       </div>
 
       <div className="products-grid">

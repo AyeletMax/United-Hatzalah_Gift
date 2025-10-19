@@ -9,6 +9,24 @@ export default function ProductList({ products = [], categorySlug }) {
     const productSlug = product.name.replace(/\s+/g, '-');
     if (categorySlug) {
       navigate(`/${categorySlug}/${productSlug}`);
+    } else {
+      // For search results, find the category from the product
+      const categories = [
+        { id: 1, slug: "לרכב" },
+        { id: 2, slug: "טקסטיל-וביגוד" },
+        { id: 3, slug: "כלי-בית" },
+        { id: 4, slug: "יודאיקה" },
+        { id: 5, slug: "מוצרים-חדשים" },
+        { id: 6, slug: "מתנות" },
+        { id: 7, slug: "מוצרי-קיץ" },
+        { id: 8, slug: "מוצרי-חורף" },
+        { id: 9, slug: "אביזרי-יחץ" },
+        { id: 10, slug: "תיקים" }
+      ];
+      const category = categories.find(c => c.id === product.category_id);
+      if (category) {
+        navigate(`/${category.slug}/${productSlug}`);
+      }
     }
   };
 

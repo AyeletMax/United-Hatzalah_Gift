@@ -178,6 +178,14 @@
 }
 
 @media (max-width: 768px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
   .modal-body {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -202,5 +210,38 @@
   
   .detail-item p {
     font-size: 13px;
+  }
+  
+  .modal-product-image {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 5px;
+  }
+  
+  .modal-body {
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .modal-product-title {
+    font-size: 18px;
+  }
+  
+  .modal-product-price {
+    font-size: 16px;
+  }
+  
+  .modal-product-image {
+    max-width: 200px;
+  }
+  
+  .modal-close {
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
   }
 }
