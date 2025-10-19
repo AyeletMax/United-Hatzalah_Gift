@@ -6,9 +6,9 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const [starRating, setStarRating] = useState(0);
   const [surveyResults, setSurveyResults] = useState(null);
   const [showSurveyForm, setShowSurveyForm] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [userAlreadyAnswered, setUserAlreadyAnswered] = useState(false);
   
   if (!isOpen || !product) return null;
@@ -27,17 +27,9 @@ export default function ProductModal({ product, isOpen, onClose }) {
     { value: 1, label: "גרוע מאוד" }
   ];
   
-  // Check if user already answered and load results
+  // Load survey results when modal opens
   useEffect(() => {
-    const checkUserResponse = async () => {
-      const savedName = localStorage.getItem('userName');
-      if (savedName) {
-        const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-        if (userResponses[`${product.id}_${savedName}`]) {
-          setUserAlreadyAnswered(true);
-        }
-      }
-    };
+    if (!product?.id) return;
     
     // Load existing survey data or initialize
     const existingSurveyData = JSON.parse(localStorage.getItem(`surveyData_${product.id}`) || 'null');
@@ -76,21 +68,41 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }));
     }
     
-    checkUserResponse();
+    // Reset form states
     setShowSurveyForm(false);
-    setHasSubmitted(false);
-  }, [product.id]);
+    setShowUserForm(false);
+    setUserAlreadyAnswered(false);
+    setUserName('');
+    setUserEmail('');
+    setSurveyAnswers({});
+    setStarRating(0);
+  }, [product?.id]);
   
   const handleAnswerChange = (questionId, value) => {
     setSurveyAnswers(prev => ({ ...prev, [questionId]: value }));
   };
   
-  const submitSurvey = async () => {
+  const checkUserAndProceed = () => {
     if (!userName.trim() || !userEmail.trim()) {
       alert('אנא מלא שם ומייל');
       return;
     }
     
+    // Check if this user (name + email) already rated this product
+    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+    
+    if (userResponses[userKey]) {
+      setUserAlreadyAnswered(true);
+      setShowUserForm(false);
+    } else {
+      setUserAlreadyAnswered(false);
+      setShowUserForm(false);
+      setShowSurveyForm(true);
+    }
+  };
+  
+  const submitSurvey = () => {
     // Check if all questions are answered
     if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
       alert('אנא ענה על כל השאלות');
@@ -112,10 +124,10 @@ export default function ProductModal({ product, isOpen, onClose }) {
       timestamp: new Date().toISOString()
     };
     
-    // Save to localStorage (in real app would be API call)
-    localStorage.setItem('userName', userName.trim());
+    // Save to localStorage with name+email key
     const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    userResponses[`${product.id}_${userName.trim()}`] = surveyData;
+    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+    userResponses[userKey] = surveyData;
     localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
     
     // Update results immediately with new answer data
@@ -157,14 +169,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return updatedResults;
     });
     
-    setHasSubmitted(true);
-    setUserAlreadyAnswered(true);
     setShowSurveyForm(false);
-    
-    // Force re-render to show updated results immediately
-    setTimeout(() => {
-      setShowSurveyForm(false);
-    }, 100);
+    alert('תודה על הדירוג!');
   };
 
   return (
@@ -213,21 +219,52 @@ export default function ProductModal({ product, isOpen, onClose }) {
             <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
-                <button 
-                  className="toggle-survey-btn"
-                  onClick={() => setShowSurveyForm(!showSurveyForm)}
-                >
-                  {showSurveyForm ? 'חזור לתוצאות' : 'מלא סקר'}
-                </button>
+                {!showUserForm && !showSurveyForm && (
+                  <button 
+                    className="toggle-survey-btn"
+                    onClick={() => setShowUserForm(true)}
+                  >
+                    מלא סקר
+                  </button>
+                )}
               </div>
               
-              {showSurveyForm && (userAlreadyAnswered || hasSubmitted) ? (
-                <div className="thank-you-message">
-                  <h4>כבר מילאת את הסקר</h4>
-                  <p>תודה שענית על הסקר! אנו מעריכים את המשוב שלך</p>
+              {/* תמיד להציג תוצאות */}
+              {surveyResults && !showUserForm && !showSurveyForm && (
+                <div className="survey-results">
+                  <div className="results-summary">
+                    <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
+                    <p>דירוג ממוצע: <strong>{surveyResults.averageRating}/5</strong> {'★'.repeat(Math.round(surveyResults.averageRating))}</p>
+                  </div>
+                  
+                  <div className="questions-results">
+                    {surveyQuestions.map(question => (
+                      <div key={question.id} className="question-result">
+                        <h4>{question.text}</h4>
+                        <div className="result-bars">
+                          {answerOptions.map(option => {
+                            const percentage = surveyResults.questions[question.id][option.value] || 0;
+                            return (
+                              <div key={option.value} className="result-bar">
+                                <span className="option-label">{option.label}</span>
+                                <div className="bar-container">
+                                  <div className="bar-fill" style={{ width: `${percentage}%` }}></div>
+                                  <span className="percentage">{percentage}%</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ) : showSurveyForm && !userAlreadyAnswered && !hasSubmitted ? (
-                <div className="survey-form">
+              )}
+              
+              {/* טופס הזנת שם ומייל */}
+              {showUserForm && (
+                <div className="user-form">
+                  <h4>הזן את הפרטים שלך</h4>
                   <div className="user-info">
                     <input
                       type="text"
@@ -243,6 +280,39 @@ export default function ProductModal({ product, isOpen, onClose }) {
                       onChange={(e) => setUserEmail(e.target.value)}
                       className="user-input"
                     />
+                  </div>
+                  <div className="form-buttons">
+                    <button className="check-user-btn" onClick={checkUserAndProceed}>
+                      המשך
+                    </button>
+                    <button className="cancel-btn" onClick={() => setShowUserForm(false)}>
+                      ביטול
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* הודעה שהמשתמש כבר דירג */}
+              {userAlreadyAnswered && (
+                <div className="thank-you-message">
+                  <h4>כבר דירגת את המוצר הזה</h4>
+                  <p>תודה שענית על הסקר! אנו מעריכים את המשוב שלך</p>
+                  <button className="back-btn" onClick={() => {
+                    setUserAlreadyAnswered(false);
+                    setUserName('');
+                    setUserEmail('');
+                  }}>
+                    חזור
+                  </button>
+                </div>
+              )}
+              
+              {/* טופס הדירוג */}
+              {showSurveyForm && (
+                <div className="survey-form">
+                  <div className="user-display">
+                    <p><strong>שם:</strong> {userName}</p>
+                    <p><strong>מייל:</strong> {userEmail}</p>
                   </div>
                   
                   <h4>דרג את המוצר</h4>
@@ -280,44 +350,22 @@ export default function ProductModal({ product, isOpen, onClose }) {
                     </div>
                   </div>
                   
-                  <button className="submit-survey" onClick={submitSurvey}>
-                    שלח דירוג
-                  </button>
-                </div>
-              ) : (
-                surveyResults && (
-                <div className="survey-results">
-                  <div className="results-summary">
-                    <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
-                    <p>דירוג ממוצע: <strong>{surveyResults.averageRating}/5</strong> {'★'.repeat(Math.round(surveyResults.averageRating))}</p>
-                  </div>
-                  
-                  <div className="questions-results">
-                    {surveyQuestions.map(question => (
-                      <div key={question.id} className="question-result">
-                        <h4>{question.text}</h4>
-                        <div className="result-bars">
-                          {answerOptions.map(option => {
-                            const percentage = surveyResults.questions[question.id][option.value] || 0;
-                            return (
-                              <div key={option.value} className="result-bar">
-                                <span className="option-label">{option.label}</span>
-                                <div className="bar-container">
-                                  <div className="bar-fill" style={{ width: `${percentage}%` }}></div>
-                                  <span className="percentage">{percentage}%</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="form-buttons">
+                    <button className="submit-survey" onClick={submitSurvey}>
+                      שלח דירוג
+                    </button>
+                    <button className="cancel-btn" onClick={() => {
+                      setShowSurveyForm(false);
+                      setUserName('');
+                      setUserEmail('');
+                      setSurveyAnswers({});
+                      setStarRating(0);
+                    }}>
+                      ביטול
+                    </button>
                   </div>
                 </div>
-                )
               )}
-              
-
             </div>
           </div>
         </div>
