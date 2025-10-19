@@ -31,15 +31,29 @@
   display: flex;
   gap: 15px;
   margin-bottom: 30px;
+  margin-top: 20px;
+  z-index: 9999;
+  position: relative;
 }
 
 .admin-actions button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: #f4a261;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 9999;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.admin-actions button:hover {
+  background: #e76f51;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .products-grid {
@@ -135,4 +149,124 @@
 .form-actions button[type="button"] {
   background: #666;
   color: white;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #545b62;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 15px;
+  }
+  
+  .admin-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .admin-header h1 {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  .admin-actions {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .admin-actions button {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px 20px;
+    font-size: 18px;
+  }
+  
+  .logout-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  .admin-info {
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  .product-form {
+    width: 95%;
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .product-form h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+  
+  .product-form input,
+  .product-form select {
+    padding: 15px;
+    font-size: 16px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .form-actions button {
+    padding: 15px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-panel {
+    padding: 10px;
+  }
+  
+  .admin-header h1 {
+    font-size: 20px;
+  }
+  
+  .admin-actions button {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  .logout-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .product-form {
+    width: 98%;
+    padding: 15px;
+  }
+  
+  .product-form input,
+  .product-form select {
+    padding: 12px;
+    font-size: 14px;
+  }
 }
