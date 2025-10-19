@@ -1,14 +1,94 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
 export default function ProductModal({ product, isOpen, onClose }) {
+  const [surveyAnswers, setSurveyAnswers] = useState({});
+  const [starRating, setStarRating] = useState(0);
+  const [surveyResults, setSurveyResults] = useState(null);
+  const [showSurveyForm, setShowSurveyForm] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [userAlreadyAnswered, setUserAlreadyAnswered] = useState(false);
+  
   if (!isOpen || !product) return null;
 
-  const reviews = [
-    { name: "דוד כהן", rating: 5, comment: "מוצר מעולה! איכות גבוהה ומשלוח מהיר" },
-    { name: "שרה לוי", rating: 4, comment: "מאוד מרוצה מהרכישה, ממליצה בחום" },
-    { name: "יוסי אברהם", rating: 5, comment: "בדיוק מה שחיפשתי, שירות מצוין" }
+  const surveyQuestions = [
+    { id: 1, text: "איך אתה מרגיש לגבי איכות המוצר?" },
+    { id: 2, text: "איך אתה מרגיש לגבי המחיר?" },
+    { id: 3, text: "איך אתה מרגיש לגבי זמן האספקה?" }
   ];
+  
+  const answerOptions = [
+    { value: 5, label: "מרוצה מאוד" },
+    { value: 4, label: "מרוצה" },
+    { value: 3, label: "סביר" },
+    { value: 2, label: "גרוע" },
+    { value: 1, label: "גרוע מאוד" }
+  ];
+  
+  // Check if user already answered and load results
+  useEffect(() => {
+    const checkUserResponse = async () => {
+      const savedName = localStorage.getItem('userName');
+      if (savedName) {
+        const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+        if (userResponses[`${product.id}_${savedName}`]) {
+          setUserAlreadyAnswered(true);
+        }
+      }
+    };
+    
+    setSurveyResults({
+      totalResponses: 47,
+      averageRating: 4.2,
+      questions: {
+        1: { 5: 45, 4: 30, 3: 15, 2: 7, 1: 3 },
+        2: { 5: 35, 4: 40, 3: 20, 2: 3, 1: 2 },
+        3: { 5: 50, 4: 25, 3: 15, 2: 8, 1: 2 }
+      }
+    });
+    
+    checkUserResponse();
+    setShowSurveyForm(false);
+    setHasSubmitted(false);
+  }, [product.id]);
+  
+  const handleAnswerChange = (questionId, value) => {
+    setSurveyAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+  
+  const submitSurvey = async () => {
+    if (!userName.trim() || !userEmail.trim()) {
+      alert('אנא מלא שם ומייל');
+      return;
+    }
+    
+    const surveyData = {
+      productId: product.id,
+      answers: surveyAnswers,
+      rating: starRating,
+      userName: userName.trim(),
+      userEmail: userEmail.trim(),
+      timestamp: new Date().toISOString()
+    };
+    
+    // Save to localStorage (in real app would be API call)
+    localStorage.setItem('userName', userName.trim());
+    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+    userResponses[`${product.id}_${userName.trim()}`] = surveyData;
+    localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
+    
+    // Update results immediately
+    setSurveyResults(prev => ({
+      ...prev,
+      totalResponses: prev.totalResponses + 1,
+      averageRating: ((prev.averageRating * prev.totalResponses) + starRating) / (prev.totalResponses + 1)
+    }));
+    
+    setHasSubmitted(true);
+    setUserAlreadyAnswered(true);
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -53,21 +133,119 @@ export default function ProductModal({ product, isOpen, onClose }) {
               </div>
             </div>
             
-            <div className="product-reviews">
-              <h3>המלצות לקוחות</h3>
-              <div className="reviews-list">
-                {reviews.map((review, index) => (
-                  <div key={index} className="review-item">
-                    <div className="review-header">
-                      <span className="reviewer-name">{review.name}</span>
-                      <div className="rating">
-                        {'★'.repeat(review.rating)}{'☆'.repeat(5-review.rating)}
+            <div className="survey-section">
+              <div className="survey-header">
+                <h3>סקר שביעות רצון</h3>
+                {!userAlreadyAnswered && !hasSubmitted && (
+                  <button 
+                    className="toggle-survey-btn"
+                    onClick={() => setShowSurveyForm(!showSurveyForm)}
+                  >
+                    {showSurveyForm ? 'חזור לתוצאות' : 'מלא סקר'}
+                  </button>
+                )}
+              </div>
+              
+              {userAlreadyAnswered && !hasSubmitted ? (
+                <div className="thank-you-message">
+                  <h4>תודה שענית על הסקר!</h4>
+                  <p>אנו מעריכים את המשוב שלך</p>
+                </div>
+              ) : hasSubmitted ? (
+                <div className="thank-you-message">
+                  <h4>תודה שענית על הסקר!</h4>
+                  <p>המשוב שלך נשמר בהצלחה</p>
+                </div>
+              ) : showSurveyForm ? (
+                <div className="survey-form">
+                  <div className="user-info">
+                    <input
+                      type="text"
+                      placeholder="השם שלך"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      className="user-input"
+                    />
+                    <input
+                      type="email"
+                      placeholder="המייל שלך"
+                      value={userEmail}
+                      onChange={(e) => setUserEmail(e.target.value)}
+                      className="user-input"
+                    />
+                  </div>
+                  
+                  <h4>דרג את המוצר</h4>
+                  {surveyQuestions.map(question => (
+                    <div key={question.id} className="question">
+                      <p>{question.text}</p>
+                      <div className="answer-options">
+                        {answerOptions.map(option => (
+                          <label key={option.value} className="option">
+                            <input
+                              type="radio"
+                              name={`question-${question.id}`}
+                              value={option.value}
+                              onChange={() => handleAnswerChange(question.id, option.value)}
+                            />
+                            <span>{option.label}</span>
+                          </label>
+                        ))}
                       </div>
                     </div>
-                    <p className="review-comment">{review.comment}</p>
+                  ))}
+                  
+                  <div className="star-rating">
+                    <p>דירוג כללי:</p>
+                    <div className="stars">
+                      {[1,2,3,4,5].map(star => (
+                        <span
+                          key={star}
+                          className={`star ${star <= starRating ? 'filled' : ''}`}
+                          onClick={() => setStarRating(star)}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                  
+                  <button className="submit-survey" onClick={submitSurvey}>
+                    שלח דירוג
+                  </button>
+                </div>
+              ) : (
+                surveyResults && (
+                <div className="survey-results">
+                  <div className="results-summary">
+                    <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
+                    <p>דירוג ממוצע: <strong>{surveyResults.averageRating}/5</strong> {'★'.repeat(Math.round(surveyResults.averageRating))}</p>
+                  </div>
+                  
+                  <div className="questions-results">
+                    {surveyQuestions.map(question => (
+                      <div key={question.id} className="question-result">
+                        <h4>{question.text}</h4>
+                        <div className="result-bars">
+                          {answerOptions.map(option => {
+                            const percentage = surveyResults.questions[question.id][option.value] || 0;
+                            return (
+                              <div key={option.value} className="result-bar">
+                                <span className="option-label">{option.label}</span>
+                                <div className="bar-container">
+                                  <div className="bar-fill" style={{ width: `${percentage}%` }}></div>
+                                  <span className="percentage">{percentage}%</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                )
+              )}
             </div>
           </div>
         </div>

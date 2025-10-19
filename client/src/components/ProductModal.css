@@ -132,13 +132,244 @@
   color: #e76f51 !important;
 }
 
-.product-reviews h3 {
+.survey-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.survey-section h3 {
   font-size: 18px;
   color: #333;
-  margin: 0 0 15px 0;
+  margin: 0;
   border-bottom: 2px solid #f4a261;
   padding-bottom: 5px;
   text-align: right;
+}
+
+.toggle-survey-btn {
+  background: #f4a261;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.toggle-survey-btn:hover {
+  background: #e76f51;
+}
+
+.thank-you-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.thank-you-message h4 {
+  color: #155724;
+  margin: 0 0 10px 0;
+}
+
+.thank-you-message p {
+  color: #155724;
+  margin: 0;
+}
+
+.user-info {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.user-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.user-input::placeholder {
+  color: #999;
+}
+
+.survey-results {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.results-summary {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.results-summary p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.question-result {
+  margin-bottom: 20px;
+}
+
+.question-result h4 {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 10px 0;
+  text-align: right;
+}
+
+.result-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.option-label {
+  width: 80px;
+  text-align: right;
+  color: #666;
+}
+
+.bar-container {
+  flex: 1;
+  height: 20px;
+  background: #e9ecef;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f4a261, #e76f51);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.percentage {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #333;
+  font-weight: bold;
+}
+
+.survey-form {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.survey-form h4 {
+  color: #333;
+  margin: 0 0 15px 0;
+  text-align: right;
+}
+
+.question {
+  margin-bottom: 20px;
+}
+
+.question p {
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 10px 0;
+  text-align: right;
+}
+
+.answer-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  direction: rtl;
+}
+
+.option:hover {
+  background-color: #f8f9fa;
+}
+
+.option input[type="radio"] {
+  margin: 0;
+}
+
+.star-rating {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.star-rating p {
+  margin: 0 0 10px 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.star {
+  font-size: 24px;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #ffd700;
+}
+
+.star:hover {
+  color: #ffd700;
+}
+
+.submit-survey {
+  background: #f4a261;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.submit-survey:hover {
+  background: #e76f51;
 }
 
 .reviews-list {
@@ -202,5 +433,31 @@
   
   .detail-item p {
     font-size: 13px;
+  }
+  
+  .survey-form {
+    padding: 15px;
+  }
+  
+  .result-bar {
+    font-size: 11px;
+  }
+  
+  .option-label {
+    width: 70px;
+  }
+  
+  .survey-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .toggle-survey-btn {
+    width: 100%;
+  }
+  
+  .user-info {
+    flex-direction: column;
   }
 }
