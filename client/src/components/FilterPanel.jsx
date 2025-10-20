@@ -172,12 +172,12 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
             </div>
           )}
 
-          {/* לקוח אחרון */}
+          {/* שם מזמין אחרון */}
           <div className="filter-section">
-            <h4>לקוח אחרון שקנה</h4>
+            <h4>חיפוש לפי שם</h4>
             <input
               type="text"
-              placeholder="חפש לפי שם לקוח"
+              placeholder="חפש לפי שם מזמין/מותג"
               value={filters.lastBuyer}
               onChange={(e) => updateFilter('lastBuyer', e.target.value)}
             />

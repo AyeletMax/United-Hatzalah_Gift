@@ -96,23 +96,13 @@ export default function FilterPage() {
       filtered = filtered.filter(p => p.brand && p.brand.includes(filters.brand));
     }
 
-    // סינון לפי לקוח אחרון
+    // סינון לפי שם מזמין אחרון
     if (filters.lastBuyer && filters.lastBuyer.trim()) {
-      const searchTerm = filters.lastBuyer.toLowerCase().trim();
+      const searchTerm = filters.lastBuyer.trim();
       filtered = filtered.filter(p => {
-        // חיפוש בכל השדות הרלוונטיים
-        const fields = [
-          p.last_buyer,
-          p.last_ordered_by_name,
-          p.lastBuyer, // אם יש שדה כזה
-          p.customer_name // אם יש שדה כזה
-        ];
-        
-        return fields.some(field => 
-          field && 
-          typeof field === 'string' && 
-          field.toLowerCase().includes(searchTerm)
-        );
+        // חיפוש בשדות שם המזמין ומוצג
+        const searchText = (p.last_ordered_by_name || '') + ' ' + (p.last_buyer || '') + ' ' + (p.displayed_by || '');
+        return searchText.includes(searchTerm);
       });
     }
 

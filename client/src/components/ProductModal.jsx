@@ -312,7 +312,12 @@ export default function ProductModal({ product, isOpen, onClose }) {
               
               <div className="detail-item">
                 <h3>שם מזמין אחרון</h3>
-                <p>דוד כהן - ירושלים</p>
+                <p>{product.last_ordered_by_name || product.last_buyer || "לא צוין"}</p>
+              </div>
+              
+              <div className="detail-item">
+                <h3>מותג</h3>
+                <p>{product.displayed_by || product.brand || "לא צוין"}</p>
               </div>
             </div>
             
