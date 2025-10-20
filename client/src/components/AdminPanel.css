@@ -29,11 +29,13 @@
 
 .admin-actions {
   display: flex;
-  gap: 15px;
+  flex-direction: column; /* stack buttons vertically by default */
+  gap: 12px;
   margin-bottom: 30px;
   margin-top: 20px;
   z-index: 9999;
   position: relative;
+  align-items: flex-start; /* keep buttons aligned to the start (right for RTL) */
 }
 
 .admin-actions button {
@@ -48,6 +50,7 @@
   z-index: 9999;
   position: relative;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  min-width: 180px;
 }
 
 .admin-actions button:hover {
@@ -169,6 +172,18 @@
 }
 
 .logout-btn:hover {
+  background: #545b62;
+}
+
+/* ensure logout inside admin-actions matches the gray styling and sizing */
+.admin-actions .logout-btn {
+  background: #6c757d;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.admin-actions .logout-btn:hover {
   background: #545b62;
 }
 
