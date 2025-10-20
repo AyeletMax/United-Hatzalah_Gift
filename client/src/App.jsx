@@ -4,6 +4,7 @@ import "./responsive.css";
 
 import Hero from "./components/Hero.jsx";
 import CategoryPuzzleGrid from "./components/CategoryPuzzleGrid.jsx";
+import kitchenImg from "./assets/Gemini_Generated_Image_bt91inbt91inbt91 (1).png";
 import ProductList from "./components/ProductList.jsx";
 import FilterPage from "./components/FilterPage.jsx";
 import AdminPanel from "./components/AdminPanel.jsx";
@@ -16,7 +17,7 @@ import Footer from "./components/Footer.jsx";
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
   { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff" },
-  { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff" },
+  { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff", image: kitchenImg },
   { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0" },
   { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff" },
   { id: 6, key: "gifts", title: "מתנות", slug: "מתנות", icon: "🎁", color: "#ffe9f0" },

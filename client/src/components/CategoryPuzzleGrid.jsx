@@ -14,6 +14,7 @@ export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
             title={c.title} 
             icon={c.icon}
             color={c.color}
+            image={c.image}
             size={sizes[index]}
             delay={index * 100}
             onClick={() => onSelect?.(c)} 
