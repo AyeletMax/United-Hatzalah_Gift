@@ -167,7 +167,10 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     category_id: product?.category_id || '',
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
-    image_url: product?.image_url || ''
+    image_url: product?.image_url || '',
+    brand: product?.brand || '',
+    last_buyer: product?.last_buyer || '',
+    popularity_score: product?.popularity_score || 0
   });
   const [uploading, setUploading] = useState(false);
 
@@ -251,6 +254,29 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             placeholder="זמן אספקה (ימים)"
             value={formData.delivery_time_days}
             onChange={(e) => setFormData({...formData, delivery_time_days: e.target.value})}
+          />
+          
+          <input
+            type="text"
+            placeholder="מותג"
+            value={formData.brand}
+            onChange={(e) => setFormData({...formData, brand: e.target.value})}
+          />
+          
+          <input
+            type="text"
+            placeholder="לקוח אחרון שקנה"
+            value={formData.last_buyer}
+            onChange={(e) => setFormData({...formData, last_buyer: e.target.value})}
+          />
+          
+          <input
+            type="number"
+            placeholder="ציון פופולריות (0-100)"
+            min="0"
+            max="100"
+            value={formData.popularity_score}
+            onChange={(e) => setFormData({...formData, popularity_score: e.target.value})}
           />
           
           <div className="image-upload-section">

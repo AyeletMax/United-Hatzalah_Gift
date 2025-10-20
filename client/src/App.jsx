@@ -5,10 +5,12 @@ import "./responsive.css";
 import Hero from "./components/Hero.jsx";
 import CategoryPuzzleGrid from "./components/CategoryPuzzleGrid.jsx";
 import ProductList from "./components/ProductList.jsx";
+import FilterPage from "./components/FilterPage.jsx";
 import AdminPanel from "./components/AdminPanel.jsx";
 import { useProducts } from "./components/ProductsContext.jsx";
 import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import ProductModal from "./components/ProductModal.jsx";
+import Nav from "./components/Nav.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
@@ -128,13 +130,17 @@ function HomePage() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/admin" element={<AdminPanel />} />
-      <Route path="/:slug" element={<CategoryPage />} />
-      <Route path="/:slug/:productName" element={<CategoryPage />} />
-    </Routes>
+    <>
+      <Nav />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/filter" element={<FilterPage />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/:slug" element={<CategoryPage />} />
+        <Route path="/:slug/:productName" element={<CategoryPage />} />
+      </Routes>
+    </>
   );
 }
 

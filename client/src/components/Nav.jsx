@@ -1,5 +1,5 @@
 import './Nav.css'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import SearchBar from './SearchBar.jsx';
 
@@ -21,6 +21,9 @@ export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isFilterPage = location.pathname === '/filter';
 
   const handleSearch = (term) => {
     if (term.trim()) {
@@ -44,6 +47,18 @@ export default function Nav() {
     <nav className="nav-root">
       <div className="nav-search-wrapper">
         <SearchBar onSearch={handleSearch} />
+        <button 
+          className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
+          onClick={() => {
+            if (isFilterPage) {
+              navigate('/');
+            } else {
+              navigate('/filter');
+            }
+          }}
+        >
+          {isFilterPage ? 'סגור סינון' : 'סינון'}
+        </button>
       </div>
       <button 
         className="nav-hamburger" 

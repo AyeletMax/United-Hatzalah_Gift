@@ -5,10 +5,10 @@ import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
 import FilterPanel from "./FilterPanel.jsx";
 
-export default function ProductList({ products = [], categorySlug }) {
+export default function AllProductsList() {
   const navigate = useNavigate();
   const { isAdminLoggedIn } = useAdmin();
-  const { refreshProducts } = useProducts();
+  const { products, refreshProducts } = useProducts();
   const [editingProduct, setEditingProduct] = useState(null);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
   const [filters, setFilters] = useState({
@@ -27,32 +27,28 @@ export default function ProductList({ products = [], categorySlug }) {
     { id: 6, name: "מתנות" },
     { id: 7, name: "מוצרי קיץ" },
     { id: 8, name: "מוצרי חורף" },
-    { id: 9, name: "אביזרי יח\"\u05e6" },
+    { id: 9, name: "אביזרי יח\"צ" },
     { id: 10, name: "תיקים" }
   ]);
 
   const handleProductClick = (product) => {
     const productSlug = product.name.replace(/\s+/g, '-');
-    if (categorySlug) {
-      navigate(`/${categorySlug}/${productSlug}`);
-    } else {
-      // For search results, find the category from the product
-      const categories = [
-        { id: 1, slug: "לרכב" },
-        { id: 2, slug: "טקסטיל-וביגוד" },
-        { id: 3, slug: "כלי-בית" },
-        { id: 4, slug: "יודאיקה" },
-        { id: 5, slug: "מוצרים-חדשים" },
-        { id: 6, slug: "מתנות" },
-        { id: 7, slug: "מוצרי-קיץ" },
-        { id: 8, slug: "מוצרי-חורף" },
-        { id: 9, slug: "אביזרי-יחץ" },
-        { id: 10, slug: "תיקים" }
-      ];
-      const category = categories.find(c => c.id === product.category_id);
-      if (category) {
-        navigate(`/${category.slug}/${productSlug}`);
-      }
+    // Find the category from the product
+    const categories = [
+      { id: 1, slug: "לרכב" },
+      { id: 2, slug: "טקסטיל-וביגוד" },
+      { id: 3, slug: "כלי-בית" },
+      { id: 4, slug: "יודאיקה" },
+      { id: 5, slug: "מוצרים-חדשים" },
+      { id: 6, slug: "מתנות" },
+      { id: 7, slug: "מוצרי-קיץ" },
+      { id: 8, slug: "מוצרי-חורף" },
+      { id: 9, slug: "אביזרי-יחץ" },
+      { id: 10, slug: "תיקים" }
+    ];
+    const category = categories.find(c => c.id === product.category_id);
+    if (category) {
+      navigate(`/${category.slug}/${productSlug}`);
     }
   };
 
@@ -176,7 +172,7 @@ export default function ProductList({ products = [], categorySlug }) {
 
   if (!products.length) {
     return (
-      <div className="product-list-empty">לא נמצאו מוצרים בקטגוריה זו.</div>
+      <div className="product-list-empty">טוען מוצרים...</div>
     );
   }
   
@@ -283,7 +279,6 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || ''
   });
-  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();

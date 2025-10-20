@@ -35,8 +35,12 @@ const getAllProducts = async (filters = {}) => {
     params.push(filters.max_delivery_days);
   }
   if (filters.last_ordered_by) {
-    query += ` AND p.last_ordered_by_name LIKE ?`;
-    params.push(`%${filters.last_ordered_by}%`);
+    query += ` AND (p.last_ordered_by_name LIKE ? OR p.last_buyer LIKE ?)`;
+    params.push(`%${filters.last_ordered_by}%`, `%${filters.last_ordered_by}%`);
+  }
+  if (filters.brand) {
+    query += ` AND (p.brand LIKE ? OR b.name LIKE ?)`;
+    params.push(`%${filters.brand}%`, `%${filters.brand}%`);
   }
 
   query += ` ORDER BY p.name`;
@@ -57,22 +61,22 @@ const getProductById = async (id) => {
 };
 
 const createProduct = async (product) => {
-  const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url } = product;
+  const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score } = product;
   const [result] = await pool.query(
-    "INSERT INTO products (name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [name, category_id, brand_id, unit_price_incl_vat || 0, delivery_time_days || null, last_ordered_by_name, image_url]
+    "INSERT INTO products (name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [name, category_id, brand_id, unit_price_incl_vat || 0, delivery_time_days || null, last_ordered_by_name, image_url, brand, last_buyer, popularity_score || 0]
   );
-  return { id: result.insertId, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url };
+  return { id: result.insertId, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score };
 };
 
 const updateProduct = async (id, product) => {
-  const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url } = product;
+  const { name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score } = product;
   const [result] = await pool.query(
-    "UPDATE products SET name = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ? WHERE id = ?",
-    [name, category_id, brand_id, unit_price_incl_vat, delivery_time_days || null, last_ordered_by_name, image_url, id]
+    "UPDATE products SET name = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ?, brand = ?, last_buyer = ?, popularity_score = ? WHERE id = ?",
+    [name, category_id, brand_id, unit_price_incl_vat, delivery_time_days || null, last_ordered_by_name, image_url, brand, last_buyer, popularity_score || 0, id]
   );
   if (result.affectedRows === 0) return null;
-  return { id, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url };
+  return { id, name, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score };
 };
 
 const deleteProduct = async (id) => {

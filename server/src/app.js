@@ -18,14 +18,49 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // ====== ✅ CORS ======
-app.use(cors({
-  origin: ["https://hatzalah-gift.netlify.app", "http://localhost:5173"],
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "https://hatzalah-gift.netlify.app",
+      "http://localhost:5173",
+      "http://localhost:5174", 
+      "http://localhost:5175",
+      "http://localhost:3000"
+    ];
+    
+    // Allow any localhost origin in development
+    if (origin.includes('localhost') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
+
+// Additional CORS headers middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 // ====== ✅ Request Logging ======
 app.use((req, res, next) => {
