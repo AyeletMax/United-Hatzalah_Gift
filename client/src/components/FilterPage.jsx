@@ -199,16 +199,23 @@ export default function FilterPage() {
           {filteredAndSortedProducts.length === 0 && (
             <div className="no-results">
               לא נמצאו מוצרים התואמים לקריטריונים שנבחרו.
-              <button onClick={() => {
-                setFilters({
-                  priceRange: { min: 0, max: 1000 },
-                  sortBy: '',
-                  deliveryTime: '',
-                  brand: '',
-                  lastBuyer: ''
-                });
-                setHasFiltered(false);
-              }}>
+              <button 
+                className="reset-filters-btn"
+                onClick={() => {
+                  // איפוס מלא של כל הסינונים
+                  const resetFilters = {
+                    priceRange: { min: 0, max: 1000 },
+                    sortBy: '',
+                    deliveryTime: '',
+                    brand: '',
+                    lastBuyer: ''
+                  };
+                  setFilters(resetFilters);
+                  setHasFiltered(false);
+                  // איפוס גם בפאנל הסינון
+                  window.dispatchEvent(new CustomEvent('resetFilters'));
+                }}
+              >
                 איפוס סינונים
               </button>
             </div>
