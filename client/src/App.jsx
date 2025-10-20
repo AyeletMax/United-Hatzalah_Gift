@@ -133,14 +133,16 @@ function App() {
   return (
     <>
       <Nav />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/filter" element={<FilterPage />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/:slug" element={<CategoryPage />} />
-        <Route path="/:slug/:productName" element={<CategoryPage />} />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/filter" element={<FilterPage />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/:slug" element={<CategoryPage />} />
+          <Route path="/:slug/:productName" element={<CategoryPage />} />
+        </Routes>
+      </main>
       <Footer />
     </>
   );

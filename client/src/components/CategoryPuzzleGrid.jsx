@@ -12,7 +12,7 @@ export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
           <CategoryCard 
             key={c.id} 
             title={c.title} 
-            icon={c.icon} 
+            icon={c.icon}
             color={c.color}
             size={sizes[index]}
             delay={index * 100}

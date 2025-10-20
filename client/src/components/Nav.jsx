@@ -39,7 +39,7 @@ export default function Nav() {
   };
 
   const handleMouseLeave = () => {
-    const timeout = setTimeout(() => setIsOpen(false), 200);
+    const timeout = setTimeout(() => setIsOpen(false), 500);
     setHoverTimeout(timeout);
   };
 
@@ -85,7 +85,12 @@ export default function Nav() {
             to={item.path} 
             className={`nav-link ${item.path === '/' ? 'nav-home-btn' : ''}`}
             aria-label={item.path === '/' ? 'עמוד הבית' : undefined}
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              if (item.path === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
             onMouseDown={(e)=>e.currentTarget.classList.add('active')} 
             onMouseUp={(e)=>e.currentTarget.classList.remove('active')}
           >

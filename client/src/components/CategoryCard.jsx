@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CategoryCard.css';
 
-export default function CategoryCard({ title, icon, onClick, size = 'medium', delay = 0 }) {
+export default function CategoryCard({ title, icon, color, onClick, size = 'medium', delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef(null);
 
@@ -29,6 +29,7 @@ export default function CategoryCard({ title, icon, onClick, size = 'medium', de
       ref={cardRef}
       className={`category-box ${size} ${isVisible ? 'animate-in' : 'animate-out'}`} 
       onClick={onClick}
+      style={{ '--card-color': color }}
     >
       <div className="category-content">
         <h3 className="category-title">{title}</h3>
