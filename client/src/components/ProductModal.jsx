@@ -45,35 +45,51 @@ export default function ProductModal({ product, isOpen, onClose }) {
           const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
           const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
           
+          // חישוב אחוזים אמיתיים לפי הדירוגים
+          const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          data.forEach(item => {
+            if (item.rating >= 1 && item.rating <= 5) {
+              ratingCounts[item.rating]++;
+            }
+          });
+          
+          // חישוב אחוזים
+          const percentages = {};
+          for (let rating = 1; rating <= 5; rating++) {
+            percentages[rating] = totalResponses > 0 ? Math.round((ratingCounts[rating] / totalResponses) * 100) : 0;
+          }
+          
           setSurveyResults({
             totalResponses,
             averageRating: parseFloat(averageRating),
             questions: {
-              1: { 5: 45, 4: 30, 3: 15, 2: 7, 1: 3 },
-              2: { 5: 35, 4: 40, 3: 19, 2: 4, 1: 2 },
-              3: { 5: 50, 4: 25, 3: 15, 2: 7, 1: 3 }
+              1: percentages,
+              2: percentages,
+              3: percentages
             }
           });
         } else {
+          const emptyPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
           setSurveyResults({
             totalResponses: 0,
             averageRating: 0,
             questions: {
-              1: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-              2: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-              3: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+              1: emptyPercentages,
+              2: emptyPercentages,
+              3: emptyPercentages
             }
           });
         }
       } catch (error) {
         console.error('Error loading survey results:', error);
+        const emptyPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         setSurveyResults({
           totalResponses: 0,
           averageRating: 0,
           questions: {
-            1: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-            2: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-            3: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+            1: emptyPercentages,
+            2: emptyPercentages,
+            3: emptyPercentages
           }
         });
       }
@@ -223,11 +239,28 @@ export default function ProductModal({ product, isOpen, onClose }) {
             const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
             const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
             
-            setSurveyResults(prev => ({
-              ...prev,
+            // חישוב אחוזים מעודכנים
+            const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            data.forEach(item => {
+              if (item.rating >= 1 && item.rating <= 5) {
+                ratingCounts[item.rating]++;
+              }
+            });
+            
+            const percentages = {};
+            for (let rating = 1; rating <= 5; rating++) {
+              percentages[rating] = totalResponses > 0 ? Math.round((ratingCounts[rating] / totalResponses) * 100) : 0;
+            }
+            
+            setSurveyResults({
               totalResponses,
-              averageRating: parseFloat(averageRating)
-            }));
+              averageRating: parseFloat(averageRating),
+              questions: {
+                1: percentages,
+                2: percentages,
+                3: percentages
+              }
+            });
           }
         } catch (error) {
           console.error('Error reloading results:', error);
