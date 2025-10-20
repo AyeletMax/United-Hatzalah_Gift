@@ -1,0 +1,36 @@
+.footer {
+  background: #2d3748;
+  color: #f7fafc;
+  padding: 20px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.footer-emails {
+  font-size: 13px;
+}
+
+.footer-emails a {
+  color: #f4a261;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-emails a:hover {
+  color: #e76f51;
+}
+
+.footer-emails span {
+  color: #cbd5e0;
+  margin: 0 8px;
+}

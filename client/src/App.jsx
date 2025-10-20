@@ -11,6 +11,7 @@ import { useProducts } from "./components/ProductsContext.jsx";
 import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import ProductModal from "./components/ProductModal.jsx";
 import Nav from "./components/Nav.jsx";
+import Footer from "./components/Footer.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
@@ -140,6 +141,7 @@ function App() {
         <Route path="/:slug" element={<CategoryPage />} />
         <Route path="/:slug/:productName" element={<CategoryPage />} />
       </Routes>
+      <Footer />
     </>
   );
 }
