@@ -124,10 +124,6 @@ const AdminPanel = () => {
     <div className="admin-panel">
       <div className="admin-header">
         <h1>פאנל ניהול</h1>
-        <button className="logout-btn" onClick={() => {
-          setIsAuthenticated(false);
-          setIsAdminLoggedIn(false);
-        }}>יציאה</button>
       </div>
       
       <div className="admin-info">
@@ -144,6 +140,11 @@ const AdminPanel = () => {
         >
           הוסף מוצר חדש
         </button>
+
+        <button className="logout-btn" onClick={() => {
+          setIsAuthenticated(false);
+          setIsAdminLoggedIn(false);
+        }}>יציאה</button>
       </div>
 
       {showProductForm && (
