@@ -53,7 +53,14 @@ export default function Nav() {
             if (isFilterPage) {
               navigate('/');
             } else {
-              navigate('/filter');
+              // אם נמצאים בקטגוריה, עבור לסינון עם הקטגוריה
+              const currentPath = location.pathname;
+              if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
+                const categorySlug = currentPath.split('/')[1];
+                navigate(`/filter?category=${categorySlug}`);
+              } else {
+                navigate('/filter');
+              }
             }
           }}
         >

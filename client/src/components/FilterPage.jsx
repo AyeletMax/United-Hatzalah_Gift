@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./ProductList.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
 import FilterPanel from "./FilterPanel.jsx";
 
 export default function FilterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAdminLoggedIn } = useAdmin();
   const { products, refreshProducts } = useProducts();
   const [editingProduct, setEditingProduct] = useState(null);
@@ -19,6 +20,25 @@ export default function FilterPage() {
     lastBuyer: ''
   });
   const [hasFiltered, setHasFiltered] = useState(false);
+  
+  // קבלת הקטגוריה מה-URL
+  const categorySlug = searchParams.get('category');
+  
+  // מיפוי קטגוריות
+  const categories = [
+    { id: 1, key: "car", title: "לרכב", slug: "לרכב" },
+    { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד" },
+    { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית" },
+    { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה" },
+    { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף" },
+    { id: 6, key: "gifts", title: "מתנות", slug: "מתנות" },
+    { id: 7, key: "summer", title: "מוצרי קיץ", slug: "מוצרי-קיץ" },
+    { id: 9, key: "outdoor", title: 'אביזרי יח"צ', slug: "אביזרי-יחץ" },
+    { id: 10, key: "bags", title: "תיקים", slug: "תיקים" },
+    { id: 5, key: "new", title: "מוצרים חדשים", slug: "מוצרים-חדשים" },
+  ];
+  
+  const currentCategory = categorySlug ? categories.find(c => c.slug === categorySlug) : null;
 
   const handleProductClick = (product) => {
     const productSlug = product.name.replace(/\s+/g, '-');
@@ -44,6 +64,11 @@ export default function FilterPage() {
     if (!hasFiltered) return [];
     
     let filtered = [...products];
+    
+    // סינון לפי קטגוריה אם נבחרה
+    if (currentCategory) {
+      filtered = filtered.filter(p => String(p.category_id) === String(currentCategory.id));
+    }
 
     // סינון לפי מחיר
     filtered = filtered.filter(product => {
@@ -116,7 +141,7 @@ export default function FilterPage() {
     }
 
     return filtered;
-  }, [products, filters, hasFiltered]);
+  }, [products, filters, hasFiltered, currentCategory]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -133,18 +158,21 @@ export default function FilterPage() {
       />
       
       <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
-        סינון מוצרים
+        {currentCategory ? `סינון מוצרים - ${currentCategory.title}` : 'סינון מוצרים'}
       </h2>
 
       {!hasFiltered ? (
         <div style={{ textAlign: "center", margin: 40, color: "#666" }}>
-          השתמש בסינון כדי לחפש מוצרים
+          {currentCategory 
+            ? `השתמש בסינון כדי לחפש מוצרים בקטגוריה ${currentCategory.title}`
+            : 'השתמש בסינון כדי לחפש מוצרים'
+          }
         </div>
       ) : (
         <>
           <div className="products-header">
             <div className="products-count">
-              מציג {filteredAndSortedProducts.length} מתוך {products.length} מוצרים
+              מציג {filteredAndSortedProducts.length} מתוך {currentCategory ? products.filter(p => String(p.category_id) === String(currentCategory.id)).length : products.length} מוצרים
             </div>
           </div>
           
