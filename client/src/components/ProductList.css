@@ -14,6 +14,8 @@
   align-items: center;
   transition: box-shadow 0.18s, transform 0.18s;
   cursor: pointer;
+  position: relative;
+  isolation: isolate;
 }
 .product-card:hover {
   box-shadow: 0 6px 24px rgba(243, 108, 33, 0.13);
@@ -27,6 +29,10 @@
 }
 .product-info {
   text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .product-name {
   font-weight: 700;
@@ -99,47 +105,65 @@
   }
 }
 
-.admin-actions {
+.product-card .admin-actions {
   position: absolute;
   top: 8px;
   right: 8px;
   display: flex;
-  gap: 4px;
-  z-index: 10;
+  flex-direction: row;
+  gap: 8px;
+  margin: 0;
+  width: auto;
 }
 
-.product-card {
+.product-card .delete-btn,
+.product-card .edit-btn {
+  all: unset;
+  background: none !important;
+  color: #bbb;
+  cursor: pointer;
+  display: inline-flex;
+  transition: color 0.2s, transform 0.2s;
   position: relative;
+  box-shadow: none !important;
+  border: none !important;
 }
 
-.delete-btn {
-  background: #e76f51;
+.product-card .delete-btn:hover,
+.product-card .edit-btn:hover {
+  transform: scale(1.15);
+}
+
+
+
+
+
+.product-card .delete-btn::after,
+.product-card .edit-btn::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
   color: white;
-  border: none;
-  border-radius: 4px;
   padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.delete-btn:hover {
-  background: #d63031;
-}
-
-.edit-btn {
-  background: #f4a261;
-  color: white;
-  border: none;
   border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.2s;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
 }
 
-.edit-btn:hover {
-  background: #e76f51;
+.product-card .delete-btn:hover::after,
+.product-card .edit-btn:hover::after {
+  opacity: 1;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
 }
 
 /* Hide admin buttons when modal is open */
