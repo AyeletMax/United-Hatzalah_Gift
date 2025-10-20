@@ -243,7 +243,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
+        <button className="modal-close" onClick={(e) => { e.stopPropagation(); onClose(); }}>×</button>
         
         <div className="modal-body">
           <div className="product-image-section">

@@ -98,3 +98,76 @@
     font-size: 0.85em;
   }
 }
+
+.admin-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.product-card {
+  position: relative;
+}
+
+.delete-btn {
+  background: #e76f51;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-btn:hover {
+  background: #d63031;
+}
+
+.edit-btn {
+  background: #f4a261;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #e76f51;
+}
+
+/* Hide admin buttons when modal is open */
+.product-list-grid.modal-open .admin-actions {
+  display: none !important;
+}
+
+body:has(.modal-overlay) .admin-actions {
+  display: none !important;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #545b62;
+}
