@@ -2,11 +2,11 @@ import CategoryCard from './CategoryCard.jsx';
 import './CategoryPuzzleGrid.css';
 
 export default function CategoryPuzzleGrid({ categories = [], onSelect }) {
-  const sizes = ['medium', 'small', 'small', 'large', 'winter-tall', 'medium', 'small', 'extra-wide', 'medium', 'small'];
+  const sizes = ['medium', 'small', 'small', 'large', 'winter-tall', 'medium', 'small', 'medium', 'small', 'small'];
   
   return (
     <section id="categories">
-      <h2 className="section-title" style={{ textAlign: 'center', margin: '40px 0 20px' }}>קטגוריות מתנות</h2>
+      <h2 className="section-title" style={{ textAlign: 'center', margin: '20px 0' }}>קטגוריות מתנות</h2>
       <div className="puzzle-grid">
         {categories.map((c, index) => (
           <CategoryCard 

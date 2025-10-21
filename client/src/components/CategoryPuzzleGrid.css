@@ -1,12 +1,11 @@
 .puzzle-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(3, calc((100vh - 120px) / 3));
+  grid-auto-rows: minmax(150px, 1fr);
   gap: 12px;
   width: 100vw;
-  height: calc(100vh - 120px);
+  padding: 10px;
   margin: 0;
-
 }
 
 #categories {
@@ -14,9 +13,8 @@
   max-width: none !important;
   margin: 0 !important;
   width: 100vw;
-  height: 100vh;
   margin-left: calc(-50vw + 50%);
-  overflow: hidden;
+  overflow: visible;
 }
 
 @media (max-width: 1200px) {
