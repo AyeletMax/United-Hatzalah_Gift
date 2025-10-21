@@ -96,23 +96,13 @@ export default function FilterPage() {
       filtered = filtered.filter(p => p.brand && p.brand.includes(filters.brand));
     }
 
-    // סינון לפי לקוח אחרון
+    // סינון לפי שם מזמין אחרון
     if (filters.lastBuyer && filters.lastBuyer.trim()) {
-      const searchTerm = filters.lastBuyer.toLowerCase().trim();
+      const searchTerm = filters.lastBuyer.trim();
       filtered = filtered.filter(p => {
-        // חיפוש בכל השדות הרלוונטיים
-        const fields = [
-          p.last_buyer,
-          p.last_ordered_by_name,
-          p.lastBuyer, // אם יש שדה כזה
-          p.customer_name // אם יש שדה כזה
-        ];
-        
-        return fields.some(field => 
-          field && 
-          typeof field === 'string' && 
-          field.toLowerCase().includes(searchTerm)
-        );
+        // חיפוש בשדות שם המזמין ומוצג
+        const searchText = (p.last_ordered_by_name || '') + ' ' + (p.last_buyer || '') + ' ' + (p.displayed_by || '');
+        return searchText.includes(searchTerm);
       });
     }
 
@@ -209,16 +199,23 @@ export default function FilterPage() {
           {filteredAndSortedProducts.length === 0 && (
             <div className="no-results">
               לא נמצאו מוצרים התואמים לקריטריונים שנבחרו.
-              <button onClick={() => {
-                setFilters({
-                  priceRange: { min: 0, max: 1000 },
-                  sortBy: '',
-                  deliveryTime: '',
-                  brand: '',
-                  lastBuyer: ''
-                });
-                setHasFiltered(false);
-              }}>
+              <button 
+                className="reset-filters-btn"
+                onClick={() => {
+                  // איפוס מלא של כל הסינונים
+                  const resetFilters = {
+                    priceRange: { min: 0, max: 1000 },
+                    sortBy: '',
+                    deliveryTime: '',
+                    brand: '',
+                    lastBuyer: ''
+                  };
+                  setFilters(resetFilters);
+                  setHasFiltered(false);
+                  // איפוס גם בפאנל הסינון
+                  window.dispatchEvent(new CustomEvent('resetFilters'));
+                }}
+              >
                 איפוס סינונים
               </button>
             </div>

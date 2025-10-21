@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './FilterPanel.css';
 
 export default function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
+  // סגירה בלחיצה על הרקע במובייל
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && window.innerWidth <= 768) {
+      onToggle();
+    }
+  };
   const [filters, setFilters] = useState({
     priceRange: { min: 0, max: 1000 },
     sortBy: '',
@@ -51,6 +57,23 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
     onFilterChange(filters);
   }, [filters, onFilterChange]);
 
+  // מאזין לאירוע איפוס סינונים
+  useEffect(() => {
+    const handleResetFilters = () => {
+      const resetFilters = {
+        priceRange: { min: priceRange.min, max: priceRange.max },
+        sortBy: '',
+        deliveryTime: '',
+        brand: '',
+        lastBuyer: ''
+      };
+      setFilters(resetFilters);
+    };
+
+    window.addEventListener('resetFilters', handleResetFilters);
+    return () => window.removeEventListener('resetFilters', handleResetFilters);
+  }, [priceRange]);
+
   // איפוס הסינונים
   const resetFilters = () => {
     const resetFilters = {
@@ -77,7 +100,7 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
   )].sort((a, b) => a - b);
 
   return (
-    <div className={`filter-panel ${isOpen ? 'open' : ''}`}>
+    <div className={`filter-panel ${isOpen ? 'open' : ''}`} onClick={handleBackdropClick}>
       <div className="filter-header">
         <h3>סינון מוצרים</h3>
         <button className="filter-toggle" onClick={onToggle}>
@@ -86,7 +109,7 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
       </div>
 
       {isOpen && (
-        <div className="filter-content">
+        <div className="filter-content" onClick={(e) => e.stopPropagation()}>
           {/* סינון לפי מחיר */}
           <div className="filter-section">
             <h4>טווח מחירים</h4>
@@ -172,12 +195,12 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
             </div>
           )}
 
-          {/* לקוח אחרון */}
+          {/* שם מזמין אחרון */}
           <div className="filter-section">
-            <h4>לקוח אחרון שקנה</h4>
+            <h4>חיפוש לפי שם</h4>
             <input
               type="text"
-              placeholder="חפש לפי שם לקוח"
+              placeholder="חפש לפי שם מזמין/מותג"
               value={filters.lastBuyer}
               onChange={(e) => updateFilter('lastBuyer', e.target.value)}
             />

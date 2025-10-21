@@ -296,22 +296,42 @@ body:has(.modal-overlay) .admin-actions {
   border: 2px dashed #ddd;
 }
 
-.no-results button {
+.no-results .reset-filters-btn {
   margin-top: 15px;
   background: #f4a261;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: bold;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(244, 162, 97, 0.3);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.no-results button:hover {
+.no-results .reset-filters-btn:hover {
   background: #e76f51;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 111, 81, 0.4);
+}
+
+.no-results .reset-filters-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(231, 111, 81, 0.3);
+}
+
+/* רספונסיבי לכפתור איפוס */
+@media (max-width: 768px) {
+  .no-results .reset-filters-btn {
+    padding: 14px 28px;
+    font-size: 16px;
+    min-height: 50px;
+    border-radius: 10px;
+  }
 }
 
 /* התאמה לפאנל הסינון */
