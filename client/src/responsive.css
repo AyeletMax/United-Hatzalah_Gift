@@ -14,6 +14,30 @@ html, body {
     min-height: 44px;
     min-width: 44px;
   }
+
+  /* תיקון רשימות נפתחות במובייל */
+  select {
+    font-size: 14px !important;
+    padding: 6px 8px;
+    border-radius: 4px;
+    width: 60% !important;
+    max-width: 180px !important;
+    size: 5 !important;
+  }
+
+  select option {
+    padding: 4px 6px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    height: 24px !important;
+  }
+  
+  select[size] {
+    height: 120px !important;
+    width: 60% !important;
+    max-width: 180px !important;
+    overflow-y: auto !important;
+  }
 }
 
 /* Responsive images */
