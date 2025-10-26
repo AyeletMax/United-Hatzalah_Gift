@@ -1,6 +1,6 @@
 /* ריווח עליון כדי שהתוכן לא יוסתר ע"י הניווט */
 body, .app-content {
-	padding-top: 62px;
+	padding-top: 100px;
 }
 
 main { flex: 1; }
