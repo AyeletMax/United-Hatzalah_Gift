@@ -279,15 +279,15 @@ export default function ProductModal({ product, isOpen, onClose }) {
         <button className="modal-close" onClick={(e) => { e.stopPropagation(); onClose(); }}>×</button>
         
         <div className="modal-body">
-          <div className="product-image-section">
-            {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="modal-product-image" />
-            ) : (
-              <div className="modal-product-placeholder">📦</div>
-            )}
-          </div>
-          
-          <div className="product-details-section">
+          <div className="product-info-section">
+            <div className="product-image-section">
+              {product.image_url ? (
+                <img src={product.image_url} alt={product.name} className="modal-product-image" />
+              ) : (
+                <div className="modal-product-placeholder">📦</div>
+              )}
+            </div>
+            
             <h2 className="modal-product-title">{product.name}</h2>
             
             {product.unit_price_incl_vat && (
@@ -307,7 +307,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
               
               <div className="detail-item">
                 <h3>זמן אספקה</h3>
-                <p>3-5 ימי עסקים</p>
+                <p>{product.delivery_time_days ? `${product.delivery_time_days} ימי עסקים` : "לא צוין"}</p>
               </div>
               
               <div className="detail-item">
@@ -320,8 +320,9 @@ export default function ProductModal({ product, isOpen, onClose }) {
                 <p>{product.displayed_by || product.brand || "לא צוין"}</p>
               </div>
             </div>
-            
-            <div className="survey-section">
+          </div>
+          
+          <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
                 {!showUserForm && !showSurveyForm && (
@@ -487,7 +488,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
                   </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </div>
