@@ -367,16 +367,17 @@
 @media (max-width: 768px) {
   .filter-panel {
     position: fixed;
-    top: 80px;
-    left: 10px;
-    right: 10px;
-    width: calc(100% - 20px);
-    max-width: 400px;
-    height: auto;
-    max-height: calc(100vh - 100px);
-    border-radius: 15px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 65vh;
+    max-width: none;
+    border-radius: 25px 25px 0 0;
     z-index: 9999;
-    transform: translateY(-20px);
+    background: linear-gradient(145deg, #2d3748, #1a202c);
+    box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   select {
@@ -410,90 +411,123 @@
   }
 
   .filter-panel:not(.open) {
-    width: 0;
-    height: 0;
+    transform: translateY(100%);
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-100px) scale(0.8);
   }
 
   .filter-panel.open {
-    width: calc(100% - 20px);
-    max-width: 400px;
-    min-height: auto;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
   }
 
   .filter-header {
-    border-radius: 15px 15px 0 0;
-    padding: 15px 18px;
+    border-radius: 25px 25px 0 0;
+    padding: 25px 20px 20px;
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+  }
+  
+  .filter-header::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
   }
 
   .filter-header h3 {
-    font-size: 15px;
+    font-size: 20px;
+    color: #f7fafc;
+    margin-top: 8px;
+    font-weight: 700;
   }
 
   .filter-toggle {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f7fafc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .filter-content {
-    padding: 15px;
-    max-height: calc(100vh - 180px);
+    padding: 25px;
+    height: calc(65vh - 100px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
   }
 
   .filter-section {
-    margin-bottom: 18px;
-    padding: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 16px;
   }
 
   .filter-section h4 {
-    font-size: 14px;
-    margin-bottom: 12px;
+    font-size: 17px;
+    margin-bottom: 16px;
+    color: #f7fafc;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+  }
+  
+  .filter-section h4::after {
+    background: #f7fafc;
+    width: 30px;
   }
 
   /* תיקון מיוחד לשדות select במובייל */
   .filter-section select {
     width: 100%;
-    padding: 8px 12px;
-    font-size: 14px !important;
-    min-height: 36px;
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 14px 18px;
+    font-size: 16px !important;
+    min-height: 52px;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #f7fafc;
     cursor: pointer;
-    max-height: 60px !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    font-weight: 500;
   }
 
   .filter-section input[type="text"],
   .filter-section input[type="number"] {
     width: 100%;
-    padding: 14px 16px;
+    padding: 14px 18px;
     font-size: 16px !important;
-    min-height: 48px;
-    border-radius: 8px;
+    min-height: 52px;
+    border-radius: 12px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #f7fafc;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    font-weight: 500;
   }
 
   .filter-section select:focus,
   .filter-section input:focus {
     outline: none !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2), 0 2px 12px rgba(0,0,0,0.4) !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), inset 0 2px 4px rgba(0,0,0,0.2) !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
   }
 
   .filter-section select:active {
@@ -550,11 +584,22 @@
   }
 
   .reset-btn {
-    padding: 14px;
-    font-size: 16px;
-    min-height: 48px;
-    border-radius: 8px;
+    padding: 18px;
+    font-size: 17px;
+    min-height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f7fafc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 700;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    letter-spacing: 0.5px;
+  }
+  
+  .reset-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
 }
