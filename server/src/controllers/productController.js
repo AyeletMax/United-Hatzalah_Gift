@@ -31,7 +31,15 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     console.log('[createProduct] Request body:', req.body);
-    const newProduct = await productService.createProduct(req.body);
+    
+    // Clean up empty strings for numeric fields
+    const cleanedData = {
+      ...req.body,
+      delivery_time_days: req.body.delivery_time_days === '' ? null : req.body.delivery_time_days,
+      unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : req.body.unit_price_incl_vat
+    };
+    
+    const newProduct = await productService.createProduct(cleanedData);
     console.log('[createProduct] Created product:', newProduct);
     res.status(201).json(newProduct);
   } catch (err) {
@@ -42,7 +50,14 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const updatedProduct = await productService.updateProduct(req.params.id, req.body);
+    // Clean up empty strings for numeric fields
+    const cleanedData = {
+      ...req.body,
+      delivery_time_days: req.body.delivery_time_days === '' ? null : req.body.delivery_time_days,
+      unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : req.body.unit_price_incl_vat
+    };
+    
+    const updatedProduct = await productService.updateProduct(req.params.id, cleanedData);
     if (!updatedProduct) return res.status(404).json({ error: "Product not found" });
     res.json(updatedProduct);
   } catch (err) {

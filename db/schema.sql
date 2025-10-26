@@ -102,10 +102,13 @@ CREATE TABLE IF NOT EXISTS `product_questions` (
 CREATE TABLE IF NOT EXISTS `product_survey_responses` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `product_id` BIGINT UNSIGNED NOT NULL,
+  `user_name` VARCHAR(255) NOT NULL,
+  `user_email` VARCHAR(255) NOT NULL,
   `rating` TINYINT UNSIGNED NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `ix_psr_product_id` (`product_id`),
+  UNIQUE KEY `ux_psr_product_user` (`product_id`, `user_name`, `user_email`),
   CONSTRAINT `chk_psr_rating_range` CHECK (`rating` IS NULL OR (`rating` >= 1 AND `rating` <= 5)),
   CONSTRAINT `fk_psr_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

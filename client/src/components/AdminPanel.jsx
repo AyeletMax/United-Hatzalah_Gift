@@ -1,26 +1,50 @@
 import { useState, useEffect } from 'react';
+import { useProducts } from './ProductsContext.jsx';
+import { useAdmin } from './AdminContext.jsx';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAdminLoggedIn, setIsAdminLoggedIn } = useAdmin();
+  const [isAuthenticated, setIsAuthenticated] = useState(isAdminLoggedIn);
   const [password, setPassword] = useState('');
-  const [products, setProducts] = useState([]);
+  const { products, refreshProducts } = useProducts();
   const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
 
   const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ;
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadCategories();
+      
+      // Check if editing a product from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      if (editId) {
+        // Find and set the product for editing
+        const productToEdit = products.find(p => p.id === parseInt(editId));
+        if (productToEdit) {
+          setSelectedProduct(productToEdit);
+          setShowProductForm(true);
+        }
+        // Clear the URL parameter
+        window.history.replaceState({}, '', '/admin');
+      }
+    }
+  }, [isAuthenticated, products]);
+
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      loadData();
+      setIsAdminLoggedIn(true);
+      loadCategories();
     } else {
       alert('סיסמה שגויה');
     }
   };
 
-  const loadData = async () => {
+  const loadCategories = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
       const apiUrl = baseUrl.includes("localhost")
@@ -29,14 +53,10 @@ const AdminPanel = () => {
         ? baseUrl
         : `${baseUrl}.onrender.com`;
       
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`${apiUrl}/api/products`),
-        fetch(`${apiUrl}/api/categories`)
-      ]);
-      setProducts(await productsRes.json());
+      const categoriesRes = await fetch(`${apiUrl}/api/categories`);
       setCategories(await categoriesRes.json());
     } catch (error) {
-      console.error('שגיאה בטעינת נתונים:', error);
+      console.error('שגיאה בטעינת קטגוריות:', error);
     }
   };
 
@@ -58,7 +78,7 @@ const AdminPanel = () => {
         body: JSON.stringify(productData)
       });
       
-      loadData();
+      refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
     } catch (error) {
@@ -77,7 +97,7 @@ const AdminPanel = () => {
           : `${baseUrl}.onrender.com`;
         const url = `${apiUrl}/api/products/${id}`;
         await fetch(url, { method: 'DELETE' });
-        loadData();
+        refreshProducts();
       } catch (error) {
         console.error('שגיאה במחיקת מוצר:', error);
       }
@@ -102,28 +122,29 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel">
-      <h1>פאנל ניהול</h1>
+      <div className="admin-header">
+        <h1>פאנל ניהול</h1>
+      </div>
       
-      <div className="admin-actions">
-        <button onClick={() => setShowProductForm(true)}>הוסף מוצר חדש</button>
-        <button onClick={loadData}>רענן נתונים</button>
+      <div className="admin-info">
+        <p>כדי לערוך או למחוק מוצרים, עבור לקטגוריה הרצויה באתר</p>
       </div>
 
-      <div className="products-grid">
-        {products.map(product => (
-          <div key={product.id} className="product-card">
-            {product.image_url && <img src={product.image_url} alt={product.name} />}
-            <h3>{product.name}</h3>
-            <p>מחיר: ₪{product.unit_price_incl_vat}</p>
-            <div className="card-actions">
-              <button onClick={() => {
-                setSelectedProduct(product);
-                setShowProductForm(true);
-              }}>ערוך</button>
-              <button onClick={() => deleteProduct(product.id)} className="delete-btn">מחק</button>
-            </div>
-          </div>
-        ))}
+      <div className="admin-actions">
+        <button 
+          onClick={() => {
+            console.log('Add product button clicked');
+            setShowProductForm(true);
+          }}
+          style={{ display: 'block', visibility: 'visible' }}
+        >
+          הוסף מוצר חדש
+        </button>
+
+        <button className="logout-btn" onClick={() => {
+          setIsAuthenticated(false);
+          setIsAdminLoggedIn(false);
+        }}>יציאה</button>
       </div>
 
       {showProductForm && (
@@ -147,7 +168,10 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     category_id: product?.category_id || '',
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
-    image_url: product?.image_url || ''
+    image_url: product?.image_url || '',
+    brand: product?.brand || '',
+    last_buyer: product?.last_buyer || '',
+    popularity_score: product?.popularity_score || 0
   });
   const [uploading, setUploading] = useState(false);
 
@@ -231,6 +255,29 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             placeholder="זמן אספקה (ימים)"
             value={formData.delivery_time_days}
             onChange={(e) => setFormData({...formData, delivery_time_days: e.target.value})}
+          />
+          
+          <input
+            type="text"
+            placeholder="מותג"
+            value={formData.brand}
+            onChange={(e) => setFormData({...formData, brand: e.target.value})}
+          />
+          
+          <input
+            type="text"
+            placeholder="לקוח אחרון שקנה"
+            value={formData.last_buyer}
+            onChange={(e) => setFormData({...formData, last_buyer: e.target.value})}
+          />
+          
+          <input
+            type="number"
+            placeholder="ציון פופולריות (0-100)"
+            min="0"
+            max="100"
+            value={formData.popularity_score}
+            onChange={(e) => setFormData({...formData, popularity_score: e.target.value})}
           />
           
           <div className="image-upload-section">

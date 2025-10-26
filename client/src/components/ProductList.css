@@ -14,6 +14,8 @@
   align-items: center;
   transition: box-shadow 0.18s, transform 0.18s;
   cursor: pointer;
+  position: relative;
+  isolation: isolate;
 }
 .product-card:hover {
   box-shadow: 0 6px 24px rgba(243, 108, 33, 0.13);
@@ -27,6 +29,10 @@
 }
 .product-info {
   text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .product-name {
   font-weight: 700;
@@ -96,5 +102,378 @@
   
   .product-category {
     font-size: 0.85em;
+  }
+}
+
+.product-card .admin-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin: 0;
+  width: auto;
+}
+
+.product-card .delete-btn,
+.product-card .edit-btn {
+  all: unset;
+  background: none !important;
+  color: #bbb;
+  cursor: pointer;
+  display: inline-flex;
+  transition: color 0.2s, transform 0.2s;
+  position: relative;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.product-card .delete-btn:hover,
+.product-card .edit-btn:hover {
+  transform: scale(1.15);
+}
+
+
+
+
+
+.product-card .delete-btn::after,
+.product-card .edit-btn::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.product-card .delete-btn:hover::after,
+.product-card .edit-btn:hover::after {
+  opacity: 1;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide admin buttons when modal is open */
+.product-list-grid.modal-open .admin-actions {
+  display: none !important;
+}
+
+body:has(.modal-overlay) .admin-actions {
+  display: none !important;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #545b62;
+}
+
+/* עיצוב לכותרת המוצרים ומונה התוצאות */
+.products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 10px 0;
+  padding: 0 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.filter-toggle-btn {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  color: #f7fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+
+.filter-toggle-btn:hover::before {
+  left: 100%;
+}
+
+.filter-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+}
+
+.filter-icon {
+  font-size: 16px;
+}
+
+.filter-toggle-btn.active {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  animation: pulse 2s infinite;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.filter-active-indicator {
+  color: #fff;
+  font-size: 20px;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); }
+  100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+.products-count {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  background: #f8f9fa;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e9ecef;
+}
+
+/* הודעה כשאין תוצאות */
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 20px;
+  border: 2px dashed #ddd;
+}
+
+.no-results .reset-filters-btn {
+  margin-top: 15px;
+  background: #f4a261;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(244, 162, 97, 0.3);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.no-results .reset-filters-btn:hover {
+  background: #e76f51;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 111, 81, 0.4);
+}
+
+.no-results .reset-filters-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(231, 111, 81, 0.3);
+}
+
+/* רספונסיבי לכפתור איפוס */
+@media (max-width: 768px) {
+  .no-results .reset-filters-btn {
+    padding: 14px 28px;
+    font-size: 16px;
+    min-height: 50px;
+    border-radius: 10px;
+  }
+}
+
+/* התאמה לפאנל הסינון */
+.product-list-grid {
+  margin-right: 0;
+  transition: margin-right 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .product-list-grid {
+    margin-right: 20px;
+  }
+}
+
+/* אנימציות למוצרים */
+.product-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* עיצוב טופס עריכת מוצר */
+.product-form {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.product-form h2 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  color: #333;
+}
+
+.product-form input,
+.product-form select {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.product-form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 12px;
+  padding-left: 35px;
+  cursor: pointer;
+}
+
+.product-form input:focus,
+.product-form select:focus {
+  outline: none;
+  border-color: #f36c21;
+  box-shadow: 0 0 0 2px rgba(243, 108, 33, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-actions button[type="submit"] {
+  background: #f36c21;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #e55a0f;
+}
+
+.form-actions button[type="button"] {
+  background: #6c757d;
+  color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background: #545b62;
+}
+
+/* תיקונים למובייל */
+@media (max-width: 768px) {
+  .product-form {
+    width: 95%;
+    padding: 20px;
+    max-height: 85vh;
+  }
+
+  .product-form input,
+  .product-form select {
+    font-size: 16px !important;
+    min-height: 48px;
+    padding: 14px 16px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .product-form select {
+    background-size: 16px;
+    background-position: left 10px center;
+    padding-left: 35px;
+  }
+
+  .form-actions button {
+    min-height: 48px;
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 }

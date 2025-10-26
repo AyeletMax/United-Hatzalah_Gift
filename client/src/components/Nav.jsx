@@ -1,5 +1,5 @@
 import './Nav.css'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import SearchBar from './SearchBar.jsx';
 
@@ -21,6 +21,9 @@ export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isFilterPage = location.pathname === '/filter';
 
   const handleSearch = (term) => {
     if (term.trim()) {
@@ -36,15 +39,12 @@ export default function Nav() {
   };
 
   const handleMouseLeave = () => {
-    const timeout = setTimeout(() => setIsOpen(false), 200);
+    const timeout = setTimeout(() => setIsOpen(false), 500);
     setHoverTimeout(timeout);
   };
 
   return (
     <nav className="nav-root">
-      <div className="nav-search-wrapper">
-        <SearchBar onSearch={handleSearch} />
-      </div>
       <button 
         className="nav-hamburger" 
         onMouseEnter={handleMouseEnter}
@@ -70,7 +70,12 @@ export default function Nav() {
             to={item.path} 
             className={`nav-link ${item.path === '/' ? 'nav-home-btn' : ''}`}
             aria-label={item.path === '/' ? 'עמוד הבית' : undefined}
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              if (item.path === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
             onMouseDown={(e)=>e.currentTarget.classList.add('active')} 
             onMouseUp={(e)=>e.currentTarget.classList.remove('active')}
           >
@@ -94,6 +99,28 @@ export default function Nav() {
             )}
           </Link>
         ))}
+      </div>
+      
+      <div className="nav-search-wrapper">
+        <SearchBar onSearch={handleSearch} />
+        <button 
+          className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
+          onClick={() => {
+            if (isFilterPage) {
+              navigate('/');
+            } else {
+              const currentPath = location.pathname;
+              if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
+                const categorySlug = currentPath.split('/')[1];
+                navigate(`/filter?category=${categorySlug}`);
+              } else {
+                navigate('/filter');
+              }
+            }
+          }}
+        >
+          {isFilterPage ? 'סגור סינון' : 'סינון'}
+        </button>
       </div>
       
       {isOpen && <div className="nav-overlay" onClick={() => setIsOpen(false)} />}

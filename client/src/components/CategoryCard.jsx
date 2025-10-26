@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CategoryCard.css';
 
-export default function CategoryCard({ title, icon, onClick, size = 'medium', delay = 0 }) {
+export default function CategoryCard({ title, icon, color, image, onClick, size = 'medium', delay = 0 }) {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef(null);
 
@@ -10,7 +10,8 @@ export default function CategoryCard({ title, icon, onClick, size = 'medium', de
       ([entry]) => {
         if (entry.isIntersecting) {
           setTimeout(() => setIsVisible(true), delay);
-          observer.disconnect();
+        } else {
+          setIsVisible(false);
         }
       },
       { threshold: 0.1 }
@@ -26,9 +27,11 @@ export default function CategoryCard({ title, icon, onClick, size = 'medium', de
   return (
     <div 
       ref={cardRef}
-      className={`category-box ${size} ${isVisible ? 'animate-in' : 'animate-out'}`} 
+      className={`category-box ${size} ${isVisible ? 'animate-in' : 'animate-out'} ${image ? 'has-image' : ''}`} 
       onClick={onClick}
+      style={{ '--card-color': color }}
     >
+      {image && <img src={image} alt={title} className="category-image" />}
       <div className="category-content">
         <h3 className="category-title">{title}</h3>
       </div>
