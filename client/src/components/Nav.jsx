@@ -45,28 +45,6 @@ export default function Nav() {
 
   return (
     <nav className="nav-root">
-      <div className="nav-search-wrapper">
-        <SearchBar onSearch={handleSearch} />
-        <button 
-          className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
-          onClick={() => {
-            if (isFilterPage) {
-              navigate('/');
-            } else {
-              // אם נמצאים בקטגוריה, עבור לסינון עם הקטגוריה
-              const currentPath = location.pathname;
-              if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
-                const categorySlug = currentPath.split('/')[1];
-                navigate(`/filter?category=${categorySlug}`);
-              } else {
-                navigate('/filter');
-              }
-            }
-          }}
-        >
-          {isFilterPage ? 'סגור סינון' : 'סינון'}
-        </button>
-      </div>
       <button 
         className="nav-hamburger" 
         onMouseEnter={handleMouseEnter}
@@ -121,6 +99,28 @@ export default function Nav() {
             )}
           </Link>
         ))}
+      </div>
+      
+      <div className="nav-search-wrapper">
+        <SearchBar onSearch={handleSearch} />
+        <button 
+          className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
+          onClick={() => {
+            if (isFilterPage) {
+              navigate('/');
+            } else {
+              const currentPath = location.pathname;
+              if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
+                const categorySlug = currentPath.split('/')[1];
+                navigate(`/filter?category=${categorySlug}`);
+              } else {
+                navigate('/filter');
+              }
+            }
+          }}
+        >
+          {isFilterPage ? 'סגור סינון' : 'סינון'}
+        </button>
       </div>
       
       {isOpen && <div className="nav-overlay" onClick={() => setIsOpen(false)} />}
