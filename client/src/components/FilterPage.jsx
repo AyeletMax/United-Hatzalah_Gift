@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
 import FilterPanel from "./FilterPanel.jsx";
+import ProductModal from "./ProductModal.jsx";
 
 export default function FilterPage() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export default function FilterPage() {
     lastBuyer: ''
   });
   const [hasFiltered, setHasFiltered] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // קבלת הקטגוריה מה-URL
   const categorySlug = searchParams.get('category');
@@ -41,23 +44,13 @@ export default function FilterPage() {
   const currentCategory = categorySlug ? categories.find(c => c.slug === categorySlug) : null;
 
   const handleProductClick = (product) => {
-    const productSlug = product.name.replace(/\s+/g, '-');
-    const categories = [
-      { id: 1, slug: "לרכב" },
-      { id: 2, slug: "טקסטיל-וביגוד" },
-      { id: 3, slug: "כלי-בית" },
-      { id: 4, slug: "יודאיקה" },
-      { id: 5, slug: "מוצרים-חדשים" },
-      { id: 6, slug: "מתנות" },
-      { id: 7, slug: "מוצרי-קיץ" },
-      { id: 8, slug: "מוצרי-חורף" },
-      { id: 9, slug: "אביזרי-יחץ" },
-      { id: 10, slug: "תיקים" }
-    ];
-    const category = categories.find(c => c.id === product.category_id);
-    if (category) {
-      navigate(`/${category.slug}/${productSlug}`);
-    }
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
   };
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -229,6 +222,14 @@ export default function FilterPage() {
             </div>
           )}
         </>
+      )}
+      
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
       )}
     </>
   );
