@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "./ProductList.css";
+import "./FilterPage.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
@@ -148,7 +149,8 @@ export default function FilterPage() {
         onToggle={() => setFilterPanelOpen(!filterPanelOpen)}
       />
       
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <div className={`main-content ${filterPanelOpen ? 'filter-open' : ''}`}>
+        <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
         {currentCategory ? `סינון מוצרים - ${currentCategory.title}` : 'סינון מוצרים'}
       </h2>
 
@@ -223,6 +225,8 @@ export default function FilterPage() {
           )}
         </>
       )}
+      
+      </div>
       
       {selectedProduct && (
         <ProductModal 

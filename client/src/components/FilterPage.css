@@ -1,0 +1,20 @@
+.main-content {
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
+  padding: 0 20px;
+}
+
+.main-content.filter-open {
+  margin-left: 370px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 10px;
+  }
+  
+  .main-content.filter-open {
+    margin-left: 0 !important;
+  }
+}
