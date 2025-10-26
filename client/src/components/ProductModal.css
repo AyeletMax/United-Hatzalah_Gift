@@ -92,6 +92,12 @@
   padding: 30px;
 }
 
+.product-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .product-image-section {
   display: flex;
   align-items: center;
@@ -115,12 +121,6 @@
   align-items: center;
   justify-content: center;
   font-size: 64px;
-}
-
-.product-details-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 .modal-product-title {
@@ -634,6 +634,10 @@
     grid-template-columns: 1fr;
     gap: 20px;
     padding: 20px;
+  }
+  
+  .product-info-section {
+    gap: 15px;
   }
   
   .modal-product-title {
