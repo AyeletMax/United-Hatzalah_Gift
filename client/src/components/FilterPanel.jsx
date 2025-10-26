@@ -89,15 +89,17 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
 
   // קבלת רשימת מותגים ייחודיים
   const uniqueBrands = [...new Set(products
-    .map(p => p.brand)
+    .flatMap(p => [p.brand, p.displayed_by])
     .filter(brand => brand && brand.trim() !== '')
-  )];
+  )].sort();
 
   // קבלת רשימת זמני אספקה ייחודיים
   const uniqueDeliveryTimes = [...new Set(products
     .map(p => p.delivery_time_days)
     .filter(time => time !== null && time !== undefined)
   )].sort((a, b) => a - b);
+  
+
 
   return (
     <div className={`filter-panel ${isOpen ? 'open' : ''}`} onClick={handleBackdropClick}>
@@ -169,13 +171,12 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
               onChange={(e) => updateFilter('deliveryTime', e.target.value)}
             >
               <option value="">כל זמני האספקה</option>
-              <option value="1-3">1-3 ימים</option>
-              <option value="4-7">4-7 ימים</option>
-              <option value="8-14">8-14 ימים</option>
-              <option value="15+">15+ ימים</option>
-              {uniqueDeliveryTimes.map(time => (
-                <option key={time} value={time}>{time} ימים</option>
-              ))}
+              <option value="1-1">יום אחד</option>
+              <option value="1-2">1-2 ימים</option>
+              <option value="2-3">2-3 ימים</option>
+              <option value="3-5">3-5 ימים</option>
+              <option value="5-7">5-7 ימים</option>
+              <option value="7+">7+ ימים</option>
             </select>
           </div>
 

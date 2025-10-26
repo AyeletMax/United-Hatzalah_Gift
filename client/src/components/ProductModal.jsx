@@ -307,7 +307,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
               
               <div className="detail-item">
                 <h3>זמן אספקה</h3>
-                <p>3-5 ימי עסקים</p>
+                <p>{product.delivery_time_days ? `${product.delivery_time_days} ימי עסקים` : "לא צוין"}</p>
               </div>
               
               <div className="detail-item">

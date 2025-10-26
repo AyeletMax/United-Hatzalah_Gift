@@ -78,31 +78,39 @@ export default function FilterPage() {
 
     // סינון לפי זמן אספקה
     if (filters.deliveryTime) {
-      if (filters.deliveryTime === '1-3') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 1 && p.delivery_time_days <= 3);
-      } else if (filters.deliveryTime === '4-7') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 4 && p.delivery_time_days <= 7);
-      } else if (filters.deliveryTime === '8-14') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 8 && p.delivery_time_days <= 14);
-      } else if (filters.deliveryTime === '15+') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 15);
-      } else {
-        filtered = filtered.filter(p => p.delivery_time_days == filters.deliveryTime);
+      if (filters.deliveryTime === '1-1') {
+        filtered = filtered.filter(p => p.delivery_time_days === 1);
+      } else if (filters.deliveryTime === '1-2') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 1 && p.delivery_time_days <= 2);
+      } else if (filters.deliveryTime === '2-3') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 2 && p.delivery_time_days <= 3);
+      } else if (filters.deliveryTime === '3-5') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 3 && p.delivery_time_days <= 5);
+      } else if (filters.deliveryTime === '5-7') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 5 && p.delivery_time_days <= 7);
+      } else if (filters.deliveryTime === '7+') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 7);
       }
     }
 
     // סינון לפי מותג
     if (filters.brand) {
-      filtered = filtered.filter(p => p.brand && p.brand.includes(filters.brand));
+      filtered = filtered.filter(p => p.brand === filters.brand || (p.displayed_by && p.displayed_by === filters.brand));
     }
 
     // סינון לפי שם מזמין אחרון
     if (filters.lastBuyer && filters.lastBuyer.trim()) {
-      const searchTerm = filters.lastBuyer.trim();
+      const searchTerm = filters.lastBuyer.trim().toLowerCase();
       filtered = filtered.filter(p => {
-        // חיפוש בשדות שם המזמין ומוצג
-        const searchText = (p.last_ordered_by_name || '') + ' ' + (p.last_buyer || '') + ' ' + (p.displayed_by || '');
-        return searchText.includes(searchTerm);
+        const searchFields = [
+          p.last_buyer,
+          p.last_ordered_by_name,
+          p.displayed_by,
+          p.brand,
+          p.name
+        ].filter(field => field).map(field => field.toLowerCase());
+        
+        return searchFields.some(field => field.includes(searchTerm));
       });
     }
 
