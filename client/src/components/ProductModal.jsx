@@ -14,6 +14,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const [userAlreadyAnswered, setUserAlreadyAnswered] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success', 'error', 'warning'
+  const [showResults, setShowResults] = useState(false);
   
   if (!isOpen || !product) return null;
 
@@ -108,6 +109,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setUserEmail('');
     setSurveyAnswers({});
     setStarRating(0);
+    setShowResults(false);
     
     return () => clearInterval(interval);
   }, [product?.id]);
@@ -142,6 +144,15 @@ export default function ProductModal({ product, isOpen, onClose }) {
         setUserAlreadyAnswered(false);
         setShowUserForm(false);
         setShowSurveyForm(true);
+        setTimeout(() => {
+          const modalContent = document.querySelector('.modal-content');
+          if (modalContent) {
+            modalContent.scrollTo({
+              top: modalContent.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error checking user:', error);
@@ -279,46 +290,44 @@ export default function ProductModal({ product, isOpen, onClose }) {
         <button className="modal-close" onClick={(e) => { e.stopPropagation(); onClose(); }}>×</button>
         
         <div className="modal-body">
-          <div className="product-info-section">
-            <div className="product-image-section">
-              {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="modal-product-image" />
-              ) : (
-                <div className="modal-product-placeholder">📦</div>
-              )}
+          <div className="product-image-section">
+            {product.image_url ? (
+              <img src={product.image_url} alt={product.name} className="modal-product-image" />
+            ) : (
+              <div className="modal-product-placeholder">📦</div>
+            )}
+          </div>
+          
+          <h2 className="modal-product-title">{product.name}</h2>
+          
+          {product.unit_price_incl_vat && (
+            <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
+          )}
+          
+          <div className="product-details">
+            <div className="detail-item">
+              <h3>פרטים על המוצר</h3>
+              <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
             </div>
             
-            <h2 className="modal-product-title">{product.name}</h2>
+            <div className="detail-item">
+              <h3>מחיר ליח' כולל מע"מ</h3>
+              <p className="price-detail">₪{product.unit_price_incl_vat || "לא צוין"}</p>
+            </div>
             
-            {product.unit_price_incl_vat && (
-              <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
-            )}
+            <div className="detail-item">
+              <h3>זמן אספקה</h3>
+              <p>{product.delivery_time_days ? `${product.delivery_time_days} ימי עסקים` : "לא צוין"}</p>
+            </div>
             
-            <div className="product-details">
-              <div className="detail-item">
-                <h3>פרטים על המוצר</h3>
-                <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>מחיר ליח' כולל מע"מ</h3>
-                <p className="price-detail">₪{product.unit_price_incl_vat || "לא צוין"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>זמן אספקה</h3>
-                <p>{product.delivery_time_days ? `${product.delivery_time_days} ימי עסקים` : "לא צוין"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>שם מזמין אחרון</h3>
-                <p>{product.last_ordered_by_name || product.last_buyer || "לא צוין"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>מותג</h3>
-                <p>{product.displayed_by || product.brand || "לא צוין"}</p>
-              </div>
+            <div className="detail-item">
+              <h3>שם מזמין אחרון</h3>
+              <p>{product.last_ordered_by_name || product.last_buyer || "לא צוין"}</p>
+            </div>
+            
+            <div className="detail-item">
+              <h3>מותג</h3>
+              <p>{product.displayed_by || product.brand || "לא צוין"}</p>
             </div>
           </div>
           
@@ -326,19 +335,51 @@ export default function ProductModal({ product, isOpen, onClose }) {
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
                 {!showUserForm && !showSurveyForm && (
-                  <button 
-                    className="toggle-survey-btn"
-                    onClick={() => setShowUserForm(true)}
-                  >
-                    מלא סקר
-                  </button>
+                  <div className="survey-buttons">
+                    <button 
+                      className="toggle-survey-btn"
+                      onClick={() => {
+                        setShowUserForm(true);
+                        setTimeout(() => {
+                          const modalContent = document.querySelector('.modal-content');
+                          if (modalContent) {
+                            modalContent.scrollTo({
+                              top: modalContent.scrollHeight,
+                              behavior: 'smooth'
+                            });
+                          }
+                        }, 100);
+                      }}
+                    >
+                      מלא סקר
+                    </button>
+                    <button 
+                      className="toggle-results-btn"
+                      onClick={() => {
+                        setShowResults(!showResults);
+                        if (!showResults) {
+                          setTimeout(() => {
+                            const modalContent = document.querySelector('.modal-content');
+                            if (modalContent) {
+                              modalContent.scrollTo({
+                                top: modalContent.scrollHeight,
+                                behavior: 'smooth'
+                              });
+                            }
+                          }, 100);
+                        }
+                      }}
+                    >
+                      {showResults ? 'הסתר תוצאות' : 'צפה בתוצאות הסקר'}
+                    </button>
+                  </div>
                 )}
               </div>
               
 
               
-              {/* תמיד להציג תוצאות */}
-              {surveyResults && !showUserForm && !showSurveyForm && (
+              {/* תוצאות הסקר - רק כשלוחצים על המלצות */}
+              {surveyResults && !showUserForm && !showSurveyForm && showResults && (
                 <div className="survey-results">
                   <div className="results-summary">
                     <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
