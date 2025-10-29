@@ -4,7 +4,16 @@ import "./responsive.css";
 
 import Hero from "./components/Hero.jsx";
 import CategoryPuzzleGrid from "./components/CategoryPuzzleGrid.jsx";
-import kitchenImg from "./assets/Gemini_Generated_Image_bt91inbt91inbt91 (1).png";
+import kitchenImg from "./assets/כלי בית.png";
+import carImg from "./assets/אביזרים לרכב.png";
+import clothesImg from "./assets/טקסטיל וביגוד.png";
+import giftsImg from "./assets/מתנות.png";
+import newProductsImg from "./assets/מוצרים חדשים.png";
+import judaicaImg from "./assets/judaica.png";
+import bagsImg from "./assets/bags.png";
+import winterImg from "./assets/winter.png";
+import summerImg from "./assets/summer.png";
+import outdoorImg from "./assets/outdoor.png";
 import ProductList from "./components/ProductList.jsx";
 import FilterPage from "./components/FilterPage.jsx";
 import AdminPanel from "./components/AdminPanel.jsx";
@@ -13,18 +22,19 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-ro
 import ProductModal from "./components/ProductModal.jsx";
 import Nav from "./components/Nav.jsx";
 import Footer from "./components/Footer.jsx";
+import ToastManager from "./components/ToastManager.jsx";
 
 const categories = [
-  { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9" },
-  { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff" },
+  { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9", image: carImg },
+  { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff", image: clothesImg },
   { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff", image: kitchenImg },
-  { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0" },
-  { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff" },
-  { id: 6, key: "gifts", title: "מתנות", slug: "מתנות", icon: "🎁", color: "#ffe9f0" },
-  { id: 7, key: "summer", title: "מוצרי קיץ", slug: "מוצרי-קיץ", icon: "☀️", color: "#fff4e9" },
-  { id: 9, key: "outdoor", title: 'אביזרי יח"צ', slug: "אביזרי-יחץ", icon: "🏕️", color: "#f0ffe9" },
-  { id: 10, key: "bags", title: "תיקים", slug: "תיקים", icon: "👜", color: "#f9e9ff" },
-  { id: 5, key: "new", title: "מוצרים חדשים", slug: "מוצרים-חדשים", icon: "✨", color: "#fff9e9" },
+  { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0", image: judaicaImg },
+  { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff", image: winterImg },
+  { id: 6, key: "gifts", title: "מתנות", slug: "מתנות", icon: "🎁", color: "#ffe9f0", image: giftsImg },
+  { id: 7, key: "summer", title: "מוצרי קיץ", slug: "מוצרי-קיץ", icon: "☀️", color: "#fff4e9", image: summerImg },
+  { id: 9, key: "outdoor", title: 'אביזרי יח"צ', slug: "אביזרי-יחץ", icon: "🏕️", color: "#f0ffe9", image: outdoorImg },
+  { id: 10, key: "bags", title: "תיקים", slug: "תיקים", icon: "👜", color: "#f9e9ff", image: bagsImg },
+  { id: 5, key: "new", title: "מוצרים חדשים", slug: "מוצרים-חדשים", icon: "✨", color: "#fff9e9", image: newProductsImg },
 ];
 
 function CategoryPage() {
@@ -37,7 +47,14 @@ function CategoryPage() {
     : [];
   
   const selectedProduct = productName 
-    ? filteredProducts.find(p => p.name.replace(/\s+/g, '-') === productName)
+    ? filteredProducts.find(p => {
+        // נסה למצוא לפי ID אם productName הוא מספר
+        if (!isNaN(productName)) {
+          return p.id === parseInt(productName);
+        }
+        // אחרת נסה למצוא לפי שם
+        return p.name.replace(/\s+/g, '-') === productName;
+      })
     : null;
   
   const handleCategorySelect = (c) => {
@@ -134,7 +151,7 @@ function App() {
   return (
     <>
       <Nav />
-      <main>
+      <main style={{ paddingTop: '120px' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
@@ -145,6 +162,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <ToastManager />
     </>
   );
 }

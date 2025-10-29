@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "./ProductList.css";
+import "./FilterPage.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
 import FilterPanel from "./FilterPanel.jsx";
+import ProductModal from "./ProductModal.jsx";
 
 export default function FilterPage() {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ export default function FilterPage() {
     lastBuyer: ''
   });
   const [hasFiltered, setHasFiltered] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // קבלת הקטגוריה מה-URL
   const categorySlug = searchParams.get('category');
@@ -41,23 +45,13 @@ export default function FilterPage() {
   const currentCategory = categorySlug ? categories.find(c => c.slug === categorySlug) : null;
 
   const handleProductClick = (product) => {
-    const productSlug = product.name.replace(/\s+/g, '-');
-    const categories = [
-      { id: 1, slug: "לרכב" },
-      { id: 2, slug: "טקסטיל-וביגוד" },
-      { id: 3, slug: "כלי-בית" },
-      { id: 4, slug: "יודאיקה" },
-      { id: 5, slug: "מוצרים-חדשים" },
-      { id: 6, slug: "מתנות" },
-      { id: 7, slug: "מוצרי-קיץ" },
-      { id: 8, slug: "מוצרי-חורף" },
-      { id: 9, slug: "אביזרי-יחץ" },
-      { id: 10, slug: "תיקים" }
-    ];
-    const category = categories.find(c => c.id === product.category_id);
-    if (category) {
-      navigate(`/${category.slug}/${productSlug}`);
-    }
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
   };
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -78,31 +72,39 @@ export default function FilterPage() {
 
     // סינון לפי זמן אספקה
     if (filters.deliveryTime) {
-      if (filters.deliveryTime === '1-3') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 1 && p.delivery_time_days <= 3);
-      } else if (filters.deliveryTime === '4-7') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 4 && p.delivery_time_days <= 7);
-      } else if (filters.deliveryTime === '8-14') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 8 && p.delivery_time_days <= 14);
-      } else if (filters.deliveryTime === '15+') {
-        filtered = filtered.filter(p => p.delivery_time_days >= 15);
-      } else {
-        filtered = filtered.filter(p => p.delivery_time_days == filters.deliveryTime);
+      if (filters.deliveryTime === '1-1') {
+        filtered = filtered.filter(p => p.delivery_time_days === 1);
+      } else if (filters.deliveryTime === '1-2') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 1 && p.delivery_time_days <= 2);
+      } else if (filters.deliveryTime === '2-3') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 2 && p.delivery_time_days <= 3);
+      } else if (filters.deliveryTime === '3-5') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 3 && p.delivery_time_days <= 5);
+      } else if (filters.deliveryTime === '5-7') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 5 && p.delivery_time_days <= 7);
+      } else if (filters.deliveryTime === '7+') {
+        filtered = filtered.filter(p => p.delivery_time_days >= 7);
       }
     }
 
     // סינון לפי מותג
     if (filters.brand) {
-      filtered = filtered.filter(p => p.brand && p.brand.includes(filters.brand));
+      filtered = filtered.filter(p => p.brand === filters.brand || (p.displayed_by && p.displayed_by === filters.brand));
     }
 
     // סינון לפי שם מזמין אחרון
     if (filters.lastBuyer && filters.lastBuyer.trim()) {
-      const searchTerm = filters.lastBuyer.trim();
+      const searchTerm = filters.lastBuyer.trim().toLowerCase();
       filtered = filtered.filter(p => {
-        // חיפוש בשדות שם המזמין ומוצג
-        const searchText = (p.last_ordered_by_name || '') + ' ' + (p.last_buyer || '') + ' ' + (p.displayed_by || '');
-        return searchText.includes(searchTerm);
+        const searchFields = [
+          p.last_buyer,
+          p.last_ordered_by_name,
+          p.displayed_by,
+          p.brand,
+          p.name
+        ].filter(field => field).map(field => field.toLowerCase());
+        
+        return searchFields.some(field => field.includes(searchTerm));
       });
     }
 
@@ -147,7 +149,8 @@ export default function FilterPage() {
         onToggle={() => setFilterPanelOpen(!filterPanelOpen)}
       />
       
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <div className={`main-content ${filterPanelOpen ? 'filter-open' : ''}`}>
+        <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
         {currentCategory ? `סינון מוצרים - ${currentCategory.title}` : 'סינון מוצרים'}
       </h2>
 
@@ -221,6 +224,16 @@ export default function FilterPage() {
             </div>
           )}
         </>
+      )}
+      
+      </div>
+      
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
       )}
     </>
   );

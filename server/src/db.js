@@ -35,11 +35,12 @@ export const pool = mysql.createPool({
   connectionLimit: Number(DB_CONN_LIMIT),
   queueLimit: Number(DB_QUEUE_LIMIT),
   charset: "utf8mb4",
+  ssl: {
+    rejectUnauthorized: false
+  },
+  connectTimeout: 60000,
   acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
-  idleTimeout: 300000,
-  maxReconnects: 3,
+  idleTimeout: 300000
 });
 
 export async function pingDatabase() {

@@ -1,6 +1,5 @@
 .category-box {
   background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-  border: 2px solid rgba(244, 162, 97, 0.3);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -13,32 +12,13 @@
   overflow: hidden;
 }
 
-.category-box::before {
-  content: '';
-  position: absolute;
-  inset: -100%;
-  background: conic-gradient(
-    from 0deg at 50% 50%,
-    var(--card-color, #f4a261) 0deg,
-    transparent 60deg,
-    transparent 300deg,
-    var(--card-color, #f4a261) 360deg
-  );
-  animation: rotate 4s linear infinite;
-  opacity: 0.3;
-}
-
 .category-box::after {
   content: '';
   position: absolute;
-  inset: 2px;
-  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-  border-radius: 18px;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.4), rgba(45, 45, 45, 0.4));
+  border-radius: 20px;
   z-index: 1;
-}
-
-@keyframes rotate {
-  100% { transform: rotate(360deg); }
 }
 
 .category-box.animate-out {
@@ -80,17 +60,9 @@
 
 
 .category-box:hover {
-  transform: scale(1.08) translateY(-8px) rotate(2deg);
+  transform: scale(1.05) translateY(-5px);
   z-index: 10;
-  border-color: var(--card-color, #f4a261);
-  box-shadow: 
-    0 25px 50px rgba(244, 162, 97, 0.4),
-    0 0 60px var(--card-color, rgba(244, 162, 97, 0.3));
-}
-
-.category-box:hover::before {
-  animation: rotate 2s linear infinite;
-  opacity: 0.6;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
 }
 
 .category-content {
@@ -106,35 +78,39 @@
   height: calc(100% - 4px);
   object-fit: cover;
   border-radius: 18px;
-  opacity: 0.5;
+  opacity: 0.8;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
 }
 
+.category-box.has-image::after {
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.7), rgba(45, 45, 45, 0.7));
+}
+
 .category-box.has-image:hover .category-image {
-  opacity: 0.6;
+  opacity: 0.9;
   transform: scale(1.05);
 }
 
 
 
 .category-title {
-  color: #f4a261;
-  font-size: 1rem;
-  font-weight: 600;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  text-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .category-box:hover .category-title {
-  color: #ffffff;
-  font-weight: 700;
-  transform: translateY(-3px);
+  transform: scale(1.05);
   text-shadow: 
-    0 0 20px var(--card-color, rgba(244, 162, 97, 0.8)),
-    0 4px 12px rgba(0, 0, 0, 0.6);
+    2px 2px 6px rgba(0, 0, 0, 0.9),
+    0 0 15px rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 1024px) {

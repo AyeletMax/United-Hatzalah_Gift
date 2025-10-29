@@ -14,6 +14,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
   const [userAlreadyAnswered, setUserAlreadyAnswered] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success', 'error', 'warning'
+  const [showResults, setShowResults] = useState(false);
   
   if (!isOpen || !product) return null;
 
@@ -108,6 +109,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setUserEmail('');
     setSurveyAnswers({});
     setStarRating(0);
+    setShowResults(false);
     
     return () => clearInterval(interval);
   }, [product?.id]);
@@ -126,8 +128,12 @@ export default function ProductModal({ product, isOpen, onClose }) {
   };
 
   const checkUserAndProceed = async () => {
-    if (!userName.trim() || !userEmail.trim()) {
-      showMessage('אנא מלא שם ומייל', 'error');
+    const missingFields = [];
+    if (!userName.trim()) missingFields.push('שם');
+    if (!userEmail.trim()) missingFields.push('מייל');
+    
+    if (missingFields.length > 0) {
+      showMessage(`אנא מלא את השדות: ${missingFields.join(', ')}`, 'warning');
       return;
     }
     
@@ -142,10 +148,19 @@ export default function ProductModal({ product, isOpen, onClose }) {
         setUserAlreadyAnswered(false);
         setShowUserForm(false);
         setShowSurveyForm(true);
+        setTimeout(() => {
+          const modalContent = document.querySelector('.modal-content');
+          if (modalContent) {
+            modalContent.scrollTo({
+              top: modalContent.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error checking user:', error);
-      showMessage('שגיאה בבדיקת המשתמש', 'error');
+      showMessage('שגיאה בבדיקת המשתמש - ממשיך במצב לא מקוון', 'warning');
       // Fallback to localStorage check
       const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
       const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
@@ -162,15 +177,22 @@ export default function ProductModal({ product, isOpen, onClose }) {
   };
   
   const submitSurvey = async () => {
-    // Check if all questions are answered
-    if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
-      showMessage('אנא ענה על כל השאלות', 'warning');
+    // בדיקת שאלות חסרות
+    const unansweredQuestions = [];
+    surveyQuestions.forEach(question => {
+      if (!surveyAnswers[question.id]) {
+        unansweredQuestions.push(question.text);
+      }
+    });
+    
+    if (unansweredQuestions.length > 0) {
+      showMessage(`אנא ענה על השאלות הבאות:\n${unansweredQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`, 'warning');
       return;
     }
     
-    // Check if star rating is selected
+    // בדיקת דירוג כוכבים
     if (starRating === 0) {
-      showMessage('אנא בחר דירוג כוכבים', 'warning');
+      showMessage('אנא בחר דירוג כוכבים (מ 1 עד 5 כוכבים)', 'warning');
       return;
     }
     
@@ -189,7 +211,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       if (response.status === 409) {
-        showMessage('כבר דירגת את המוצר הזה', 'warning');
+        showMessage('כבר דירגת את המוצר הזה קודם לכן', 'info');
         setUserAlreadyAnswered(true);
         setShowSurveyForm(false);
         return;
@@ -226,7 +248,13 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       setShowSurveyForm(false);
-      showMessage('תודה על הדירוג!', 'success');
+      showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
+      console.log('Trying to show toast:', window.showToast);
+      if (window.showToast) {
+        window.showToast('הדירוג נשמר בהצלחה! תודה על המשוב', 'success', 4000);
+      } else {
+        console.log('showToast not available');
+      }
       
       // Reload survey results to show real-time update
       setTimeout(async () => {
@@ -269,7 +297,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       
     } catch (error) {
       console.error('Error submitting survey:', error);
-      showMessage('שגיאה בשמירת הדירוג', 'error');
+      showMessage('שגיאה בשמירת הדירוג. אנא נסה שוב', 'error');
     }
   };
 
@@ -287,57 +315,88 @@ export default function ProductModal({ product, isOpen, onClose }) {
             )}
           </div>
           
-          <div className="product-details-section">
-            <h2 className="modal-product-title">{product.name}</h2>
-            
-            {product.unit_price_incl_vat && (
-              <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
-            )}
-            
-            <div className="product-details">
-              <div className="detail-item">
-                <h3>פרטים על המוצר</h3>
-                <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>מחיר ליח' כולל מע"מ</h3>
-                <p className="price-detail">₪{product.unit_price_incl_vat || "לא צוין"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>זמן אספקה</h3>
-                <p>3-5 ימי עסקים</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>שם מזמין אחרון</h3>
-                <p>{product.last_ordered_by_name || product.last_buyer || "לא צוין"}</p>
-              </div>
-              
-              <div className="detail-item">
-                <h3>מותג</h3>
-                <p>{product.displayed_by || product.brand || "לא צוין"}</p>
-              </div>
+          <h2 className="modal-product-title">{product.name}</h2>
+          
+          {product.unit_price_incl_vat && (
+            <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
+          )}
+          
+          <div className="product-details">
+            <div className="detail-item">
+              <h3>פרטים על המוצר</h3>
+              <p>{product.description || "לא צוין תיאור"}</p>
             </div>
             
-            <div className="survey-section">
+            <div className="detail-item">
+              <h3>מחיר ליח' כולל מע"מ</h3>
+              <p className="price-detail">₪{product.unit_price_incl_vat || "לא צוין"}</p>
+            </div>
+            
+            <div className="detail-item">
+              <h3>זמן אספקה</h3>
+              <p>{product.delivery_time_days ? `${product.delivery_time_days} ימי עסקים` : "לא צוין"}</p>
+            </div>
+            
+            <div className="detail-item">
+              <h3>שם מזמין אחרון</h3>
+              <p>{product.last_ordered_by_name || product.last_buyer || "לא צוין"}</p>
+            </div>
+            
+            <div className="detail-item">
+              <h3>מותג</h3>
+              <p>{product.displayed_by || product.brand || "לא צוין"}</p>
+            </div>
+          </div>
+          
+          <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
                 {!showUserForm && !showSurveyForm && (
-                  <button 
-                    className="toggle-survey-btn"
-                    onClick={() => setShowUserForm(true)}
-                  >
-                    מלא סקר
-                  </button>
+                  <div className="survey-buttons">
+                    <button 
+                      className="toggle-survey-btn"
+                      onClick={() => {
+                        setShowUserForm(true);
+                        setTimeout(() => {
+                          const modalContent = document.querySelector('.modal-content');
+                          if (modalContent) {
+                            modalContent.scrollTo({
+                              top: modalContent.scrollHeight,
+                              behavior: 'smooth'
+                            });
+                          }
+                        }, 100);
+                      }}
+                    >
+                      מלא סקר
+                    </button>
+                    <button 
+                      className="toggle-results-btn"
+                      onClick={() => {
+                        setShowResults(!showResults);
+                        if (!showResults) {
+                          setTimeout(() => {
+                            const modalContent = document.querySelector('.modal-content');
+                            if (modalContent) {
+                              modalContent.scrollTo({
+                                top: modalContent.scrollHeight,
+                                behavior: 'smooth'
+                              });
+                            }
+                          }, 100);
+                        }
+                      }}
+                    >
+                      {showResults ? 'הסתר תוצאות' : 'צפה בתוצאות הסקר'}
+                    </button>
+                  </div>
                 )}
               </div>
               
 
               
-              {/* תמיד להציג תוצאות */}
-              {surveyResults && !showUserForm && !showSurveyForm && (
+              {/* תוצאות הסקר - רק כשלוחצים על המלצות */}
+              {surveyResults && !showUserForm && !showSurveyForm && showResults && (
                 <div className="survey-results">
                   <div className="results-summary">
                     <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
@@ -487,7 +546,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
                   </div>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </div>

@@ -64,7 +64,13 @@ app.use((req, res, next) => {
 
 // ====== ✅ Request Logging ======
 app.use((req, res, next) => {
+  console.log(`\n=== INCOMING REQUEST ===`);
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+  }
+  console.log('=== END REQUEST LOG ===\n');
   next();
 });
 
