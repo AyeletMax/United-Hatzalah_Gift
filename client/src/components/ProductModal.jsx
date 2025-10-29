@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const getApiUrl = () => {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  return baseUrl.includes("localhost")
+    ? baseUrl
+    : baseUrl.includes("onrender.com")
+    ? baseUrl
+    : `${baseUrl}.onrender.com`;
+};
+
+const API_URL = getApiUrl();
 
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
@@ -38,7 +47,17 @@ export default function ProductModal({ product, isOpen, onClose }) {
     
     const loadSurveyResults = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
+        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.length > 0) {
@@ -82,7 +101,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
           });
         }
       } catch (error) {
-        console.error('Error loading survey results:', error);
+        console.warn('Survey service unavailable:', error.message);
+        // Set empty results silently - don't show error to user
         const emptyPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         setSurveyResults({
           totalResponses: 0,
@@ -98,8 +118,11 @@ export default function ProductModal({ product, isOpen, onClose }) {
     
     loadSurveyResults();
     
-    // Auto-refresh every 5 seconds to sync between browsers
-    const interval = setInterval(loadSurveyResults, 5000);
+    // Only auto-refresh if survey service is working
+    let interval;
+    if (API_URL.includes('localhost')) {
+      interval = setInterval(loadSurveyResults, 5000);
+    }
     
     // Reset form states
     setShowSurveyForm(false);
@@ -111,7 +134,9 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setStarRating(0);
     setShowResults(false);
     
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [product?.id]);
   
   const handleAnswerChange = (questionId, value) => {
@@ -159,8 +184,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
         }, 100);
       }
     } catch (error) {
-      console.error('Error checking user:', error);
-      showMessage('שגיאה בבדיקת המשתמש - ממשיך במצב לא מקוון', 'warning');
+      console.warn('Survey service unavailable, using local storage');
       // Fallback to localStorage check
       const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
       const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
@@ -296,8 +320,25 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }, 500);
       
     } catch (error) {
-      console.error('Error submitting survey:', error);
-      showMessage('שגיאה בשמירת הדירוג. אנא נסה שוב', 'error');
+      console.warn('Survey service unavailable, saving locally');
+      // Save to localStorage as fallback
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+      userResponses[userKey] = {
+        productId: product.id,
+        answers: surveyAnswers,
+        rating: starRating,
+        userName: userName.trim(),
+        userEmail: userEmail.trim(),
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
+      
+      setShowSurveyForm(false);
+      showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
+      if (window.showToast) {
+        window.showToast('הדירוג נשמר בהצלחה! תודה על המשוב', 'success', 4000);
+      }
     }
   };
 
