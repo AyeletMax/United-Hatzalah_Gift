@@ -3,12 +3,15 @@ import "./ProductList.css";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
+import ConfirmDialog from "./ConfirmDialog.jsx";
 
 export default function AllProductsList() {
   const navigate = useNavigate();
   const { isAdminLoggedIn } = useAdmin();
   const { products, refreshProducts } = useProducts();
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   const [categories] = useState([
     { id: 1, name: "לרכב" },
@@ -68,19 +71,27 @@ export default function AllProductsList() {
 
   const deleteProduct = async (productId, e) => {
     e.stopPropagation();
-    if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
-      try {
-        const baseUrl = import.meta.env.VITE_API_URL;
-        const apiUrl = baseUrl.includes("localhost")
-          ? baseUrl
-          : baseUrl.includes("onrender.com")
-          ? baseUrl
-          : `${baseUrl}.onrender.com`;
-        await fetch(`${apiUrl}/api/products/${productId}`, { method: 'DELETE' });
-        refreshProducts();
-      } catch (error) {
-        console.error('שגיאה במחיקת מוצר:', error);
-      }
+    setProductToDelete(productId);
+    setShowDeleteConfirm(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      await fetch(`${apiUrl}/api/products/${productToDelete}`, { method: 'DELETE' });
+      window.showToast && window.showToast('המוצר נמחק בהצלחה', 'success');
+      refreshProducts();
+    } catch (error) {
+      console.error('שגיאה במחיקת מוצר:', error);
+      window.showToast && window.showToast('שגיאה במחיקת המוצר', 'error');
+    } finally {
+      setShowDeleteConfirm(false);
+      setProductToDelete(null);
     }
   };
 
@@ -156,7 +167,18 @@ export default function AllProductsList() {
         )}
       </div>
       
-
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="מחיקת מוצר"
+        message="האם אתה בטוח שברצונך למחוק את המוצר?פעולה זו לא ניתנת לביטול."
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setProductToDelete(null);
+        }}
+        confirmText="מחק"
+        cancelText="ביטול"
+      />
     </>
   );
 }
@@ -176,8 +198,8 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 999999 }}>
-      <div className="product-form" style={{ zIndex: 1000000 }}>
+    <div className="modal-overlay" style={{ zIndex: 999999 }} onClick={onClose}>
+      <div className="product-form" style={{ zIndex: 1000000 }} onClick={(e) => e.stopPropagation()}>
         <h2>עריכת מוצר</h2>
         
         <form onSubmit={handleSubmit}>

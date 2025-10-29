@@ -22,6 +22,7 @@ import { Routes, Route, useNavigate, useParams, useSearchParams } from "react-ro
 import ProductModal from "./components/ProductModal.jsx";
 import Nav from "./components/Nav.jsx";
 import Footer from "./components/Footer.jsx";
+import ToastManager from "./components/ToastManager.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9", image: carImg },
@@ -161,6 +162,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <ToastManager />
     </>
   );
 }

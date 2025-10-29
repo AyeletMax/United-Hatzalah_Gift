@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useProducts } from './ProductsContext.jsx';
 import { useAdmin } from './AdminContext.jsx';
+import ConfirmDialog from './ConfirmDialog.jsx';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
@@ -11,6 +12,8 @@ const AdminPanel = () => {
   const [categories, setCategories] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ;
 
@@ -39,8 +42,9 @@ const AdminPanel = () => {
       setIsAuthenticated(true);
       setIsAdminLoggedIn(true);
       loadCategories();
+      window.showToast && window.showToast('התחברת בהצלחה!', 'success');
     } else {
-      alert('סיסמה שגויה');
+      window.showToast && window.showToast('סיסמה שגויה', 'error');
     }
   };
 
@@ -83,39 +87,47 @@ const AdminPanel = () => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('שגיאה:', errorText);
-        alert('שגיאה בשמירה: ' + errorText);
+        window.showToast && window.showToast('שגיאה בשמירה: ' + errorText, 'error');
         return;
       }
       
       const result = await response.json();
       console.log('הצלחה:', result);
       
-      alert(selectedProduct ? 'המוצר עודכן!' : 'המוצר נוסף!');
+      window.showToast && window.showToast(selectedProduct ? 'המוצר עודכן בהצלחה!' : 'המוצר נוסף בהצלחה!', 'success');
       refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
       
     } catch (error) {
       console.error('שגיאה:', error);
-      alert('שגיאה: ' + error.message);
+      window.showToast && window.showToast('שגיאה: ' + error.message, 'error');
     }
   };
 
   const deleteProduct = async (id) => {
-    if (confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
-      try {
-        const baseUrl = import.meta.env.VITE_API_URL;
-        const apiUrl = baseUrl.includes("localhost")
-          ? baseUrl
-          : baseUrl.includes("onrender.com")
-          ? baseUrl
-          : `${baseUrl}.onrender.com`;
-        const url = `${apiUrl}/api/products/${id}`;
-        await fetch(url, { method: 'DELETE' });
-        refreshProducts();
-      } catch (error) {
-        console.error('שגיאה במחיקת מוצר:', error);
-      }
+    setProductToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      const url = `${apiUrl}/api/products/${productToDelete}`;
+      await fetch(url, { method: 'DELETE' });
+      window.showToast && window.showToast('המוצר נמחק בהצלחה', 'success');
+      refreshProducts();
+    } catch (error) {
+      console.error('שגיאה במחיקת מוצר:', error);
+      window.showToast && window.showToast('שגיאה במחיקת המוצר', 'error');
+    } finally {
+      setShowDeleteConfirm(false);
+      setProductToDelete(null);
     }
   };
 
@@ -173,11 +185,28 @@ const AdminPanel = () => {
           }}
         />
       )}
+      
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="מחיקת מוצר"
+        message="האם אתה בטוח שברצונך למחוק את המוצר?פעולה זו לא ניתנת לביטול."
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setProductToDelete(null);
+        }}
+        confirmText="מחק"
+        cancelText="ביטול"
+      />
     </div>
   );
 };
 
 const ProductForm = ({ product, categories, onSave, onClose }) => {
+  const [showEmptyFieldsConfirm, setShowEmptyFieldsConfirm] = useState(false);
+  const [emptyFieldsList, setEmptyFieldsList] = useState([]);
+  const [pendingFormData, setPendingFormData] = useState(null);
+  
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -258,11 +287,6 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.category_id || !formData.unit_price_incl_vat) {
-      alert('אנא מלא את כל השדות החובה');
-      return;
-    }
-    
     const cleanData = {
       name: formData.name.trim(),
       description: formData.description ? formData.description.trim() : null,
@@ -278,17 +302,59 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       brand_id: null
     };
     
-    console.log('תיאור שנשלח:', cleanData.description);
+    // בדיקת שדות חובה
+    const missingFields = [];
+    if (!formData.name?.trim()) missingFields.push('שם המוצר');
+    if (!formData.category_id) missingFields.push('קטגוריה');
+    if (!formData.unit_price_incl_vat) missingFields.push('מחיר');
     
-    console.log('שולח טופס:', cleanData);
+    if (missingFields.length > 0) {
+      window.showToast && window.showToast(`שדות חובה חסרים: ${missingFields.join(', ')}`, 'warning');
+      return;
+    }
+    
+    // בדיקת שדות אופציונליים ריקים
+    const emptyOptionalFields = [];
+    if (!formData.description?.trim()) emptyOptionalFields.push('תיאור');
+    if (!formData.delivery_time_days) emptyOptionalFields.push('זמן אספקה');
+    if (!formData.brand?.trim()) emptyOptionalFields.push('מותג');
+    if (!formData.last_buyer?.trim()) emptyOptionalFields.push('לקוח אחרון');
+    if (!formData.image_url?.trim()) emptyOptionalFields.push('תמונה');
+    
+    if (emptyOptionalFields.length > 0) {
+      setEmptyFieldsList(emptyOptionalFields);
+      setPendingFormData(cleanData);
+      setShowEmptyFieldsConfirm(true);
+      return;
+    }
+    
+    // אם אין שדות ריקים, שמור ישירות
+    proceedWithSave(cleanData);
+  };
+  
+  const proceedWithSave = (data) => {
+    console.log('שולח טופס:', data);
     console.log('תיאור מהטופס:', formData.description);
-    console.log('תיאור מנוקה:', cleanData.description);
-    onSave(cleanData);
+    console.log('תיאור מנוקה:', data.description);
+    onSave(data);
+  };
+  
+  const handleEmptyFieldsConfirm = () => {
+    setShowEmptyFieldsConfirm(false);
+    proceedWithSave(pendingFormData);
+    setPendingFormData(null);
+    setEmptyFieldsList([]);
+  };
+  
+  const handleEmptyFieldsCancel = () => {
+    setShowEmptyFieldsConfirm(false);
+    setPendingFormData(null);
+    setEmptyFieldsList([]);
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="product-form">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="product-form" onClick={(e) => e.stopPropagation()}>
         <h2>{product ? 'עריכת מוצר' : 'הוספת מוצר חדש'}</h2>
         
         <form onSubmit={handleSubmit}>
@@ -379,6 +445,16 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             <button type="button" onClick={onClose}>ביטול</button>
           </div>
         </form>
+        
+        <ConfirmDialog
+          isOpen={showEmptyFieldsConfirm}
+          title="שדות ריקים"
+          message={`השדות הבאים ריקים:\n${emptyFieldsList.join(', ')}\n\nהאם אתה בטוח שברצונך להמשיך?`}
+          onConfirm={handleEmptyFieldsConfirm}
+          onCancel={handleEmptyFieldsCancel}
+          confirmText="המשך"
+          cancelText="חזור לעריכה"
+        />
       </div>
     </div>
   );

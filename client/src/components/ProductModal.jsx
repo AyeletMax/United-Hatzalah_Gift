@@ -128,8 +128,12 @@ export default function ProductModal({ product, isOpen, onClose }) {
   };
 
   const checkUserAndProceed = async () => {
-    if (!userName.trim() || !userEmail.trim()) {
-      showMessage('אנא מלא שם ומייל', 'error');
+    const missingFields = [];
+    if (!userName.trim()) missingFields.push('שם');
+    if (!userEmail.trim()) missingFields.push('מייל');
+    
+    if (missingFields.length > 0) {
+      showMessage(`אנא מלא את השדות: ${missingFields.join(', ')}`, 'warning');
       return;
     }
     
@@ -156,7 +160,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }
     } catch (error) {
       console.error('Error checking user:', error);
-      showMessage('שגיאה בבדיקת המשתמש', 'error');
+      showMessage('שגיאה בבדיקת המשתמש - ממשיך במצב לא מקוון', 'warning');
       // Fallback to localStorage check
       const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
       const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
@@ -173,15 +177,22 @@ export default function ProductModal({ product, isOpen, onClose }) {
   };
   
   const submitSurvey = async () => {
-    // Check if all questions are answered
-    if (Object.keys(surveyAnswers).length !== surveyQuestions.length) {
-      showMessage('אנא ענה על כל השאלות', 'warning');
+    // בדיקת שאלות חסרות
+    const unansweredQuestions = [];
+    surveyQuestions.forEach(question => {
+      if (!surveyAnswers[question.id]) {
+        unansweredQuestions.push(question.text);
+      }
+    });
+    
+    if (unansweredQuestions.length > 0) {
+      showMessage(`אנא ענה על השאלות הבאות:\n${unansweredQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`, 'warning');
       return;
     }
     
-    // Check if star rating is selected
+    // בדיקת דירוג כוכבים
     if (starRating === 0) {
-      showMessage('אנא בחר דירוג כוכבים', 'warning');
+      showMessage('אנא בחר דירוג כוכבים (מ 1 עד 5 כוכבים)', 'warning');
       return;
     }
     
@@ -200,7 +211,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       if (response.status === 409) {
-        showMessage('כבר דירגת את המוצר הזה', 'warning');
+        showMessage('כבר דירגת את המוצר הזה קודם לכן', 'info');
         setUserAlreadyAnswered(true);
         setShowSurveyForm(false);
         return;
@@ -237,7 +248,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       });
       
       setShowSurveyForm(false);
-      showMessage('תודה על הדירוג!', 'success');
+      showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
       
       // Reload survey results to show real-time update
       setTimeout(async () => {
@@ -280,7 +291,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       
     } catch (error) {
       console.error('Error submitting survey:', error);
-      showMessage('שגיאה בשמירת הדירוג', 'error');
+      showMessage('שגיאה בשמירת הדירוג. אנא נסה שוב', 'error');
     }
   };
 
