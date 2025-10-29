@@ -1,30 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
-const getApiUrl = () => {
-  const baseUrl = import.meta.env.VITE_API_URL;
-  
-  // אם אין VITE_API_URL או שהוא לא תקין, השתמש ב-localhost
-  if (!baseUrl || baseUrl === 'united-hatzalah-gift') {
-    return 'http://localhost:3000';
-  }
-  
-  // אם זה localhost, החזר כמו שזה
-  if (baseUrl.includes('localhost')) {
-    return baseUrl;
-  }
-  
-  // אם זה כבר כולל onrender.com, החזר כמו שזה
-  if (baseUrl.includes('onrender.com')) {
-    return baseUrl;
-  }
-  
-  // אחרת, הוסף .onrender.com
-  return `${baseUrl}.onrender.com`;
-};
-
-const API_URL = getApiUrl();
-console.log('API_URL:', API_URL);
+// כבה סקר בענן עד שהשרת יעבוד
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : null;
 
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
@@ -57,7 +35,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
   
   // Load survey results
   useEffect(() => {
-    if (!product?.id) return;
+    if (!product?.id || !API_URL) return;
     
     const loadSurveyResults = async () => {
       try {
@@ -176,6 +154,22 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return;
     }
     
+    if (!API_URL) {
+      // אם אין שרת, עבור ישר לסקר
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+      
+      if (userResponses[userKey]) {
+        setUserAlreadyAnswered(true);
+        setShowUserForm(false);
+      } else {
+        setUserAlreadyAnswered(false);
+        setShowUserForm(false);
+        setShowSurveyForm(true);
+      }
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/surveys/check/${product.id}/${encodeURIComponent(userName.trim())}/${encodeURIComponent(userEmail.trim())}`);
       const data = await response.json();
@@ -231,6 +225,28 @@ export default function ProductModal({ product, isOpen, onClose }) {
     // בדיקת דירוג כוכבים
     if (starRating === 0) {
       showMessage('אנא בחר דירוג כוכבים (מ 1 עד 5 כוכבים)', 'warning');
+      return;
+    }
+    
+    if (!API_URL) {
+      // שמירה מקומית בלבד
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
+      userResponses[userKey] = {
+        productId: product.id,
+        answers: surveyAnswers,
+        rating: starRating,
+        userName: userName.trim(),
+        userEmail: userEmail.trim(),
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
+      
+      setShowSurveyForm(false);
+      showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
+      if (window.showToast) {
+        window.showToast('הדירוג נשמר בהצלחה! תודה על המשוב', 'success', 4000);
+      }
       return;
     }
     
