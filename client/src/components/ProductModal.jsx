@@ -33,57 +33,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
     { value: 1, label: "גרוע מאוד" }
   ];
   
-  // Load survey results - only in localhost
+  // Reset form states only
   useEffect(() => {
-    if (!product?.id || !API_URL) {
-      // Reset form states
-      setShowSurveyForm(false);
-      setShowUserForm(false);
-      setUserAlreadyAnswered(false);
-      setUserName('');
-      setUserEmail('');
-      setSurveyAnswers({});
-      setStarRating(0);
-      setShowResults(false);
-      return;
-    }
-    
-    const loadSurveyResults = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
-        const data = await response.json();
-        
-        if (data.length > 0) {
-          const totalResponses = data.length;
-          const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
-          const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
-          
-          const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-          data.forEach(item => {
-            if (item.rating >= 1 && item.rating <= 5) {
-              ratingCounts[item.rating]++;
-            }
-          });
-          
-          const percentages = {};
-          for (let rating = 1; rating <= 5; rating++) {
-            percentages[rating] = totalResponses > 0 ? Math.round((ratingCounts[rating] / totalResponses) * 100) : 0;
-          }
-          
-          setSurveyResults({
-            totalResponses,
-            averageRating: parseFloat(averageRating),
-            questions: { 1: percentages, 2: percentages, 3: percentages }
-          });
-        }
-      } catch (error) {
-        // Silent fail
-      }
-    };
-    
-    loadSurveyResults();
-    
-    // Reset form states
     setShowSurveyForm(false);
     setShowUserForm(false);
     setUserAlreadyAnswered(false);
