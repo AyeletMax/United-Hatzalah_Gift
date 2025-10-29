@@ -46,7 +46,14 @@ function CategoryPage() {
     : [];
   
   const selectedProduct = productName 
-    ? filteredProducts.find(p => p.name.replace(/\s+/g, '-') === productName)
+    ? filteredProducts.find(p => {
+        // נסה למצוא לפי ID אם productName הוא מספר
+        if (!isNaN(productName)) {
+          return p.id === parseInt(productName);
+        }
+        // אחרת נסה למצוא לפי שם
+        return p.name.replace(/\s+/g, '-') === productName;
+      })
     : null;
   
   const handleCategorySelect = (c) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ProductList.css";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
@@ -9,24 +9,48 @@ export default function ProductList({ products = [], categorySlug }) {
   const { isAdminLoggedIn } = useAdmin();
   const { refreshProducts } = useProducts();
   const [editingProduct, setEditingProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
 
-  const [categories] = useState([
-    { id: 1, name: "לרכב" },
-    { id: 2, name: "טקסטיל וביגוד" },
-    { id: 3, name: "כלי בית" },
-    { id: 4, name: "יודאיקה" },
-    { id: 5, name: "מוצרים חדשים" },
-    { id: 6, name: "מתנות" },
-    { id: 7, name: "מוצרי קיץ" },
-    { id: 8, name: "מוצרי חורף" },
-    { id: 9, name: "אביזרי יח\"\u05e6" },
-    { id: 10, name: "תיקים" }
-  ]);
+  // טעינת קטגוריות מהשרת
+  const loadCategories = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      
+      const categoriesRes = await fetch(`${apiUrl}/api/categories`);
+      const categoriesData = await categoriesRes.json();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('שגיאה בטעינת קטגוריות:', error);
+      // fallback לקטגוריות סטטיות
+      setCategories([
+        { id: 1, name: "לרכב" },
+        { id: 2, name: "טקסטיל וביגוד" },
+        { id: 3, name: "כלי בית" },
+        { id: 4, name: "יודאיקה" },
+        { id: 5, name: "מוצרים חדשים" },
+        { id: 6, name: "מתנות" },
+        { id: 7, name: "מוצרי קיץ" },
+        { id: 8, name: "מוצרי חורף" },
+        { id: 9, name: "אביזרי יח\"\u05e6" },
+        { id: 10, name: "תיקים" }
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdminLoggedIn) {
+      loadCategories();
+    }
+  }, [isAdminLoggedIn]);
 
   const handleProductClick = (product) => {
-    const productSlug = product.name.replace(/\s+/g, '-');
     if (categorySlug) {
-      navigate(`/${categorySlug}/${productSlug}`);
+      navigate(`/${categorySlug}/${product.id}`);
     } else {
       // For search results, find the category from the product
       const categories = [
@@ -43,13 +67,14 @@ export default function ProductList({ products = [], categorySlug }) {
       ];
       const category = categories.find(c => c.id === product.category_id);
       if (category) {
-        navigate(`/${category.slug}/${productSlug}`);
+        navigate(`/${category.slug}/${product.id}`);
       }
     }
   };
 
   const saveProduct = async (productData) => {
     try {
+      console.log('מעדכן מוצר:', productData);
       const baseUrl = import.meta.env.VITE_API_URL;
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
@@ -57,16 +82,28 @@ export default function ProductList({ products = [], categorySlug }) {
         ? baseUrl
         : `${baseUrl}.onrender.com`;
       
-      await fetch(`${apiUrl}/api/products/${editingProduct.id}`, {
+      const response = await fetch(`${apiUrl}/api/products/${editingProduct.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData)
       });
       
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('שגיאה בתגובה:', errorData);
+        alert(`שגיאה בעדכון המוצר: ${response.status} - ${errorData}`);
+        return;
+      }
+      
+      const result = await response.json();
+      console.log('מוצר עודכן בהצלחה:', result);
+      
+      alert('המוצר עודכן בהצלחה!');
       refreshProducts();
       setEditingProduct(null);
     } catch (error) {
       console.error('שגיאה בעדכון מוצר:', error);
+      alert(`שגיאה בעדכון המוצר: ${error.message}`);
     }
   };
 
@@ -168,15 +205,75 @@ export default function ProductList({ products = [], categorySlug }) {
 const ProductForm = ({ product, categories, onSave, onClose }) => {
   const [formData, setFormData] = useState({
     name: product?.name || '',
+    description: product?.description || '',
     category_id: product?.category_id || '',
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
-    image_url: product?.image_url || ''
+    image_url: product?.image_url || '',
+    brand: product?.brand || '',
+    last_buyer: product?.last_buyer || '',
+    last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
+    displayed_by: product?.displayed_by || '',
+    popularity_score: product?.popularity_score || 0
   });
   const [uploading, setUploading] = useState(false);
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      const url = `${apiUrl}/api/upload/image`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formDataUpload
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
+      setFormData({...formData, image_url: fullImageUrl});
+    } catch (error) {
+      console.error('שגיאה בהעלאת תמונה:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // וידוא שכל השדות הנדרשים מלאים
+    if (!formData.name.trim()) {
+      alert('נא למלא את שם המוצר');
+      return;
+    }
+    
+    if (!formData.category_id) {
+      alert('נא לבחור קטגוריה');
+      return;
+    }
+    
+    if (!formData.unit_price_incl_vat || formData.unit_price_incl_vat <= 0) {
+      alert('נא למלא מחיר תקין');
+      return;
+    }
+    
+    console.log('שולח נתוני מוצר לעדכון:', formData);
     onSave(formData);
   };
 
@@ -192,6 +289,13 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
             required
+          />
+          
+          <textarea
+            placeholder="תיאור המוצר"
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            rows="3"
           />
           
           <select
@@ -220,6 +324,50 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             value={formData.delivery_time_days}
             onChange={(e) => setFormData({...formData, delivery_time_days: e.target.value})}
           />
+          
+          <input
+            type="text"
+            placeholder="מותג"
+            value={formData.brand}
+            onChange={(e) => setFormData({...formData, brand: e.target.value})}
+          />
+          
+          <input
+            type="text"
+            placeholder="לקוח אחרון שקנה"
+            value={formData.last_buyer}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData({
+                ...formData, 
+                last_buyer: value,
+                last_ordered_by_name: value
+              });
+            }}
+          />
+          
+          <input
+            type="text"
+            placeholder="מוצג על ידי"
+            value={formData.displayed_by}
+            onChange={(e) => setFormData({...formData, displayed_by: e.target.value})}
+          />
+          
+          <div className="image-upload-section">
+            <label>תמונה:</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+            />
+            {uploading && <span>מעלה תמונה...</span>}
+            {formData.image_url && (
+              <div className="image-preview">
+                <img src={formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
+              </div>
+            )}
+          </div>
           
           <div className="form-actions">
             <button type="submit">שמור</button>

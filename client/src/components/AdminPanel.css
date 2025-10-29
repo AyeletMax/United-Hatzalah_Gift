@@ -119,7 +119,7 @@
   max-width: 500px;
 }
 
-.product-form input, .product-form select {
+.product-form input, .product-form select, .product-form textarea {
   width: 100%;
   padding: 12px;
   margin-bottom: 15px;
@@ -127,6 +127,12 @@
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 16px;
+  font-family: inherit;
+}
+
+.product-form textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 .product-form select {
@@ -142,7 +148,8 @@
 }
 
 .product-form select:focus,
-.product-form input:focus {
+.product-form input:focus,
+.product-form textarea:focus {
   outline: none;
   border-color: #f4a261;
   box-shadow: 0 0 0 2px rgba(244, 162, 97, 0.2);
@@ -257,7 +264,8 @@
   }
   
   .product-form input,
-  .product-form select {
+  .product-form select,
+  .product-form textarea {
     padding: 15px;
     font-size: 16px !important;
     min-height: 48px;
@@ -307,7 +315,8 @@
   }
   
   .product-form input,
-  .product-form select {
+  .product-form select,
+  .product-form textarea {
     padding: 12px;
     font-size: 16px !important;
     min-height: 44px;

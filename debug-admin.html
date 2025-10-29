@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בדיקת פאנל מנהל</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            direction: rtl;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>בדיקת פאנל מנהל - United Hatzalah Gift</h1>
+    
+    <!-- בדיקת חיבור -->
+    <div class="section">
+        <h2>בדיקת חיבור לשרת</h2>
+        <button onclick="testConnection()">בדוק חיבור</button>
+        <div id="connectionResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- בדיקת קטגוריות -->
+    <div class="section">
+        <h2>בדיקת קטגוריות</h2>
+        <button onclick="loadCategories()">טען קטגוריות</button>
+        <div id="categoriesResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- הוספת מוצר -->
+    <div class="section">
+        <h2>הוספת מוצר חדש</h2>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="name">שם המוצר:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">תיאור:</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="category_id">קטגוריה:</label>
+                <select id="category_id" name="category_id" required>
+                    <option value="">בחר קטגוריה</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="unit_price_incl_vat">מחיר:</label>
+                <input type="number" id="unit_price_incl_vat" name="unit_price_incl_vat" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="delivery_time_days">זמן אספקה (ימים):</label>
+                <input type="number" id="delivery_time_days" name="delivery_time_days">
+            </div>
+            
+            <div class="form-group">
+                <label for="brand">מותג:</label>
+                <input type="text" id="brand" name="brand">
+            </div>
+            
+            <div class="form-group">
+                <label for="last_buyer">לקוח אחרון:</label>
+                <input type="text" id="last_buyer" name="last_buyer">
+            </div>
+            
+            <div class="form-group">
+                <label for="displayed_by">מוצג על ידי:</label>
+                <input type="text" id="displayed_by" name="displayed_by">
+            </div>
+            
+            <button type="submit" id="submitBtn">הוסף מוצר</button>
+        </form>
+        <div id="productResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- רשימת מוצרים -->
+    <div class="section">
+        <h2>רשימת מוצרים</h2>
+        <button onclick="loadProducts()">טען מוצרים</button>
+        <div id="productsResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let categories = [];
+        
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+        
+        async function testConnection() {
+            showResult('connectionResult', 'בודק חיבור...', 'loading');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/test`);
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('connectionResult', `חיבור תקין: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult('connectionResult', `שגיאה: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('connectionResult', `שגיאת רשת: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadCategories() {
+            showResult('categoriesResult', 'טוען קטגוריות...', 'loading');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/categories`);
+                if (response.ok) {
+                    categories = await response.json();
+                    
+                    // עדכון הרשימה הנפתחת
+                    const select = document.getElementById('category_id');
+                    select.innerHTML = '<option value="">בחר קטגוריה</option>';
+                    categories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.name;
+                        select.appendChild(option);
+                    });
+                    
+                    showResult('categoriesResult', `נטענו ${categories.length} קטגוריות:\\n${JSON.stringify(categories, null, 2)}`, 'success');
+                } else {
+                    showResult('categoriesResult', `שגיאה: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('categoriesResult', `שגיאת רשת: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadProducts() {
+            showResult('productsResult', 'טוען מוצרים...', 'loading');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products`);
+                if (response.ok) {
+                    const products = await response.json();
+                    showResult('productsResult', `נטענו ${products.length} מוצרים:\\n${JSON.stringify(products.slice(0, 3), null, 2)}\\n... ועוד ${products.length - 3} מוצרים`, 'success');
+                } else {
+                    showResult('productsResult', `שגיאה: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('productsResult', `שגיאת רשת: ${error.message}`, 'error');
+            }
+        }
+        
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'מוסיף...';
+            
+            showResult('productResult', 'מוסיף מוצר...', 'loading');
+            
+            try {
+                const formData = new FormData(this);
+                const productData = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    productData[key] = value;
+                }
+                
+                // המרת שדות מספריים
+                if (productData.category_id) productData.category_id = parseInt(productData.category_id);
+                if (productData.unit_price_incl_vat) productData.unit_price_incl_vat = parseFloat(productData.unit_price_incl_vat);
+                if (productData.delivery_time_days) productData.delivery_time_days = parseInt(productData.delivery_time_days);
+                
+                // הוספת ברירות מחדל
+                productData.popularity_score = 0;
+                productData.last_ordered_by_name = productData.last_buyer || '';
+                
+                console.log('שולח נתוני מוצר:', productData);
+                
+                const response = await fetch(`${API_URL}/api/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('productResult', `מוצר נוסף בהצלחה!\\nID: ${result.id}\\nשם: ${result.name}\\n\\nפרטים מלאים:\\n${JSON.stringify(result, null, 2)}`, 'success');
+                    this.reset();
+                } else {
+                    let errorText;
+                    try {
+                        const errorData = await response.json();
+                        errorText = JSON.stringify(errorData, null, 2);
+                    } catch {
+                        errorText = await response.text();
+                    }
+                    showResult('productResult', `שגיאה בהוספת מוצר:\\nסטטוס: ${response.status}\\nתגובה: ${errorText}`, 'error');
+                }
+                
+            } catch (error) {
+                showResult('productResult', `שגיאת רשת: ${error.message}\\nStack: ${error.stack}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'הוסף מוצר';
+            }
+        });
+        
+        // טעינה אוטומטית של קטגוריות בעת טעינת הדף
+        window.addEventListener('load', () => {
+            testConnection();
+            loadCategories();
+        });
+    </script>
+</body>
+</html>

@@ -9,7 +9,7 @@ async function seedData() {
     await pool.query(`
       INSERT INTO categories (id, name) VALUES
       (1, 'לרכב'),
-      (2, 'טקסטיל וביגוד'),
+      (2, 'ביגוד קיץ וחורף'),
       (3, 'כלי בית'),
       (4, 'יודאיקה'),
       (5, 'מוצרים חדשים'),

@@ -307,7 +307,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
           <div className="product-details">
             <div className="detail-item">
               <h3>פרטים על המוצר</h3>
-              <p>{product.description || "מוצר איכותי ומומלץ מבית יונייטד הצלה"}</p>
+              <p>{product.description || "לא צוין תיאור"}</p>
             </div>
             
             <div className="detail-item">

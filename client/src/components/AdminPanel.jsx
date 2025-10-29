@@ -62,27 +62,42 @@ const AdminPanel = () => {
 
   const saveProduct = async (productData) => {
     try {
-      const method = selectedProduct ? 'PUT' : 'POST';
-      const baseUrl = import.meta.env.VITE_API_URL;
-      const apiUrl = baseUrl.includes("localhost")
-        ? baseUrl
-        : baseUrl.includes("onrender.com")
-        ? baseUrl
-        : `${baseUrl}.onrender.com`;
-      const endPath = selectedProduct ? `api/products/${selectedProduct.id}` : 'api/products';
-      const url = `${apiUrl}/${endPath}`;
+      console.log('שומר מוצר:', productData);
       
-      await fetch(url, {
+      const method = selectedProduct ? 'PUT' : 'POST';
+      const url = selectedProduct 
+        ? `http://localhost:3000/api/products/${selectedProduct.id}` 
+        : 'http://localhost:3000/api/products';
+      
+      console.log('שולח ל:', url);
+      console.log('נתונים:', JSON.stringify(productData));
+      
+      const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData)
       });
       
+      console.log('תגובה:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('שגיאה:', errorText);
+        alert('שגיאה בשמירה: ' + errorText);
+        return;
+      }
+      
+      const result = await response.json();
+      console.log('הצלחה:', result);
+      
+      alert(selectedProduct ? 'המוצר עודכן!' : 'המוצר נוסף!');
       refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
+      
     } catch (error) {
-      console.error('שגיאה בשמירת מוצר:', error);
+      console.error('שגיאה:', error);
+      alert('שגיאה: ' + error.message);
     }
   };
 
@@ -165,15 +180,44 @@ const AdminPanel = () => {
 const ProductForm = ({ product, categories, onSave, onClose }) => {
   const [formData, setFormData] = useState({
     name: product?.name || '',
+    description: product?.description || '',
     category_id: product?.category_id || '',
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || '',
     brand: product?.brand || '',
     last_buyer: product?.last_buyer || '',
-    popularity_score: product?.popularity_score || 0
+    last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
+    displayed_by: product?.displayed_by || '',
+    popularity_score: product?.popularity_score || 0,
+    brand_id: product?.brand_id || null
   });
+  
+  console.log('ProductForm initialized with product:', product);
+  console.log('ProductForm formData:', formData);
+  
+  // וידוא שהנתונים מעודכנים כשהמוצר משתנה
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || '',
+        description: product.description || '',
+        category_id: product.category_id || '',
+        unit_price_incl_vat: product.unit_price_incl_vat || '',
+        delivery_time_days: product.delivery_time_days || '',
+        image_url: product.image_url || '',
+        brand: product.brand || '',
+        last_buyer: product.last_buyer || '',
+        last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
+        displayed_by: product.displayed_by || '',
+        popularity_score: product.popularity_score || 0,
+        brand_id: product.brand_id || null
+      });
+    }
+  }, [product]);
+  
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -213,7 +257,33 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    
+    if (!formData.name || !formData.category_id || !formData.unit_price_incl_vat) {
+      alert('אנא מלא את כל השדות החובה');
+      return;
+    }
+    
+    const cleanData = {
+      name: formData.name.trim(),
+      description: formData.description ? formData.description.trim() : null,
+      category_id: parseInt(formData.category_id),
+      unit_price_incl_vat: parseFloat(formData.unit_price_incl_vat),
+      delivery_time_days: formData.delivery_time_days ? parseInt(formData.delivery_time_days) : null,
+      image_url: formData.image_url || null,
+      brand: formData.brand ? formData.brand.trim() : null,
+      last_buyer: formData.last_buyer ? formData.last_buyer.trim() : null,
+      last_ordered_by_name: formData.last_ordered_by_name ? formData.last_ordered_by_name.trim() : (formData.last_buyer ? formData.last_buyer.trim() : null),
+      displayed_by: formData.displayed_by ? formData.displayed_by.trim() : null,
+      popularity_score: 0,
+      brand_id: null
+    };
+    
+    console.log('תיאור שנשלח:', cleanData.description);
+    
+    console.log('שולח טופס:', cleanData);
+    console.log('תיאור מהטופס:', formData.description);
+    console.log('תיאור מנוקה:', cleanData.description);
+    onSave(cleanData);
   };
 
   return (
@@ -228,6 +298,16 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
             required
+          />
+          
+          <textarea
+            placeholder="תיאור המוצר"
+            value={formData.description || ''}
+            onChange={(e) => {
+              console.log('מעדכן תיאור:', e.target.value);
+              setFormData({...formData, description: e.target.value});
+            }}
+            rows="3"
           />
           
           <select
@@ -268,16 +348,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             type="text"
             placeholder="לקוח אחרון שקנה"
             value={formData.last_buyer}
-            onChange={(e) => setFormData({...formData, last_buyer: e.target.value})}
-          />
-          
-          <input
-            type="number"
-            placeholder="ציון פופולריות (0-100)"
-            min="0"
-            max="100"
-            value={formData.popularity_score}
-            onChange={(e) => setFormData({...formData, popularity_score: e.target.value})}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData({
+                ...formData, 
+                last_buyer: value,
+                last_ordered_by_name: value
+              });
+            }}
           />
           
           <div className="image-upload-section">
