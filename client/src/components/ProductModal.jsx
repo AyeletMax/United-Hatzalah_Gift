@@ -112,7 +112,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
     
     // Only auto-refresh if survey service is working
     let interval;
-    if (API_URL.includes('localhost')) {
+    if (API_URL && API_URL.includes('localhost')) {
       interval = setInterval(loadSurveyResults, 5000);
     }
     
