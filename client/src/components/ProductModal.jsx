@@ -2,15 +2,29 @@ import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
 const getApiUrl = () => {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  return baseUrl.includes("localhost")
-    ? baseUrl
-    : baseUrl.includes("onrender.com")
-    ? baseUrl
-    : `${baseUrl}.onrender.com`;
+  const baseUrl = import.meta.env.VITE_API_URL;
+  
+  // אם אין VITE_API_URL או שהוא לא תקין, השתמש ב-localhost
+  if (!baseUrl || baseUrl === 'united-hatzalah-gift') {
+    return 'http://localhost:3000';
+  }
+  
+  // אם זה localhost, החזר כמו שזה
+  if (baseUrl.includes('localhost')) {
+    return baseUrl;
+  }
+  
+  // אם זה כבר כולל onrender.com, החזר כמו שזה
+  if (baseUrl.includes('onrender.com')) {
+    return baseUrl;
+  }
+  
+  // אחרת, הוסף .onrender.com
+  return `${baseUrl}.onrender.com`;
 };
 
 const API_URL = getApiUrl();
+console.log('API_URL:', API_URL);
 
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
