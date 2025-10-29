@@ -9,7 +9,9 @@ export default function Hero() {
   return (
     <header style={{
       background: 'linear-gradient(135deg, var(--uh-navy), #0f1a24)',
-      color: 'var(--white)'
+      color: 'var(--white)',
+      marginTop: '-120px',
+      paddingTop: '120px'
     }}>
       <div className="container hero-grid" style={{
         display: 'grid',

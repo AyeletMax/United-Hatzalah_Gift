@@ -102,24 +102,43 @@ export default function Nav() {
       </div>
       
       <div className="nav-search-wrapper">
-        <SearchBar onSearch={handleSearch} />
-        <button 
-          className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
-          onClick={() => {
-            if (isFilterPage) {
-              navigate('/');
-            } else {
-              const currentPath = location.pathname;
-              if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
-                const categorySlug = currentPath.split('/')[1];
-                navigate(`/filter?category=${categorySlug}`);
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <SearchBar onSearch={handleSearch} />
+          <button 
+            className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
+            onClick={() => {
+              if (isFilterPage) {
+                navigate('/');
               } else {
-                navigate('/filter');
+                const currentPath = location.pathname;
+                if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
+                  const categorySlug = currentPath.split('/')[1];
+                  navigate(`/filter?category=${categorySlug}`);
+                } else {
+                  navigate('/filter');
+                }
               }
-            }
-          }}
+            }}
+          >
+            {isFilterPage ? 'סגור סינון' : 'סינון'}
+          </button>
+        </div>
+        
+        <button 
+          className="nav-admin-btn"
+          onClick={() => navigate('/admin')}
+          aria-label="כניסה למנהל"
+          title="כניסה למנהל"
         >
-          {isFilterPage ? 'סגור סינון' : 'סינון'}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
         </button>
       </div>
       

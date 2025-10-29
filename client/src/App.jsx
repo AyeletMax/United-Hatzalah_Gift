@@ -143,7 +143,7 @@ function App() {
   return (
     <>
       <Nav />
-      <main>
+      <main style={{ paddingTop: '120px' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
