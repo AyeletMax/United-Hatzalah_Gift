@@ -84,7 +84,7 @@ export default function AllProductsList() {
         ? baseUrl
         : `${baseUrl}.onrender.com`;
       await fetch(`${apiUrl}/api/products/${productToDelete}`, { method: 'DELETE' });
-      window.showToast && window.showToast('המוצר נמחק בהצלחה', 'success');
+      window.showToast && window.showToast('המוצר נמחק בהצלחה! הפעולה בוצעה', 'success', 3000);
       refreshProducts();
     } catch (error) {
       console.error('שגיאה במחיקת מוצר:', error);

@@ -101,7 +101,7 @@ export default function ProductList({ products = [], categorySlug }) {
       const result = await response.json();
       console.log('מוצר עודכן בהצלחה:', result);
       
-      window.showToast && window.showToast('המוצר עודכן בהצלחה!', 'success');
+      window.showToast && window.showToast('המוצר עודכן בהצלחה! השינויים נשמרו', 'success', 4000);
       refreshProducts();
       setEditingProduct(null);
     } catch (error) {
@@ -125,7 +125,7 @@ export default function ProductList({ products = [], categorySlug }) {
         ? baseUrl
         : `${baseUrl}.onrender.com`;
       await fetch(`${apiUrl}/api/products/${productToDelete}`, { method: 'DELETE' });
-      window.showToast && window.showToast('המוצר נמחק בהצלחה', 'success');
+      window.showToast && window.showToast('המוצר נמחק בהצלחה! הפעולה בוצעה', 'success', 3000);
       refreshProducts();
     } catch (error) {
       console.error('שגיאה במחיקת מוצר:', error);

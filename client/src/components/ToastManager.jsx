@@ -22,24 +22,24 @@ const ToastManager = () => {
   // Make addToast available globally
   React.useEffect(() => {
     window.showToast = addToast;
+    console.log('ToastManager loaded, showToast available');
     return () => {
       delete window.showToast;
     };
   }, [addToast]);
 
   return (
-    <div className="toast-container">
+    <>
       {toasts.map((toast, index) => (
-        <div key={toast.id} style={{ top: `${20 + index * 80}px` }}>
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            duration={toast.duration}
-            onClose={() => removeToast(toast.id)}
-          />
-        </div>
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={() => removeToast(toast.id)}
+        />
       ))}
-    </div>
+    </>
   );
 };
 

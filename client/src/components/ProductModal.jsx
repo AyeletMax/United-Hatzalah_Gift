@@ -249,6 +249,12 @@ export default function ProductModal({ product, isOpen, onClose }) {
       
       setShowSurveyForm(false);
       showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
+      console.log('Trying to show toast:', window.showToast);
+      if (window.showToast) {
+        window.showToast('הדירוג נשמר בהצלחה! תודה על המשוב', 'success', 4000);
+      } else {
+        console.log('showToast not available');
+      }
       
       // Reload survey results to show real-time update
       setTimeout(async () => {

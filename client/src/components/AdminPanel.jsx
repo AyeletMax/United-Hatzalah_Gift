@@ -94,7 +94,12 @@ const AdminPanel = () => {
       const result = await response.json();
       console.log('הצלחה:', result);
       
-      window.showToast && window.showToast(selectedProduct ? 'המוצר עודכן בהצלחה!' : 'המוצר נוסף בהצלחה!', 'success');
+      console.log('Trying to show admin toast:', window.showToast);
+      if (window.showToast) {
+        window.showToast(selectedProduct ? 'המוצר עודכן בהצלחה! השינויים נשמרו' : 'המוצר נוסף בהצלחה! המוצר זמין עכשיו באתר', 'success', 4000);
+      } else {
+        console.log('showToast not available in admin');
+      }
       refreshProducts();
       setShowProductForm(false);
       setSelectedProduct(null);
@@ -120,7 +125,7 @@ const AdminPanel = () => {
         : `${baseUrl}.onrender.com`;
       const url = `${apiUrl}/api/products/${productToDelete}`;
       await fetch(url, { method: 'DELETE' });
-      window.showToast && window.showToast('המוצר נמחק בהצלחה', 'success');
+      window.showToast && window.showToast('המוצר נמחק בהצלחה! הפעולה בוצעה', 'success', 3000);
       refreshProducts();
     } catch (error) {
       console.error('שגיאה במחיקת מוצר:', error);
