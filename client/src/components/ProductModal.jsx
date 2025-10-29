@@ -419,6 +419,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
             </div>
           </div>
           
+          {API_URL && (
           <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
@@ -618,6 +619,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
                 </div>
               )}
           </div>
+          )}
         </div>
       </div>
     </div>
