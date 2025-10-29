@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
-// כבה סקר בענן עד שהשרת יעבוד
-const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : null;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
@@ -43,6 +42,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setSurveyAnswers({});
     setStarRating(0);
     setShowResults(false);
+    setSurveyResults(null);
   }, [product?.id]);
   
   const handleAnswerChange = (questionId, value) => {
@@ -58,6 +58,55 @@ export default function ProductModal({ product, isOpen, onClose }) {
     }, 3000);
   };
 
+  const loadSurveyResults = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
+      const data = await response.json();
+      
+      if (data.length > 0) {
+        const totalResponses = data.length;
+        const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
+        const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
+        
+        // חישוב אחוזים
+        const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        data.forEach(item => {
+          if (item.rating >= 1 && item.rating <= 5) {
+            ratingCounts[item.rating]++;
+          }
+        });
+        
+        const percentages = {};
+        for (let rating = 1; rating <= 5; rating++) {
+          percentages[rating] = totalResponses > 0 ? Math.round((ratingCounts[rating] / totalResponses) * 100) : 0;
+        }
+        
+        setSurveyResults({
+          totalResponses,
+          averageRating: parseFloat(averageRating),
+          questions: {
+            1: percentages,
+            2: percentages,
+            3: percentages
+          }
+        });
+      } else {
+        setSurveyResults({
+          totalResponses: 0,
+          averageRating: 0,
+          questions: {
+            1: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            2: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            3: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error loading survey results:', error);
+      showMessage('שגיאה בטעינת תוצאות הסקר', 'error');
+    }
+  };
+
   const checkUserAndProceed = async () => {
     const missingFields = [];
     if (!userName.trim()) missingFields.push('שם');
@@ -68,21 +117,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return;
     }
     
-    if (!API_URL) {
-      // אם אין שרת, עבור ישר לסקר
-      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-      
-      if (userResponses[userKey]) {
-        setUserAlreadyAnswered(true);
-        setShowUserForm(false);
-      } else {
-        setUserAlreadyAnswered(false);
-        setShowUserForm(false);
-        setShowSurveyForm(true);
-      }
-      return;
-    }
+
     
     try {
       const response = await fetch(`${API_URL}/api/surveys/check/${product.id}/${encodeURIComponent(userName.trim())}/${encodeURIComponent(userEmail.trim())}`);
@@ -142,27 +177,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return;
     }
     
-    if (!API_URL) {
-      // שמירה מקומית בלבד
-      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-      const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-      userResponses[userKey] = {
-        productId: product.id,
-        answers: surveyAnswers,
-        rating: starRating,
-        userName: userName.trim(),
-        userEmail: userEmail.trim(),
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
-      
-      setShowSurveyForm(false);
-      showMessage('תודה רבה על הדירוג! המשוב שלך חשוב לנו', 'success');
-      if (window.showToast) {
-        window.showToast('הדירוג נשמר בהצלחה! תודה על המשוב', 'success', 4000);
-      }
-      return;
-    }
+
     
     try {
       const response = await fetch(`${API_URL}/api/surveys`, {
@@ -333,7 +348,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
             </div>
           </div>
           
-          {API_URL && (
           <div className="survey-section">
               <div className="survey-header">
                 <h3>סקר שביעות רצון</h3>
@@ -358,7 +372,10 @@ export default function ProductModal({ product, isOpen, onClose }) {
                     </button>
                     <button 
                       className="toggle-results-btn"
-                      onClick={() => {
+                      onClick={async () => {
+                        if (!showResults) {
+                          await loadSurveyResults();
+                        }
                         setShowResults(!showResults);
                         if (!showResults) {
                           setTimeout(() => {
@@ -382,34 +399,43 @@ export default function ProductModal({ product, isOpen, onClose }) {
 
               
               {/* תוצאות הסקר - רק כשלוחצים על המלצות */}
-              {surveyResults && !showUserForm && !showSurveyForm && showResults && (
+              {showResults && !showUserForm && !showSurveyForm && (
                 <div className="survey-results">
-                  <div className="results-summary">
-                    <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
-                    <p>דירוג ממוצע: <strong>{surveyResults.averageRating}/5</strong> {'★'.repeat(Math.round(surveyResults.averageRating))}</p>
-                  </div>
-                  
-                  <div className="questions-results">
-                    {surveyQuestions.map(question => (
-                      <div key={question.id} className="question-result">
-                        <h4>{question.text}</h4>
-                        <div className="result-bars">
-                          {answerOptions.map(option => {
-                            const percentage = surveyResults.questions[question.id][option.value] || 0;
-                            return (
-                              <div key={option.value} className="result-bar">
-                                <span className="option-label">{option.label}</span>
-                                <div className="bar-container">
-                                  <div className="bar-fill" style={{ width: `${percentage}%` }}></div>
-                                  <span className="percentage">{percentage}%</span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                  {surveyResults && surveyResults.totalResponses > 0 ? (
+                    <>
+                      <div className="results-summary">
+                        <p><strong>{surveyResults.totalResponses}</strong> לקוחות דירגו את המוצר</p>
+                        <p>דירוג ממוצע: <strong>{surveyResults.averageRating}/5</strong> {'★'.repeat(Math.round(surveyResults.averageRating))}</p>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div className="questions-results">
+                        {surveyQuestions.map(question => (
+                          <div key={question.id} className="question-result">
+                            <h4>{question.text}</h4>
+                            <div className="result-bars">
+                              {answerOptions.map(option => {
+                                const percentage = surveyResults.questions[question.id][option.value] || 0;
+                                return (
+                                  <div key={option.value} className="result-bar">
+                                    <span className="option-label">{option.label}</span>
+                                    <div className="bar-container">
+                                      <div className="bar-fill" style={{ width: `${percentage}%` }}></div>
+                                      <span className="percentage">{percentage}%</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="no-results">
+                      <p>עדיין לא נשלחו דירוגים למוצר הזה</p>
+                      <p>היה הראשון לדרג!</p>
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -533,7 +559,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
                 </div>
               )}
           </div>
-          )}
         </div>
       </div>
     </div>
