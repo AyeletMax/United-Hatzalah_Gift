@@ -33,23 +33,24 @@ export default function ProductModal({ product, isOpen, onClose }) {
     { value: 1, label: "גרוע מאוד" }
   ];
   
-  // Load survey results
+  // Load survey results - only in localhost
   useEffect(() => {
-    if (!product?.id || !API_URL) return;
+    if (!product?.id || !API_URL) {
+      // Reset form states
+      setShowSurveyForm(false);
+      setShowUserForm(false);
+      setUserAlreadyAnswered(false);
+      setUserName('');
+      setUserEmail('');
+      setSurveyAnswers({});
+      setStarRating(0);
+      setShowResults(false);
+      return;
+    }
     
     const loadSurveyResults = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
+        const response = await fetch(`${API_URL}/api/surveys/product/${product.id}`);
         const data = await response.json();
         
         if (data.length > 0) {
@@ -57,7 +58,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
           const totalRating = data.reduce((sum, item) => sum + (item.rating || 0), 0);
           const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
           
-          // חישוב אחוזים אמיתיים לפי הדירוגים
           const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
           data.forEach(item => {
             if (item.rating >= 1 && item.rating <= 5) {
@@ -65,7 +65,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
             }
           });
           
-          // חישוב אחוזים
           const percentages = {};
           for (let rating = 1; rating <= 5; rating++) {
             percentages[rating] = totalResponses > 0 ? Math.round((ratingCounts[rating] / totalResponses) * 100) : 0;
@@ -74,47 +73,15 @@ export default function ProductModal({ product, isOpen, onClose }) {
           setSurveyResults({
             totalResponses,
             averageRating: parseFloat(averageRating),
-            questions: {
-              1: percentages,
-              2: percentages,
-              3: percentages
-            }
-          });
-        } else {
-          const emptyPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-          setSurveyResults({
-            totalResponses: 0,
-            averageRating: 0,
-            questions: {
-              1: emptyPercentages,
-              2: emptyPercentages,
-              3: emptyPercentages
-            }
+            questions: { 1: percentages, 2: percentages, 3: percentages }
           });
         }
       } catch (error) {
-        console.warn('Survey service unavailable:', error.message);
-        // Set empty results silently - don't show error to user
-        const emptyPercentages = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        setSurveyResults({
-          totalResponses: 0,
-          averageRating: 0,
-          questions: {
-            1: emptyPercentages,
-            2: emptyPercentages,
-            3: emptyPercentages
-          }
-        });
+        // Silent fail
       }
     };
     
     loadSurveyResults();
-    
-    // Only auto-refresh if survey service is working
-    let interval;
-    if (API_URL && API_URL.includes('localhost')) {
-      interval = setInterval(loadSurveyResults, 5000);
-    }
     
     // Reset form states
     setShowSurveyForm(false);
@@ -125,10 +92,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
     setSurveyAnswers({});
     setStarRating(0);
     setShowResults(false);
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
   }, [product?.id]);
   
   const handleAnswerChange = (questionId, value) => {
