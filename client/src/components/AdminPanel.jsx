@@ -69,9 +69,19 @@ const AdminPanel = () => {
       console.log('שומר מוצר:', productData);
       
       const method = selectedProduct ? 'PUT' : 'POST';
+      const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        window.showToast && window.showToast('עריכת/הוספת מוצרים זמינה רק עם API מוגדר', 'warning');
+        return;
+      }
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       const url = selectedProduct 
-        ? `http://localhost:3000/api/products/${selectedProduct.id}` 
-        : 'http://localhost:3000/api/products';
+        ? `${apiUrl}/api/products/${selectedProduct.id}` 
+        : `${apiUrl}/api/products`;
       
       console.log('שולח ל:', url);
       console.log('נתונים:', JSON.stringify(productData));
