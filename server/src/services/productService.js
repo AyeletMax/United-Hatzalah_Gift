@@ -1,4 +1,10 @@
 import { pool } from "../db.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const getAllProducts = async (filters = {}) => {
   let query = `
@@ -122,8 +128,36 @@ const updateProduct = async (id, product) => {
 };
 
 const deleteProduct = async (id) => {
+  // Fetch current image URL before deletion
+  const [rows] = await pool.query("SELECT image_url FROM products WHERE id = ?", [id]);
+  const product = rows[0];
+
+  // Delete DB row
   const [result] = await pool.query("DELETE FROM products WHERE id = ?", [id]);
-  return result.affectedRows > 0;
+  const deleted = result.affectedRows > 0;
+
+  if (!deleted) return false;
+
+  // Attempt to remove local uploaded file if exists
+  try {
+    const imageUrl = product?.image_url;
+    if (imageUrl && imageUrl.includes('/uploads/')) {
+      const afterUploads = imageUrl.split('/uploads/')[1];
+      if (afterUploads) {
+        const filename = afterUploads.split('?')[0];
+        const uploadsDir = path.join(__dirname, '../../uploads');
+        const filePath = path.join(uploadsDir, filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
+  } catch (err) {
+    // Log but do not fail the request if file deletion fails
+    console.error('[productService.deleteProduct] Failed to delete image file:', err.message);
+  }
+
+  return true;
 };
 
 export default {

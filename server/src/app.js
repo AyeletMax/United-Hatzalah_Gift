@@ -48,6 +48,13 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
+// Serve uploaded images statically
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Additional CORS headers middleware
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
