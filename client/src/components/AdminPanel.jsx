@@ -290,8 +290,8 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       }
       
       const result = await response.json();
-      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: fullImageUrl});
+      // שמירה רק של ה-path
+      setFormData({...formData, image_url: result.imageUrl});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
