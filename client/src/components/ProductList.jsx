@@ -91,13 +91,14 @@ export default function ProductList({ products = [], categorySlug }) {
   };
 
   const saveProduct = async (productData) => {
+    const baseUrl = import.meta.env.VITE_API_URL;
+    if (!baseUrl) {
+      window.showToast && window.showToast('עריכת מוצרים זמינה רק במצב פיתוח', 'warning');
+      setEditingProduct(null);
+      return;
+    }
     try {
       console.log('מעדכן מוצר:', productData);
-      const baseUrl = import.meta.env.VITE_API_URL;
-      if (!baseUrl) {
-        window.showToast && window.showToast('לא ניתן לעדכן מוצרים בענן', 'error');
-        return;
-      }
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
         : baseUrl.includes("onrender.com")
@@ -176,7 +177,7 @@ export default function ProductList({ products = [], categorySlug }) {
       <div className={`product-list-grid ${editingProduct ? 'modal-open' : ''}`}>
         {products.map((p) => (
           <div className="product-card" key={p.id} onClick={() => handleProductClick(p)}>
-          {p.image_url && (
+          {p.image_url && !p.image_url.includes('via.placeholder') && (
             <img 
               src={p.image_url} 
               alt={p.name} 
@@ -187,9 +188,12 @@ export default function ProductList({ products = [], categorySlug }) {
               }}
             />
           )}
-          <div className="product-placeholder" style={{ display: 'none', width: '120px', height: '120px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '48px' }}>
-            📦
-          </div>
+          {(!p.image_url || p.image_url.includes('via.placeholder')) && (
+            <div className="product-placeholder" style={{ display: 'flex', width: '120px', height: '120px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '48px' }}>
+              📦
+            </div>
+          )}
+
           <div className="product-info">
             <div className="product-name">{p.name}</div>
             {p.unit_price_incl_vat && (

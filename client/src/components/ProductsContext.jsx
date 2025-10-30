@@ -12,6 +12,12 @@ export function ProductsProvider({ children }) {
     setError(null);
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        // בענן - אין שרת, הצג רשימה ריקה
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
       const fullUrl = baseUrl.includes("localhost")
         ? `${baseUrl}/api/products`
         : baseUrl.includes("onrender.com")
@@ -26,7 +32,12 @@ export function ProductsProvider({ children }) {
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       console.log('Products received:', data);
-      setProducts(data);
+      // ניקוי URLs של via.placeholder
+      const cleanedData = data.map(product => ({
+        ...product,
+        image_url: product.image_url && product.image_url.includes('via.placeholder') ? null : product.image_url
+      }));
+      setProducts(cleanedData);
     } catch (err) {
       setError(err.message);
     } finally {
