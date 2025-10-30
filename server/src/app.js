@@ -33,7 +33,10 @@ const corsOptions = {
     ];
     
     // Allow any localhost origin in development
-    if (origin.includes('localhost') || allowedOrigins.includes(origin)) {
+    const isLocalhost = origin.includes('localhost');
+    const isExactAllowed = allowedOrigins.includes(origin);
+    const isNetlifyPreview = origin.endsWith('.netlify.app') && origin.includes('hatzalah-gift');
+    if (isLocalhost || isExactAllowed || isNetlifyPreview) {
       return callback(null, true);
     }
     
