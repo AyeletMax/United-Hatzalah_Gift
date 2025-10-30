@@ -215,8 +215,10 @@ export default function ProductModal({ product, isOpen, onClose }) {
     localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
     
     if (!API_URL) {
-      // בענן - שמור רק מקומית
+      // בענן - שמור רק מקומית ועדכן תוצאות
       setShowSurveyForm(false);
+      setShowResults(true);
+      await loadSurveyResults();
       showMessage('תודה רבה על הדירוג!', 'success');
       if (window.showToast) {
         window.showToast('הדירוג נשמר בהצלחה', 'success', 4000);
@@ -245,12 +247,16 @@ export default function ProductModal({ product, isOpen, onClose }) {
       }
       
       setShowSurveyForm(false);
+      setShowResults(true);
+      setTimeout(() => loadSurveyResults(), 100);
       showMessage('תודה רבה על הדירוג!', 'success');
       if (window.showToast) {
         window.showToast('הדירוג נשמר בהצלחה', 'success', 4000);
       }
     } catch (error) {
       setShowSurveyForm(false);
+      setShowResults(true);
+      setTimeout(() => loadSurveyResults(), 100);
       showMessage('הדירוג נשמר מקומית', 'success');
       if (window.showToast) {
         window.showToast('הדירוג נשמר מקומית', 'success', 4000);

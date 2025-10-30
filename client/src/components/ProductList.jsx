@@ -18,6 +18,21 @@ export default function ProductList({ products = [], categorySlug }) {
   const loadCategories = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        setCategories([
+          { id: 1, name: "לרכב" },
+          { id: 2, name: "טקסטיל וביגוד" },
+          { id: 3, name: "כלי בית" },
+          { id: 4, name: "יודאיקה" },
+          { id: 5, name: "מוצרים חדשים" },
+          { id: 6, name: "מתנות" },
+          { id: 7, name: "מוצרי קיץ" },
+          { id: 8, name: "מוצרי חורף" },
+          { id: 9, name: "אביזרי יח\"\u05e6" },
+          { id: 10, name: "תיקים" }
+        ]);
+        return;
+      }
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
         : baseUrl.includes("onrender.com")
@@ -79,6 +94,10 @@ export default function ProductList({ products = [], categorySlug }) {
     try {
       console.log('מעדכן מוצר:', productData);
       const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        window.showToast && window.showToast('לא ניתן לעדכן מוצרים בענן', 'error');
+        return;
+      }
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
         : baseUrl.includes("onrender.com")
@@ -119,6 +138,10 @@ export default function ProductList({ products = [], categorySlug }) {
   const handleDeleteConfirm = async () => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        window.showToast && window.showToast('לא ניתן למחוק מוצרים בענן', 'error');
+        return;
+      }
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
         : baseUrl.includes("onrender.com")
@@ -254,6 +277,10 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        console.error('API URL לא מוגדר');
+        return;
+      }
       const apiUrl = baseUrl.includes("localhost")
         ? baseUrl
         : baseUrl.includes("onrender.com")
