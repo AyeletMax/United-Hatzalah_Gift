@@ -101,10 +101,7 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is working' });
 });
 
-// Simple upload route for testing
-app.post('/api/upload/image', (req, res) => {
-  res.json({ imageUrl: '/uploads/test-image.jpg' });
-});
+// Removed test upload route that conflicted with real upload route
 
 // ====== ✅ Error Handler ======
 app.use(errorHandler);
