@@ -18,11 +18,12 @@ export function ProductsProvider({ children }) {
         setLoading(false);
         return;
       }
-      const fullUrl = baseUrl.includes("localhost")
-        ? `${baseUrl}/api/products`
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
         : baseUrl.includes("onrender.com")
-        ? `${baseUrl}/api/products`
-        : `${baseUrl}.onrender.com/api/products`;
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      const fullUrl = `${apiUrl}/api/products`;
       console.log('Fetching from:', fullUrl);
       const res = await fetch(fullUrl, {
         method: "GET",
@@ -32,11 +33,26 @@ export function ProductsProvider({ children }) {
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
       console.log('Products received:', data);
-      // ניקוי URLs של via.placeholder
-      const cleanedData = data.map(product => ({
-        ...product,
-        image_url: product.image_url && product.image_url.includes('via.placeholder') ? null : product.image_url
-      }));
+      // ניקוי URLs של via.placeholder והמרת paths יחסיים ל-URL מלא
+      const cleanedData = data.map(product => {
+        let imageUrl = product.image_url;
+        if (imageUrl && !imageUrl.includes('via.placeholder')) {
+          // אם זה path יחסי, המיר ל-URL מלא
+          if (imageUrl.startsWith('/')) {
+            imageUrl = `${apiUrl}${imageUrl}`;
+          }
+          // ודא שזה https אם האתר ב-https
+          if (typeof window !== 'undefined' && window.location.protocol === 'https:' && imageUrl.startsWith('http:')) {
+            imageUrl = imageUrl.replace('http:', 'https:');
+          }
+        } else if (imageUrl && imageUrl.includes('via.placeholder')) {
+          imageUrl = null;
+        }
+        return {
+          ...product,
+          image_url: imageUrl
+        };
+      });
       setProducts(cleanedData);
     } catch (err) {
       setError(err.message);
