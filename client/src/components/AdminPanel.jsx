@@ -258,7 +258,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         brand_id: product.brand_id || null
       });
     }
-  }, [product]);
+  }, [product?.id]); // רק כשה-ID משתנה, לא כל פעם שהמוצר משתנה
   
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -295,7 +295,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: resolvedUrl});
+      setFormData(prev => ({...prev, image_url: resolvedUrl}));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
