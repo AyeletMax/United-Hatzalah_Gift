@@ -221,6 +221,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   const [showEmptyFieldsConfirm, setShowEmptyFieldsConfirm] = useState(false);
   const [emptyFieldsList, setEmptyFieldsList] = useState([]);
   const [pendingFormData, setPendingFormData] = useState(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null); // שמור את התמורה שהעלנו בנפרד
   
   const [formData, setFormData] = useState({
     name: product?.name || '',
@@ -257,6 +258,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         popularity_score: product.popularity_score || 0,
         brand_id: product.brand_id || null
       });
+      setUploadedImageUrl(null); // אפס את התמונה שהעלנו כשמוצר חדש נבחר
     }
   }, [product?.id]); // רק כשה-ID משתנה, לא כל פעם שהמוצר משתנה
   
@@ -295,6 +297,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
+      setUploadedImageUrl(resolvedUrl); // שמור את התמונה בstate נפרד
       setFormData(prev => ({...prev, image_url: resolvedUrl}));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
@@ -452,9 +455,9 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
               disabled={uploading}
             />
             {uploading && <span>מעלה תמונה...</span>}
-            {formData.image_url && (
+            {(uploadedImageUrl || formData.image_url) && (
               <div className="image-preview">
-                <img src={formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
+                <img src={uploadedImageUrl || formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
               </div>
             )}
           </div>
