@@ -33,7 +33,10 @@ const corsOptions = {
     ];
     
     // Allow any localhost origin in development
-    if (origin.includes('localhost') || allowedOrigins.includes(origin)) {
+    const isLocalhost = origin.includes('localhost');
+    const isExactAllowed = allowedOrigins.includes(origin);
+    const isNetlifyPreview = origin.endsWith('.netlify.app') && origin.includes('hatzalah-gift');
+    if (isLocalhost || isExactAllowed || isNetlifyPreview) {
       return callback(null, true);
     }
     
@@ -47,6 +50,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+
+// Serve uploaded images statically
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Additional CORS headers middleware
 app.use((req, res, next) => {
@@ -91,10 +101,7 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is working' });
 });
 
-// Simple upload route for testing
-app.post('/api/upload/image', (req, res) => {
-  res.json({ imageUrl: '/uploads/test-image.jpg' });
-});
+// Removed test upload route that conflicted with real upload route
 
 // ====== ✅ Error Handler ======
 app.use(errorHandler);

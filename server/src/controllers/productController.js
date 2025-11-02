@@ -49,9 +49,20 @@ const createProduct = async (req, res) => {
     }
     
     // Clean up empty strings for numeric fields
+    // delivery_time_days is INT UNSIGNED - must be null or positive integer
+    let deliveryTimeDays = null;
+    if (req.body.delivery_time_days !== '' && 
+        req.body.delivery_time_days !== null && 
+        req.body.delivery_time_days !== undefined) {
+      const parsed = parseInt(req.body.delivery_time_days);
+      if (!isNaN(parsed) && parsed >= 0) {
+        deliveryTimeDays = parsed;
+      }
+    }
+    
     const cleanedData = {
       ...req.body,
-      delivery_time_days: req.body.delivery_time_days === '' || req.body.delivery_time_days === null ? null : parseInt(req.body.delivery_time_days),
+      delivery_time_days: deliveryTimeDays,
       unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : parseFloat(req.body.unit_price_incl_vat),
       category_id: parseInt(req.body.category_id),
       brand_id: req.body.brand_id ? parseInt(req.body.brand_id) : null,
@@ -86,9 +97,20 @@ const updateProduct = async (req, res) => {
     }
     
     // Clean up empty strings for numeric fields
+    // delivery_time_days is INT UNSIGNED - must be null or positive integer
+    let deliveryTimeDays = null;
+    if (req.body.delivery_time_days !== '' && 
+        req.body.delivery_time_days !== null && 
+        req.body.delivery_time_days !== undefined) {
+      const parsed = parseInt(req.body.delivery_time_days);
+      if (!isNaN(parsed) && parsed >= 0) {
+        deliveryTimeDays = parsed;
+      }
+    }
+    
     const cleanedData = {
       ...req.body,
-      delivery_time_days: req.body.delivery_time_days === '' || req.body.delivery_time_days === null ? null : parseInt(req.body.delivery_time_days),
+      delivery_time_days: deliveryTimeDays,
       unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : parseFloat(req.body.unit_price_incl_vat),
       category_id: parseInt(req.body.category_id),
       brand_id: req.body.brand_id ? parseInt(req.body.brand_id) : null,

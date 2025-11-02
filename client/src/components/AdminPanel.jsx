@@ -69,9 +69,19 @@ const AdminPanel = () => {
       console.log('שומר מוצר:', productData);
       
       const method = selectedProduct ? 'PUT' : 'POST';
+      const baseUrl = import.meta.env.VITE_API_URL;
+      if (!baseUrl) {
+        window.showToast && window.showToast('עריכת/הוספת מוצרים זמינה רק עם API מוגדר', 'warning');
+        return;
+      }
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
       const url = selectedProduct 
-        ? `http://localhost:3000/api/products/${selectedProduct.id}` 
-        : 'http://localhost:3000/api/products';
+        ? `${apiUrl}/api/products/${selectedProduct.id}` 
+        : `${apiUrl}/api/products`;
       
       console.log('שולח ל:', url);
       console.log('נתונים:', JSON.stringify(productData));
@@ -266,7 +276,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         brand_id: product.brand_id || null
       });
     }
-  }, [product]);
+  }, [product?.id]); // רק כשה-ID משתנה, לא כל פעם שהמוצר משתנה
   
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -280,12 +290,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     formDataUpload.append('image', file);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
-      const apiUrl = baseUrl.includes("localhost")
-        ? baseUrl
-        : baseUrl.includes("onrender.com")
-        ? baseUrl
-        : `${baseUrl}.onrender.com`;
+      const envBase = import.meta.env.VITE_API_URL || '';
+      const apiUrl = envBase
+        ? (envBase.includes("localhost") || envBase.includes("onrender.com")
+            ? envBase
+            : `${envBase}.onrender.com`)
+        : (window.location.origin.includes('localhost')
+            ? 'http://localhost:3000'
+            : 'https://hatzalah-gift.onrender.com');
       const url = `${apiUrl}/api/upload/image`;
       
       const response = await fetch(url, {
@@ -298,8 +310,10 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       }
       
       const result = await response.json();
-      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: fullImageUrl});
+      const resolvedUrl = result.imageUrl?.startsWith('http')
+        ? result.imageUrl
+        : `${apiUrl}${result.imageUrl}`;
+      setFormData(prev => ({...prev, image_url: resolvedUrl}));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {

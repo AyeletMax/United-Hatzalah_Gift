@@ -280,16 +280,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     formDataUpload.append('image', file);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
-      if (!baseUrl) {
-        console.error('API URL לא מוגדר');
-        return;
-      }
-      const apiUrl = baseUrl.includes("localhost")
-        ? baseUrl
-        : baseUrl.includes("onrender.com")
-        ? baseUrl
-        : `${baseUrl}.onrender.com`;
+      const envBase = import.meta.env.VITE_API_URL || '';
+      const apiUrl = envBase
+        ? (envBase.includes("localhost") || envBase.includes("onrender.com")
+            ? envBase
+            : `${envBase}.onrender.com`)
+        : (window.location.origin.includes('localhost')
+            ? 'http://localhost:3000'
+            : 'https://hatzalah-gift.onrender.com');
       const url = `${apiUrl}/api/upload/image`;
       
       const response = await fetch(url, {
@@ -302,8 +300,10 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       }
       
       const result = await response.json();
-      const fullImageUrl = `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: fullImageUrl});
+      const resolvedUrl = result.imageUrl?.startsWith('http')
+        ? result.imageUrl
+        : `${apiUrl}${result.imageUrl}`;
+      setFormData({...formData, image_url: resolvedUrl});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
