@@ -82,8 +82,6 @@ const AdminPanel = () => {
         body: JSON.stringify(productData)
       });
       
-      console.log('תגובה:', response.status);
-      
       if (!response.ok) {
         const errorText = await response.text();
         console.error('שגיאה:', errorText);
@@ -92,7 +90,27 @@ const AdminPanel = () => {
       }
       
       const result = await response.json();
-      console.log('הצלחה:', result);
+      
+      // אם זה מוצר חדש (לא עריכה), הוסף גם למוצרים חדשים
+      if (!selectedProduct) {
+        const newProductsCategory = categories.find(cat => cat.name === 'מוצרים חדשים');
+        if (newProductsCategory && result.id) {
+          try {
+            await fetch('http://localhost:3000/api/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...productData,
+                category_id: newProductsCategory.id
+              })
+            });
+            console.log('מוצר נוסף גם למוצרים חדשים');
+          } catch (error) {
+            console.error('שגיאה בהוספה למוצרים חדשים:', error);
+          }
+        }
+      }
+
       
       console.log('Trying to show admin toast:', window.showToast);
       if (window.showToast) {
@@ -387,7 +405,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             required
           >
             <option value="">בחר קטגוריה</option>
-            {categories.map(cat => (
+            {categories.filter(cat => cat.name !== 'מוצרים חדשים').map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
