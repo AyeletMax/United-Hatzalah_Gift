@@ -132,7 +132,12 @@ export default function FilterPage() {
       }
     }
 
-    return filtered;
+    // הסרת כפילויות לפי שם ומחיר
+    const uniqueFiltered = filtered.filter((product, index, self) => 
+      index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+    );
+    
+    return uniqueFiltered;
   }, [products, filters, hasFiltered, currentCategory]);
 
   const handleFilterChange = (newFilters) => {
