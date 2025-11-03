@@ -43,10 +43,6 @@ export default function Hero() {
           <img 
             src={logo} 
             alt="לוגו איחוד הצלה" 
-            onClick={() => {
-            
-              navigate('/admin');
-            }}
             style={{
               position: 'absolute',
               top: '50%',
@@ -56,7 +52,6 @@ export default function Hero() {
               height: '60%',
               objectFit: 'contain',
               zIndex: 2,
-              cursor: 'pointer',
             }} 
           />
           <div

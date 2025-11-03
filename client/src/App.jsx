@@ -44,6 +44,9 @@ function CategoryPage() {
   const category = categories.find((c) => c.slug === slug);
   const filteredProducts = category
     ? products.filter((p) => String(p.category_id) === String(category.id))
+        .filter((product, index, self) => 
+          index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+        )
     : [];
   
   const selectedProduct = productName 
@@ -104,6 +107,8 @@ function SearchPage() {
     ? products.filter((p) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         (p.description && p.description.toLowerCase().includes(query.toLowerCase()))
+      ).filter((product, index, self) => 
+        index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
       )
     : [];
   
