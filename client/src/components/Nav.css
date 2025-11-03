@@ -48,6 +48,7 @@
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .nav-search-wrapper {
@@ -138,8 +139,9 @@
   gap: 28px;
   padding: 10px 20px;
   direction: rtl;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
+  max-width: 100%;
 }
 
 .nav-link:hover,
@@ -171,6 +173,83 @@
   outline: none;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Overflow Menu Styles */
+.nav-overflow-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.nav-overflow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 24px;
+  line-height: 1;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+  outline: none;
+  width: 38px;
+  height: 38px;
+}
+
+.nav-overflow-btn:hover,
+.nav-overflow-btn:focus {
+  background: rgba(243, 108, 33, .12);
+  color: var(--uh-orange);
+}
+
+.nav-overflow-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(243, 108, 33, 0.3);
+  border-radius: 12px;
+  padding: 8px 0;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10003;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  direction: rtl;
+}
+
+.nav-overflow-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(243, 108, 33, 0.1);
+}
+
+.nav-overflow-link:last-child {
+  border-bottom: none;
+}
+
+.nav-overflow-link:hover,
+.nav-overflow-link:focus {
+  background: rgba(243, 108, 33, .15);
+  color: var(--uh-orange);
 }
 
 .nav-link::before {
@@ -280,11 +359,13 @@
   .nav-inner {
     gap: 15px;
     font-size: 13px;
+    flex-wrap: nowrap;
   }
   
   .nav-link {
     padding: 6px 10px;
     font-size: 13px;
+    flex-shrink: 0;
   }
 }
 

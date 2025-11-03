@@ -248,6 +248,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || '',
+    image_file_id: product?.image_file_id || null,
     brand: product?.brand || '',
     last_buyer: product?.last_buyer || '',
     last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
@@ -269,6 +270,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         unit_price_incl_vat: product.unit_price_incl_vat || '',
         delivery_time_days: product.delivery_time_days || '',
         image_url: product.image_url || '',
+        image_file_id: product.image_file_id || null,
         brand: product.brand || '',
         last_buyer: product.last_buyer || '',
         last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
@@ -316,7 +318,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
       setUploadedImageUrl(resolvedUrl); // שמור את התמונה בstate נפרד
-      setFormData(prev => ({...prev, image_url: resolvedUrl}));
+      setFormData(prev => ({...prev, image_url: resolvedUrl, image_file_id: result.fileId || null }));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
@@ -334,6 +336,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       unit_price_incl_vat: parseFloat(formData.unit_price_incl_vat),
       delivery_time_days: formData.delivery_time_days ? parseInt(formData.delivery_time_days) : null,
       image_url: formData.image_url || null,
+      image_file_id: formData.image_file_id || null,
       brand: formData.brand ? formData.brand.trim() : null,
       last_buyer: formData.last_buyer ? formData.last_buyer.trim() : null,
       last_ordered_by_name: formData.last_ordered_by_name ? formData.last_ordered_by_name.trim() : (formData.last_buyer ? formData.last_buyer.trim() : null),

@@ -263,6 +263,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || '',
+    image_file_id: product?.image_file_id || null,
     brand: product?.brand || '',
     last_buyer: product?.last_buyer || '',
     last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
@@ -303,7 +304,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: resolvedUrl});
+      setFormData({...formData, image_url: resolvedUrl, image_file_id: result.fileId || null});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
