@@ -71,7 +71,7 @@ function CategoryPage() {
   return (
     <>
     {console.log("היי מה קורה")}
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: 20 }}>
         {category ? category.title : 'קטגוריה'}
       </h2>
       {loading ? (
@@ -114,7 +114,7 @@ function SearchPage() {
   
   return (
     <>
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: 20 }}>
         תוצאות חיפוש עבור: "{query}"
       </h2>
       {loading ? (
@@ -156,7 +156,7 @@ function App() {
   return (
     <>
       <Nav />
-      <main style={{ paddingTop: '120px' }}>
+      <main style={{ paddingTop: '40px' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
