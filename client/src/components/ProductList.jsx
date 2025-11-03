@@ -397,17 +397,21 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
           <input
             type="number"
             step="0.01"
+            min="0"
             placeholder="מחיר"
             value={formData.unit_price_incl_vat}
             onChange={(e) => setFormData({...formData, unit_price_incl_vat: e.target.value})}
+            onWheel={(e) => e.target.blur()}
             required
           />
           
           <input
             type="number"
+            min="0"
             placeholder="זמן אספקה (ימים)"
             value={formData.delivery_time_days}
             onChange={(e) => setFormData({...formData, delivery_time_days: e.target.value})}
+            onWheel={(e) => e.target.blur()}
           />
           
           <input
