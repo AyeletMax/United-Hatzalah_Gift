@@ -164,6 +164,63 @@ const deleteProduct = async (id) => {
 
   if (!deleted) return false;
 
+  // Attempt to delete from ImageKit when the URL points to ImageKit
+  try {
+    const imageUrl = product?.image_url;
+    const { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, IMAGEKIT_URL_ENDPOINT } = process.env || {};
+
+    const looksLikeImageKit = !!(imageUrl && IMAGEKIT_URL_ENDPOINT && imageUrl.startsWith(IMAGEKIT_URL_ENDPOINT));
+    const hasCreds = !!(IMAGEKIT_PUBLIC_KEY && IMAGEKIT_PRIVATE_KEY && IMAGEKIT_URL_ENDPOINT);
+
+    if (looksLikeImageKit && hasCreds) {
+      // Dynamic import to avoid hard dependency when not configured
+      const { default: ImageKit } = await import('imagekit');
+      const ik = new ImageKit({
+        publicKey: IMAGEKIT_PUBLIC_KEY,
+        privateKey: IMAGEKIT_PRIVATE_KEY,
+        urlEndpoint: IMAGEKIT_URL_ENDPOINT
+      });
+
+      // Derive path and file name from URL to find fileId
+      // Example URL: `${IMAGEKIT_URL_ENDPOINT}/folder/sub/filename.jpg?tr=...`
+      const withoutEndpoint = imageUrl.replace(IMAGEKIT_URL_ENDPOINT, '');
+      const withoutQuery = withoutEndpoint.split('?')[0];
+      // Ensure leading slash removed for splitting
+      const cleanPath = withoutQuery.startsWith('/') ? withoutQuery.slice(1) : withoutQuery;
+      const parts = cleanPath.split('/');
+      const fileName = parts.pop();
+      const dirPath = '/' + parts.join('/'); // ImageKit paths start with '/'
+
+      try {
+        // Narrow search by both path and name to get exact fileId
+        const files = await ik.listFiles({
+          path: dirPath === '/' ? '' : dirPath,
+          name: fileName,
+          limit: 1
+        });
+        const file = Array.isArray(files) && files.length > 0 ? files[0] : null;
+        if (file?.fileId) {
+          await ik.deleteFile(file.fileId);
+        } else {
+          // Fallback: try searchQuery in case CDN transformations changed the path
+          const fallback = await ik.listFiles({
+            searchQuery: `name = \"${fileName}\"`,
+            limit: 1
+          });
+          const fallbackFile = Array.isArray(fallback) && fallback.length > 0 ? fallback[0] : null;
+          if (fallbackFile?.fileId) {
+            await ik.deleteFile(fallbackFile.fileId);
+          }
+        }
+      } catch (ikErr) {
+        console.error('[productService.deleteProduct] ImageKit deletion failed:', ikErr?.message || ikErr);
+      }
+    }
+  } catch (err) {
+    // Log but do not fail the request if ImageKit deletion fails
+    console.error('[productService.deleteProduct] Error during ImageKit deletion attempt:', err?.message || err);
+  }
+
   // Attempt to remove local uploaded file if exists
   try {
     const imageUrl = product?.image_url;
