@@ -270,21 +270,19 @@ export default function ProductModal({ product, isOpen, onClose }) {
         <button className="modal-close" onClick={(e) => { e.stopPropagation(); onClose(); }}>×</button>
         
         <div className="modal-body">
-          <div className="product-image-section">
-            {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="modal-product-image" />
-            ) : (
-              <div className="modal-product-placeholder">📦</div>
-            )}
-          </div>
-          
-          <h2 className="modal-product-title">{product.name}</h2>
-          
-          {product.unit_price_incl_vat && (
-            <div className="modal-product-price">₪{product.unit_price_incl_vat}</div>
-          )}
-          
-          <div className="product-details">
+          <div className="modal-main-content">
+            <div className="product-image-section">
+              {product.image_url ? (
+                <img src={product.image_url} alt={product.name} className="modal-product-image" />
+              ) : (
+                <div className="modal-product-placeholder">📦</div>
+              )}
+            </div>
+            
+            <div className="product-info-section">
+              <h2 className="modal-product-title">{product.name}</h2>
+              
+              <div className="product-details">
             <div className="detail-item">
               <h3>פרטים על המוצר</h3>
               <p>{product.description || "לא צוין תיאור"}</p>
@@ -308,6 +306,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
             <div className="detail-item">
               <h3>מותג</h3>
               <p>{product.displayed_by || product.brand || "לא צוין"}</p>
+            </div>
+              </div>
             </div>
           </div>
           
