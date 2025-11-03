@@ -1,7 +1,8 @@
-import './Nav.css'
+import './Nav.css';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar.jsx';
+import MobileDrawer from './MobileDrawer';
 
 const items = [
   { label: 'עמוד הבית', path: '/' },
@@ -19,17 +20,76 @@ const items = [
 
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [overflowMenuOpen, setOverflowMenuOpen] = useState(false);
   const [visibleItems, setVisibleItems] = useState(items);
-  const [hiddenItems, setHiddenItems] = useState([]);
-  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
-  const navInnerRef = useRef(null);
-  const itemRefs = useRef({});
-  const overflowMenuRef = useRef(null);
+  const [overflowItems, setOverflowItems] = useState([]);
+  const navRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
   const isFilterPage = location.pathname === '/filter';
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      calculateVisibleItems();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    calculateVisibleItems();
+  }, [isMobile]);
+
+  useEffect(() => {
+    const timer = setTimeout(calculateVisibleItems, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // סגירת תפריט העוד כשלוחצים מחוץ לו
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (overflowMenuOpen && !event.target.closest('.nav-overflow-container')) {
+        setOverflowMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [overflowMenuOpen]);
+
+  const calculateVisibleItems = () => {
+    if (isMobile) {
+      setVisibleItems(items);
+      setOverflowItems([]);
+      return;
+    }
+
+    // גישה פשוטה - בדיקה לפי רוחב המסך
+    const screenWidth = window.innerWidth;
+    let maxItems;
+    
+    if (screenWidth > 1400) {
+      maxItems = items.length; // הכל נראה
+    } else if (screenWidth > 1200) {
+      maxItems = 9;
+    } else if (screenWidth > 1000) {
+      maxItems = 7;
+    } else if (screenWidth > 900) {
+      maxItems = 6;
+    } else {
+      maxItems = 5;
+    }
+    
+    if (maxItems >= items.length) {
+      setVisibleItems(items);
+      setOverflowItems([]);
+    } else {
+      setVisibleItems(items.slice(0, maxItems));
+      setOverflowItems(items.slice(maxItems));
+    }
+  };
 
   const handleSearch = (term) => {
     if (term.trim()) {
@@ -39,179 +99,31 @@ export default function Nav() {
     }
   };
 
-  const handleMouseEnter = () => {
-    if (hoverTimeout) clearTimeout(hoverTimeout);
-    setIsOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    const timeout = setTimeout(() => setIsOpen(false), 500);
-    setHoverTimeout(timeout);
-  };
-
-  // Calculate which items fit and which should go to overflow menu
-  useEffect(() => {
-    const calculateOverflow = () => {
-      if (!navInnerRef.current) return;
-      
-      const container = navInnerRef.current;
-      const containerWidth = container.offsetWidth;
-      
-      // If container not ready yet, show all items
-      if (containerWidth === 0) {
-        setVisibleItems(items);
-        setHiddenItems([]);
-        return;
-      }
-      
-      // Rough calculation for overflow button width (we'll refine this)
-      const estimatedOverflowBtnWidth = 60;
-      const containerPadding = 40; // 20px on each side
-      const availableWidth = containerWidth - estimatedOverflowBtnWidth - containerPadding; // Account for overflow button and padding
-      
-      let visible = [];
-      let hidden = [];
-      let accumulatedWidth = 0;
-      
-      // Use a ref to temporarily measure items
-      const tempDiv = document.createElement('div');
-      tempDiv.style.visibility = 'hidden';
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.display = 'flex';
-      tempDiv.style.gap = '28px';
-      tempDiv.style.padding = '0';
-      document.body.appendChild(tempDiv);
-      
-      items.forEach((item, index) => {
-        // Create a temporary element to measure with same structure as real link
-        const measureEl = document.createElement('div');
-        measureEl.style.display = 'inline-flex';
-        measureEl.style.alignItems = 'center';
-        measureEl.style.gap = '10px';
-        measureEl.style.padding = '8px 12px';
-        measureEl.style.fontWeight = '800';
-        
-        // Get font size safely with fallback
-        try {
-          const computedStyle = window.getComputedStyle(navInnerRef.current);
-          measureEl.style.fontSize = computedStyle.fontSize || '16px';
-        } catch (e) {
-          measureEl.style.fontSize = '16px';
-        }
-        
-        if (item.path === '/') {
-          const icon = document.createElement('div');
-          icon.style.width = '20px';
-          icon.style.height = '20px';
-          measureEl.appendChild(icon);
-        } else {
-          const text = document.createElement('span');
-          text.textContent = item.label;
-          measureEl.appendChild(text);
-          const arrow = document.createElement('span');
-          arrow.textContent = '❯';
-          measureEl.appendChild(arrow);
-        }
-        
-        tempDiv.appendChild(measureEl);
-        
-        const itemWidth = measureEl.offsetWidth;
-        // Add gap for items after the first one
-        if (index > 0) {
-          accumulatedWidth += 28; // gap between items
-        }
-        accumulatedWidth += itemWidth;
-        
-        // Check if this item should be hidden
-        if (accumulatedWidth > availableWidth) {
-          hidden.push(item);
-        } else {
-          visible.push(item);
-        }
-        
-        tempDiv.removeChild(measureEl);
-      });
-      
-      document.body.removeChild(tempDiv);
-      
-      // Safety check: if no items in either array, show all items
-      if (visible.length === 0 && hidden.length === 0) {
-        setVisibleItems(items);
-        setHiddenItems([]);
-      } else {
-        setVisibleItems(visible);
-        setHiddenItems(hidden);
-      }
-    };
-    
-    // Use double requestAnimationFrame to ensure DOM is fully ready
-    let rafId1, rafId2;
-    rafId1 = requestAnimationFrame(() => {
-      rafId2 = requestAnimationFrame(() => {
-        calculateOverflow();
-      });
-    });
-    
-    // Recalculate on window resize
-    const handleResize = () => {
-      calculateOverflow();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => {
-      if (rafId1) cancelAnimationFrame(rafId1);
-      if (rafId2) cancelAnimationFrame(rafId2);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Close overflow menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (overflowMenuRef.current && !overflowMenuRef.current.contains(event.target)) {
-        setShowOverflowMenu(false);
-      }
-    };
-    
-    if (showOverflowMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showOverflowMenu]);
-
   return (
     <nav className="nav-root">
-      <button 
-        className="nav-hamburger" 
-        onMouseEnter={handleMouseEnter}
-        onClick={(e) => {
-          e.preventDefault();
-          setIsOpen(!isOpen);
-        }}
-        aria-label="תפריט"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      
-      <div 
-        ref={navInnerRef}
-        className={`nav-inner ${isOpen ? 'nav-open' : ''}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        {items.map((item, index) => {
-          // Only render items that are supposed to be visible
-          const isVisible = visibleItems.includes(item);
-          if (!isVisible) return null;
-          
-          return (
-            <Link 
-              key={item.label} 
-              ref={(el) => (itemRefs.current[`item-${index}`] = el)}
-              to={item.path} 
+      {/* כפתור המבורגר רק במובייל */}
+      {isMobile && (
+        <button
+          className="nav-hamburger"
+          onClick={() => setIsOpen(true)}
+          aria-label="תפריט"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      )}
+
+      {/* Drawer במובייל */}
+      <MobileDrawer open={isOpen} items={items} onClose={() => setIsOpen(false)} />
+
+      {/* תפריט רגיל רק בדסקטופ */}
+      {!isMobile && (
+        <div className="nav-inner" ref={navRef}>
+          {visibleItems.map((item, index) => (
+            <Link
+              key={item.label}
+              to={item.path}
               className={`nav-link ${item.path === '/' ? 'nav-home-btn' : ''}`}
               aria-label={item.path === '/' ? 'עמוד הבית' : undefined}
               onClick={() => {
@@ -242,56 +154,60 @@ export default function Nav() {
                 <span aria-hidden="true" className="nav-arrow">❯</span>
               )}
             </Link>
-          );
-        })}
-        
-        {/* Overflow Menu Button */}
-        {hiddenItems.length > 0 && (
-          <div ref={overflowMenuRef} className="nav-overflow-container">
-            <button 
-              className="nav-overflow-btn"
-              onClick={() => setShowOverflowMenu(!showOverflowMenu)}
-              aria-label="עוד אפשרויות"
-            >
-              <span>⋯</span>
-            </button>
-            
-            {showOverflowMenu && (
-              <div className="nav-overflow-menu">
-                {hiddenItems.map((item) => (
-                  <Link 
-                    key={item.label} 
-                    to={item.path} 
-                    className="nav-overflow-link"
-                    onClick={() => {
-                      setShowOverflowMenu(false);
-                      setIsOpen(false);
-                      if (item.path === '/') {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }
-                    }}
-                  >
-                    <span>{item.label}</span>
-                    <span className="nav-arrow">❯</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      
+          ))}
+          
+          {/* כפתור עוד (3 נקודות) */}
+          {overflowItems.length > 0 && (
+            <div className="nav-overflow-container">
+              <button
+                className="nav-overflow-btn"
+                onClick={() => setOverflowMenuOpen(!overflowMenuOpen)}
+                aria-label="עוד אפשרויות"
+              >
+                ⋯
+              </button>
+              
+              {overflowMenuOpen && (
+                <div className="nav-overflow-menu">
+                  {overflowItems.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.path}
+                      className="nav-overflow-link"
+                      onClick={() => {
+                        setOverflowMenuOpen(false);
+                        if (item.path === '/') {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                    >
+                      <span>{item.label}</span>
+                      <span className="nav-arrow">❯</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* חיפוש וסינון - תמיד! */}
       <div className="nav-search-wrapper">
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <SearchBar onSearch={handleSearch} />
-          <button 
+          <button
             className={`nav-filter-btn ${isFilterPage ? 'active' : ''}`}
             onClick={() => {
               if (isFilterPage) {
                 navigate('/');
               } else {
                 const currentPath = location.pathname;
-                if (currentPath !== '/' && currentPath !== '/search' && currentPath !== '/admin') {
+                if (
+                  currentPath !== '/' &&
+                  currentPath !== '/search' &&
+                  currentPath !== '/admin'
+                ) {
                   const categorySlug = currentPath.split('/')[1];
                   navigate(`/filter?category=${categorySlug}`);
                 } else {
@@ -303,8 +219,8 @@ export default function Nav() {
             {isFilterPage ? 'סגור סינון' : 'סינון'}
           </button>
         </div>
-        
-        <button 
+
+        <button
           className="nav-admin-btn"
           onClick={() => navigate('/admin')}
           aria-label="כניסה למנהל"
@@ -321,8 +237,8 @@ export default function Nav() {
           </svg>
         </button>
       </div>
-      
       {isOpen && <div className="nav-overlay" onClick={() => setIsOpen(false)} />}
+
     </nav>
   );
 }
