@@ -121,21 +121,28 @@ export default function Nav() {
       {!isMobile && (
         <div className="nav-inner" ref={navRef}>
           {visibleItems.map((item, index) => (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={`nav-link ${item.path === '/' ? 'nav-home-btn' : ''}`}
-              aria-label={item.path === '/' ? 'עמוד הבית' : undefined}
-              onClick={() => {
-                setIsOpen(false);
-                if (item.path === '/') {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }}
-              onMouseDown={(e)=>e.currentTarget.classList.add('active')} 
-              onMouseUp={(e)=>e.currentTarget.classList.remove('active')}
-            >
-              {item.path === '/' ? (
+            item.path === '/' ? (
+              <Link
+                key={item.label}
+                to={item.path}
+                className="nav-link nav-home-btn"
+                aria-label="עמוד הבית"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsOpen(false);
+                  
+                  if (location.pathname === '/') {
+                    // אם כבר בעמוד הבית - רק גלול
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    // אם לא בעמוד הבית - נווט ואז גלול
+                    navigate('/', { replace: true });
+                    setTimeout(() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 50);
+                  }
+                }}
+              >
                 <svg
                   className="nav-home-icon"
                   width="20"
@@ -147,13 +154,20 @@ export default function Nav() {
                 >
                   <path d="M12 3.172l7 6.222V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-4H11v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9.394l7-6.222zm0-2.121L2.293 9.293a1 1 0 1 0 1.414 1.414L12 2.414l8.293 8.293a1 1 0 0 0 1.414-1.414L12 1.05z"/>
                 </svg>
-              ) : (
+              </Link>
+            ) : (
+              <Link
+                key={item.label}
+                to={item.path}
+                className="nav-link"
+                onClick={() => setIsOpen(false)}
+              onMouseDown={(e)=>e.currentTarget.classList.add('active')} 
+              onMouseUp={(e)=>e.currentTarget.classList.remove('active')}
+              >
                 <span>{item.label}</span>
-              )}
-              {item.path !== '/' && (
                 <span aria-hidden="true" className="nav-arrow">❯</span>
-              )}
-            </Link>
+              </Link>
+            )
           ))}
           
           {/* כפתור עוד (3 נקודות) */}
