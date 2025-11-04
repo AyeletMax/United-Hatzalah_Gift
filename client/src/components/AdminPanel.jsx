@@ -111,6 +111,13 @@ const AdminPanel = () => {
         console.log('showToast not available in admin');
       }
       refreshProducts();
+      // נקה את sessionStorage אחרי שמירה מוצלחת
+      try {
+        const key = selectedProduct 
+          ? `uploadedImage_${selectedProduct.id}` 
+          : 'uploadedImage_new';
+        sessionStorage.removeItem(key);
+      } catch {}
       setShowProductForm(false);
       setSelectedProduct(null);
       
@@ -240,25 +247,61 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   console.log('ProductForm initialized with product:', product);
   console.log('ProductForm formData:', formData);
   
-  // וידוא שהנתונים מעודכנים כשהמוצר משתנה
+  // פונקציה ליצירת מפתח ייחודי לשמירת תמונה ב-sessionStorage
+  const getStorageKey = () => `uploadedImage_${product?.id || 'new'}`;
+  
+  // טען תמונה מ-sessionStorage בעת אתחול
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(() => {
+    try {
+      const key = `uploadedImage_${product?.id || 'new'}`;
+      const saved = sessionStorage.getItem(key);
+      return saved || null;
+    } catch {
+      return null;
+    }
+  });
+
+  // וידוא שהנתונים מעודכנים כשהמוצר משתנה, אבל שמור את התמונה שהועלתה
   useEffect(() => {
     if (product) {
-      setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        category_id: product.category_id || '',
-        unit_price_incl_vat: product.unit_price_incl_vat || '',
-        delivery_time_days: product.delivery_time_days || '',
-        image_url: product.image_url || '',
-        brand: product.brand || '',
-        last_buyer: product.last_buyer || '',
-        last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
-        displayed_by: product.displayed_by || '',
-        popularity_score: product.popularity_score || 0,
-        brand_id: product.brand_id || null
+      // נסה לטעון תמונה שהועלתה מ-sessionStorage (למקרה של דפלוי/רענון)
+      try {
+        const savedImage = sessionStorage.getItem(getStorageKey());
+        if (savedImage && !uploadedImageUrl) {
+          setUploadedImageUrl(savedImage);
+        }
+      } catch (error) {
+        console.error('שגיאה בטעינת תמונה מ-sessionStorage:', error);
+      }
+      
+      // שמור את התמונה שהועלתה אם קיימת ב-formData או ב-uploadedImageUrl, אחרת השתמש בתמונה מהמוצר
+      // חשוב: prev.image_url יש עדיפות כדי לשמור תמונות שהועלו
+      setFormData(prev => {
+        const savedImage = sessionStorage.getItem(getStorageKey());
+        const imageToUse = prev.image_url || uploadedImageUrl || savedImage || product.image_url || '';
+        return {
+          name: product.name || '',
+          description: product.description || '',
+          category_id: product.category_id || '',
+          unit_price_incl_vat: product.unit_price_incl_vat || '',
+          delivery_time_days: product.delivery_time_days || '',
+          image_url: imageToUse,
+          brand: product.brand || '',
+          last_buyer: product.last_buyer || '',
+          last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
+          displayed_by: product.displayed_by || '',
+          popularity_score: product.popularity_score || 0,
+          brand_id: product.brand_id || null
+        };
       });
+    } else {
+      // אם אין מוצר (הוספה חדשה), אפס את התמונה שהועלתה
+      try {
+        sessionStorage.removeItem(getStorageKey());
+      } catch {}
+      setUploadedImageUrl(null);
     }
-  }, [product]);
+  }, [product?.id, uploadedImageUrl]); // רץ כשה-ID משתנה או כשתמונה חדשה מועלת
   
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -295,7 +338,15 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: resolvedUrl});
+      
+      // שמור את התמונה בstate נפרד וב-sessionStorage כדי שלא תאבד בדפלוי
+      setUploadedImageUrl(resolvedUrl);
+      try {
+        sessionStorage.setItem(getStorageKey(), resolvedUrl);
+      } catch (error) {
+        console.error('שגיאה בשמירת תמונה ב-sessionStorage:', error);
+      }
+      setFormData(prev => ({...prev, image_url: resolvedUrl}));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {

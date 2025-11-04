@@ -122,6 +122,11 @@ export default function ProductList({ products = [], categorySlug }) {
       console.log('מוצר עודכן בהצלחה:', result);
       
       window.showToast && window.showToast('המוצר עודכן בהצלחה! השינויים נשמרו', 'success', 4000);
+      // נקה את sessionStorage אחרי שמירה מוצלחת
+      try {
+        const key = `uploadedImage_${editingProduct.id}`;
+        sessionStorage.removeItem(key);
+      } catch {}
       refreshProducts();
       setEditingProduct(null);
     } catch (error) {
@@ -256,6 +261,20 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   const [emptyFieldsList, setEmptyFieldsList] = useState([]);
   const [pendingFormData, setPendingFormData] = useState(null);
   
+  // פונקציה ליצירת מפתח ייחודי לשמירת תמונה ב-sessionStorage
+  const getStorageKey = () => `uploadedImage_${product?.id || 'new'}`;
+  
+  // טען תמונה מ-sessionStorage בעת אתחול
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(() => {
+    try {
+      const key = `uploadedImage_${product?.id || 'new'}`;
+      const saved = sessionStorage.getItem(key);
+      return saved || null;
+    } catch {
+      return null;
+    }
+  });
+  
   const [formData, setFormData] = useState({
     name: product?.name || '',
     description: product?.description || '',
@@ -270,6 +289,47 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     popularity_score: product?.popularity_score || 0
   });
   const [uploading, setUploading] = useState(false);
+
+  // וידוא שהנתונים מעודכנים כשהמוצר משתנה, אבל שמור את התמונה שהועלתה
+  useEffect(() => {
+    if (product) {
+      // נסה לטעון תמונה שהועלתה מ-sessionStorage (למקרה של דפלוי/רענון)
+      try {
+        const savedImage = sessionStorage.getItem(getStorageKey());
+        if (savedImage && !uploadedImageUrl) {
+          setUploadedImageUrl(savedImage);
+        }
+      } catch (error) {
+        console.error('שגיאה בטעינת תמונה מ-sessionStorage:', error);
+      }
+      
+      // שמור את התמונה שהועלתה אם קיימת ב-formData או ב-uploadedImageUrl, אחרת השתמש בתמונה מהמוצר
+      // חשוב: prev.image_url יש עדיפות כדי לשמור תמונות שהועלו
+      setFormData(prev => {
+        const savedImage = sessionStorage.getItem(getStorageKey());
+        const imageToUse = prev.image_url || uploadedImageUrl || savedImage || product.image_url || '';
+        return {
+          name: product.name || '',
+          description: product.description || '',
+          category_id: product.category_id || '',
+          unit_price_incl_vat: product.unit_price_incl_vat || '',
+          delivery_time_days: product.delivery_time_days || '',
+          image_url: imageToUse,
+          brand: product.brand || '',
+          last_buyer: product.last_buyer || '',
+          last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
+          displayed_by: product.displayed_by || '',
+          popularity_score: product.popularity_score || 0
+        };
+      });
+    } else {
+      // אם אין מוצר, אפס את התמונה שהועלתה
+      try {
+        sessionStorage.removeItem(getStorageKey());
+      } catch {}
+      setUploadedImageUrl(null);
+    }
+  }, [product?.id, uploadedImageUrl]); // רץ כשה-ID משתנה או כשתמונה חדשה מועלת
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -303,7 +363,15 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: resolvedUrl});
+      
+      // שמור את התמונה בstate נפרד וב-sessionStorage כדי שלא תאבד בדפלוי
+      setUploadedImageUrl(resolvedUrl);
+      try {
+        sessionStorage.setItem(getStorageKey(), resolvedUrl);
+      } catch (error) {
+        console.error('שגיאה בשמירת תמונה ב-sessionStorage:', error);
+      }
+      setFormData(prev => ({...prev, image_url: resolvedUrl}));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
@@ -447,9 +515,9 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
               disabled={uploading}
             />
             {uploading && <span>מעלה תמונה...</span>}
-            {formData.image_url && (
+            {(uploadedImageUrl || formData.image_url) && (
               <div className="image-preview">
-                <img src={formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
+                <img src={uploadedImageUrl || formData.image_url} alt="תצוגה מקדימה" style={{width: '100px', height: '100px', objectFit: 'cover'}} />
               </div>
             )}
           </div>
