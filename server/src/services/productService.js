@@ -15,17 +15,7 @@ function getImageKitClient() {
   return new ImageKit({ publicKey, privateKey, urlEndpoint });
 }
 
-let ensuredColumn = false;
-async function ensureImageFileIdColumn() {
-  if (ensuredColumn) return;
-  try {
-    await pool.query("ALTER TABLE products ADD COLUMN IF NOT EXISTS image_file_id VARCHAR(255) NULL");
-  } catch (e) {
-    // ignore if not supported or already exists
-  } finally {
-    ensuredColumn = true;
-  }
-}
+
 
 const getAllProducts = async (filters = {}) => {
   let query = `
@@ -88,12 +78,11 @@ const getProductById = async (id) => {
 };
 
 const createProduct = async (product) => {
-  await ensureImageFileIdColumn();
   console.log('[productService.createProduct] Input product:', product);
   console.log('[productService.createProduct] Description:', product.description);
   
   const [result] = await pool.query(
-    "INSERT INTO products (name, description, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, image_file_id, brand, last_buyer, popularity_score, displayed_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO products (name, description, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score, displayed_by, is_new) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       product.name,
       product.description,
@@ -103,11 +92,11 @@ const createProduct = async (product) => {
       product.delivery_time_days || null,
       product.last_ordered_by_name || null,
       product.image_url || null,
-      product.image_file_id || null,
       product.brand || null,
       product.last_buyer || null,
       product.popularity_score || 0,
-      product.displayed_by || null
+      product.displayed_by || null,
+      product.is_new || false
     ]
   );
   
@@ -120,12 +109,11 @@ const createProduct = async (product) => {
 };
 
 const updateProduct = async (id, product) => {
-  await ensureImageFileIdColumn();
   console.log('[productService.updateProduct] Input ID:', id);
   console.log('[productService.updateProduct] Input product:', product);
   
   const [result] = await pool.query(
-    "UPDATE products SET name = ?, description = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ?, image_file_id = ?, brand = ?, last_buyer = ?, popularity_score = ?, displayed_by = ? WHERE id = ?",
+    "UPDATE products SET name = ?, description = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ?, brand = ?, last_buyer = ?, popularity_score = ?, displayed_by = ?, is_new = ? WHERE id = ?",
     [
       product.name,
       product.description || null,
@@ -135,11 +123,11 @@ const updateProduct = async (id, product) => {
       product.delivery_time_days || null,
       product.last_ordered_by_name || null,
       product.image_url || null,
-      product.image_file_id || null,
       product.brand || null,
       product.last_buyer || null,
       product.popularity_score || 0,
       product.displayed_by || null,
+      product.is_new || false,
       id
     ]
   );
@@ -153,9 +141,8 @@ const updateProduct = async (id, product) => {
 };
 
 const deleteProduct = async (id) => {
-  await ensureImageFileIdColumn();
   // Fetch current image URL before deletion
-  const [rows] = await pool.query("SELECT image_url, image_file_id FROM products WHERE id = ?", [id]);
+  const [rows] = await pool.query("SELECT image_url FROM products WHERE id = ?", [id]);
   const product = rows[0];
 
   // Delete DB row
@@ -164,67 +151,38 @@ const deleteProduct = async (id) => {
 
   if (!deleted) return false;
 
-  // Attempt to delete from ImageKit when the URL points to ImageKit
+  // Attempt to delete image from ImageKit or local storage
   try {
     const imageUrl = product?.image_url;
-    const { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, IMAGEKIT_URL_ENDPOINT } = process.env || {};
+    if (!imageUrl) return true;
 
-    const looksLikeImageKit = !!(imageUrl && IMAGEKIT_URL_ENDPOINT && imageUrl.startsWith(IMAGEKIT_URL_ENDPOINT));
-    const hasCreds = !!(IMAGEKIT_PUBLIC_KEY && IMAGEKIT_PRIVATE_KEY && IMAGEKIT_URL_ENDPOINT);
-
-    if (looksLikeImageKit && hasCreds) {
-      // Dynamic import to avoid hard dependency when not configured
-      const { default: ImageKit } = await import('imagekit');
-      const ik = new ImageKit({
-        publicKey: IMAGEKIT_PUBLIC_KEY,
-        privateKey: IMAGEKIT_PRIVATE_KEY,
-        urlEndpoint: IMAGEKIT_URL_ENDPOINT
-      });
-
-      // Derive path and file name from URL to find fileId
-      // Example URL: `${IMAGEKIT_URL_ENDPOINT}/folder/sub/filename.jpg?tr=...`
-      const withoutEndpoint = imageUrl.replace(IMAGEKIT_URL_ENDPOINT, '');
-      const withoutQuery = withoutEndpoint.split('?')[0];
-      // Ensure leading slash removed for splitting
-      const cleanPath = withoutQuery.startsWith('/') ? withoutQuery.slice(1) : withoutQuery;
-      const parts = cleanPath.split('/');
-      const fileName = parts.pop();
-      const dirPath = '/' + parts.join('/'); // ImageKit paths start with '/'
-
-      try {
-        // Narrow search by both path and name to get exact fileId
-        const files = await ik.listFiles({
-          path: dirPath === '/' ? '' : dirPath,
-          name: fileName,
-          limit: 1
-        });
-        const file = Array.isArray(files) && files.length > 0 ? files[0] : null;
-        if (file?.fileId) {
-          await ik.deleteFile(file.fileId);
-        } else {
-          // Fallback: try searchQuery in case CDN transformations changed the path
-          const fallback = await ik.listFiles({
-            searchQuery: `name = \"${fileName}\"`,
+    // Check if it's an ImageKit URL
+    const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+    if (endpoint && imageUrl.startsWith(endpoint)) {
+      const ikClient = getImageKitClient();
+      if (ikClient) {
+        try {
+          // Extract filename from URL
+          const urlParts = imageUrl.split('/');
+          const filename = urlParts[urlParts.length - 1].split('?')[0];
+          
+          // Search for the file by name
+          const files = await ikClient.listFiles({
+            searchQuery: `name = "${filename}"`,
             limit: 1
           });
-          const fallbackFile = Array.isArray(fallback) && fallback.length > 0 ? fallback[0] : null;
-          if (fallbackFile?.fileId) {
-            await ik.deleteFile(fallbackFile.fileId);
+          
+          if (files && files.length > 0) {
+            await ikClient.deleteFile(files[0].fileId);
+            console.log('[productService.deleteProduct] ImageKit image deleted:', filename);
           }
+        } catch (ikErr) {
+          console.error('[productService.deleteProduct] ImageKit deletion failed:', ikErr.message);
         }
-      } catch (ikErr) {
-        console.error('[productService.deleteProduct] ImageKit deletion failed:', ikErr?.message || ikErr);
       }
     }
-  } catch (err) {
-    // Log but do not fail the request if ImageKit deletion fails
-    console.error('[productService.deleteProduct] Error during ImageKit deletion attempt:', err?.message || err);
-  }
-
-  // Attempt to remove local uploaded file if exists
-  try {
-    const imageUrl = product?.image_url;
-    if (imageUrl && imageUrl.includes('/uploads/')) {
+    // Check if it's a local upload
+    else if (imageUrl.includes('/uploads/')) {
       const afterUploads = imageUrl.split('/uploads/')[1];
       if (afterUploads) {
         const filename = afterUploads.split('?')[0];
@@ -236,69 +194,8 @@ const deleteProduct = async (id) => {
         }
       }
     }
-
-    // Attempt to delete from ImageKit if URL matches endpoint
-    try {
-      const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
-      const ikClient = getImageKitClient();
-      if (ikClient && endpoint && imageUrl && imageUrl.startsWith(endpoint)) {
-        // Prefer delete by fileId if we have it
-        if (product?.image_file_id) {
-          try {
-            await ikClient.deleteFile(product.image_file_id);
-            console.log('[productService.deleteProduct] ImageKit delete by fileId OK:', product.image_file_id);
-            return true;
-          } catch {}
-        }
-        // Parse path and filename from the CDN URL
-        let filename = '';
-        let pathInIk = '/';
-        try {
-          const urlObj = new URL(imageUrl);
-          const parts = urlObj.pathname.split('/').filter(Boolean);
-          // parts: [<ik_id>, ...path, filename]
-          if (parts.length >= 2) {
-            filename = parts[parts.length - 1] || '';
-            const folderParts = parts.slice(1, -1); // skip account id segment
-            pathInIk = '/' + folderParts.join('/');
-            if (pathInIk === '/') pathInIk = '/';
-          }
-        } catch {}
-
-        // 1) Try listFiles with folder path and name
-        let fileIdToDelete = '';
-        if (filename) {
-          try {
-            const list = await ikClient.listFiles({ path: pathInIk, name: filename, limit: 1 });
-            const file = Array.isArray(list) ? list[0] : null;
-            if (file && file.fileId) {
-              fileIdToDelete = file.fileId;
-            }
-          } catch {}
-        }
-
-        // 2) Fallback: searchQuery by name
-        if (!fileIdToDelete && filename) {
-          try {
-            const listSearch = await ikClient.listFiles({ searchQuery: `name = "${filename}"`, limit: 1 });
-            const file = Array.isArray(listSearch) ? listSearch[0] : null;
-            if (file && file.fileId) {
-              fileIdToDelete = file.fileId;
-            }
-          } catch {}
-        }
-
-        if (fileIdToDelete) {
-          await ikClient.deleteFile(fileIdToDelete);
-          console.log('[productService.deleteProduct] ImageKit delete by lookup OK:', fileIdToDelete, 'path:', pathInIk, 'name:', filename);
-        }
-      }
-    } catch (ikErr) {
-      console.error('[productService.deleteProduct] Failed to delete from ImageKit:', ikErr?.message || ikErr);
-    }
   } catch (err) {
-    // Log but do not fail the request if file deletion fails
-    console.error('[productService.deleteProduct] Failed to delete image file:', err.message);
+    console.error('[productService.deleteProduct] Failed to delete image:', err.message);
   }
 
   return true;

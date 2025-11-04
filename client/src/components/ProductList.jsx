@@ -263,12 +263,13 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || '',
-    image_file_id: product?.image_file_id || null,
+
     brand: product?.brand || '',
     last_buyer: product?.last_buyer || '',
     last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
     displayed_by: product?.displayed_by || '',
-    popularity_score: product?.popularity_score || 0
+    popularity_score: product?.popularity_score || 0,
+    is_new: product?.is_new || false
   });
   const [uploading, setUploading] = useState(false);
 
@@ -304,7 +305,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       const resolvedUrl = result.imageUrl?.startsWith('http')
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
-      setFormData({...formData, image_url: resolvedUrl, image_file_id: result.fileId || null});
+      setFormData({...formData, image_url: resolvedUrl});
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
@@ -346,8 +347,12 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
   };
   
   const proceedWithSave = (data) => {
-    console.log('שולח נתוני מוצר לעדכון:', data);
-    onSave(data);
+    const cleanedData = {
+      ...data,
+      is_new: formData.is_new || false
+    };
+    console.log('שולח נתוני מוצר לעדכון:', cleanedData);
+    onSave(cleanedData);
   };
   
   const handleEmptyFieldsConfirm = () => {
@@ -442,6 +447,17 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             value={formData.displayed_by}
             onChange={(e) => setFormData({...formData, displayed_by: e.target.value})}
           />
+          
+          <div className="checkbox-field">
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.is_new}
+                onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
+              />
+              מוצר חדש (יופיע בקטגוריית "מוצרים חדשים")
+            </label>
+          </div>
           
           <div className="image-upload-section">
             <label>תמונה:</label>

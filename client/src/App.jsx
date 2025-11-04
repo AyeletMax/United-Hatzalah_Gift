@@ -43,10 +43,15 @@ function CategoryPage() {
   const { slug, productName } = useParams();
   const category = categories.find((c) => c.slug === slug);
   const filteredProducts = category
-    ? products.filter((p) => String(p.category_id) === String(category.id))
-        .filter((product, index, self) => 
-          index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
-        )
+    ? category.id === 5 // מוצרים חדשים
+      ? products.filter((p) => p.is_new === true || p.is_new === 1)
+          .filter((product, index, self) => 
+            index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+          )
+      : products.filter((p) => String(p.category_id) === String(category.id))
+          .filter((product, index, self) => 
+            index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+          )
     : [];
   
   const selectedProduct = productName 

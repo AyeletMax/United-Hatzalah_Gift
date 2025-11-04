@@ -101,25 +101,7 @@ const AdminPanel = () => {
       
       const result = await response.json();
       
-      // אם זה מוצר חדש (לא עריכה), הוסף גם למוצרים חדשים
-      if (!selectedProduct) {
-        const newProductsCategory = categories.find(cat => cat.name === 'מוצרים חדשים');
-        if (newProductsCategory && result.id) {
-          try {
-            await fetch('http://localhost:3000/api/products', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ...productData,
-                category_id: newProductsCategory.id
-              })
-            });
-            console.log('מוצר נוסף גם למוצרים חדשים');
-          } catch (error) {
-            console.error('שגיאה בהוספה למוצרים חדשים:', error);
-          }
-        }
-      }
+
 
       
       console.log('Trying to show admin toast:', window.showToast);
@@ -248,13 +230,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
     unit_price_incl_vat: product?.unit_price_incl_vat || '',
     delivery_time_days: product?.delivery_time_days || '',
     image_url: product?.image_url || '',
-    image_file_id: product?.image_file_id || null,
+
     brand: product?.brand || '',
     last_buyer: product?.last_buyer || '',
     last_ordered_by_name: product?.last_ordered_by_name || product?.last_buyer || '',
     displayed_by: product?.displayed_by || '',
     popularity_score: product?.popularity_score || 0,
-    brand_id: product?.brand_id || null
+    brand_id: product?.brand_id || null,
+    is_new: product?.is_new || false
   });
   
   console.log('ProductForm initialized with product:', product);
@@ -270,13 +253,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         unit_price_incl_vat: product.unit_price_incl_vat || '',
         delivery_time_days: product.delivery_time_days || '',
         image_url: product.image_url || '',
-        image_file_id: product.image_file_id || null,
+
         brand: product.brand || '',
         last_buyer: product.last_buyer || '',
         last_ordered_by_name: product.last_ordered_by_name || product.last_buyer || '',
         displayed_by: product.displayed_by || '',
         popularity_score: product.popularity_score || 0,
-        brand_id: product.brand_id || null
+        brand_id: product.brand_id || null,
+        is_new: product.is_new || false
       });
       setUploadedImageUrl(null); // אפס את התמונה שהעלנו כשמוצר חדש נבחר
     }
@@ -318,7 +302,7 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
         ? result.imageUrl
         : `${apiUrl}${result.imageUrl}`;
       setUploadedImageUrl(resolvedUrl); // שמור את התמונה בstate נפרד
-      setFormData(prev => ({...prev, image_url: resolvedUrl, image_file_id: result.fileId || null }));
+      setFormData(prev => ({...prev, image_url: resolvedUrl }));
     } catch (error) {
       console.error('שגיאה בהעלאת תמונה:', error);
     } finally {
@@ -336,13 +320,14 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
       unit_price_incl_vat: parseFloat(formData.unit_price_incl_vat),
       delivery_time_days: formData.delivery_time_days ? parseInt(formData.delivery_time_days) : null,
       image_url: formData.image_url || null,
-      image_file_id: formData.image_file_id || null,
+
       brand: formData.brand ? formData.brand.trim() : null,
       last_buyer: formData.last_buyer ? formData.last_buyer.trim() : null,
       last_ordered_by_name: formData.last_ordered_by_name ? formData.last_ordered_by_name.trim() : (formData.last_buyer ? formData.last_buyer.trim() : null),
       displayed_by: formData.displayed_by ? formData.displayed_by.trim() : null,
       popularity_score: 0,
-      brand_id: null
+      brand_id: null,
+      is_new: formData.is_new
     };
     
     // בדיקת שדות חובה
@@ -470,6 +455,17 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
               });
             }}
           />
+          
+          <div className="checkbox-field">
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.is_new}
+                onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
+              />
+              מוצר חדש (יופיע בקטגוריית "מוצרים חדשים")
+            </label>
+          </div>
           
           <div className="image-upload-section">
             <label>תמונה:</label>
