@@ -149,7 +149,7 @@ const AdminPanel = () => {
   if (!isAuthenticated) {
     return (
       <div className="admin-login">
-        <h2>כניסת מנהל</h2>
+        <h2> מרכז תפעול</h2>
         <input
           type="password"
           placeholder="סיסמה"
