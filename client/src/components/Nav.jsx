@@ -1,4 +1,5 @@
-import './Nav.css';
+import './Nav.css'
+import './Nav-fixed.css';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar.jsx';
