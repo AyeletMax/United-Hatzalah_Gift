@@ -174,15 +174,21 @@ export default function Nav() {
           
           {/* כפתור עוד (3 נקודות) */}
           {overflowItems.length > 0 && (
-            <div className="nav-overflow-container">
+            <div
+              className="nav-overflow-container"
+              onMouseEnter={() => setOverflowMenuOpen(true)}
+              onMouseLeave={() => setOverflowMenuOpen(false)}
+            >
               <button
                 className="nav-overflow-btn"
-                onClick={() => setOverflowMenuOpen(!overflowMenuOpen)}
                 aria-label="עוד אפשרויות"
+                aria-haspopup="menu"
+                aria-expanded={overflowMenuOpen}
+                type="button"
               >
                 ⋯
               </button>
-              
+
               {overflowMenuOpen && (
                 <div className="nav-overflow-menu">
                   {overflowItems.map((item) => (
