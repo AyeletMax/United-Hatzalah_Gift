@@ -5,8 +5,15 @@ import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar.jsx';
 import MobileDrawer from './MobileDrawer';
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
 const items = [
-  { label: 'עמוד הבית', path: '/' },
+  { label: 'עמוד הבית', path: '/', onClick: scrollToTop },
   { label: 'מוצרים חדשים', path: '/מוצרים-חדשים' },
   { label: 'מתנות', path: '/מתנות' },
   { label: 'כלי בית', path: '/כלי-בית' },
@@ -133,14 +140,10 @@ export default function Nav() {
                   setIsOpen(false);
                   
                   if (location.pathname === '/') {
-                    // אם כבר בעמוד הבית - רק גלול
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.scrollTo({ top: 0, behavior: 'auto' });
                   } else {
-                    // אם לא בעמוד הבית - נווט ואז גלול
-                    navigate('/', { replace: true });
-                    setTimeout(() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }, 50);
+                    navigate('/');
+                    window.scrollTo({ top: 0, behavior: 'auto' });
                   }
                 }}
               >
