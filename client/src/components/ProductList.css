@@ -117,7 +117,8 @@
 }
 
 .product-card .delete-btn,
-.product-card .edit-btn {
+.product-card .edit-btn,
+.product-card .reset-survey-btn {
   all: unset;
   background: none !important;
   color: #bbb;
@@ -130,8 +131,13 @@
 }
 
 .product-card .delete-btn:hover,
-.product-card .edit-btn:hover {
+.product-card .edit-btn:hover,
+.product-card .reset-survey-btn:hover {
   transform: scale(1.15);
+}
+
+.product-card .reset-survey-btn:hover {
+  color: #f39c12;
 }
 
 
@@ -139,7 +145,8 @@
 
 
 .product-card .delete-btn::after,
-.product-card .edit-btn::after {
+.product-card .edit-btn::after,
+.product-card .reset-survey-btn::after {
   content: attr(title);
   position: absolute;
   bottom: -25px;
@@ -157,7 +164,8 @@
 }
 
 .product-card .delete-btn:hover::after,
-.product-card .edit-btn:hover::after {
+.product-card .edit-btn:hover::after,
+.product-card .reset-survey-btn:hover::after {
   opacity: 1;
 }
 

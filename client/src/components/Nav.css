@@ -582,6 +582,16 @@
   border: none;
   color: #fff;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.drawer-close:hover,
+.drawer-close:focus,
+.drawer-close:active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--uh-orange);
 }
 .drawer-links {
   display: flex;
@@ -598,15 +608,18 @@
   padding: 12px 20px;
   border-radius: 0;
   border-bottom: 1px solid rgba(243, 108, 33, 0.2);
-  transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.15s;
+  transition: background 0.4s ease, color 0.4s ease;
   display: flex;
   align-items: center;
   gap: 10px;
   direction: rtl;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .drawer-link:hover,
-.drawer-link:focus {
-  background: rgba(243, 108, 33, 0.13);
+.drawer-link:focus,
+.drawer-link:active {
+  background: rgba(243, 108, 33, 0.12);
   color: var(--uh-orange);
 }
 .drawer-link .nav-arrow {
