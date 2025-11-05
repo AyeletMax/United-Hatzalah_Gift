@@ -183,10 +183,21 @@
 }
 
 .nav-link:hover,
-.nav-link:focus,
-.nav-link.active {
+.nav-link:focus {
   background: rgba(243, 108, 33, .12); /* soft UH orange */
   color: var(--uh-orange);
+}
+
+.nav-link.active {
+  background: rgba(243, 108, 33, .20);
+  color: var(--uh-orange);
+  transform: scale(0.98);
+}
+
+.nav-link.current-page {
+  background: rgba(243, 108, 33, .25);
+  color: var(--uh-orange);
+  border: 1px solid rgba(243, 108, 33, 0.4);
 }
 
 .nav-arrow {
