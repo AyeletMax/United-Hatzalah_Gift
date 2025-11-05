@@ -1,3 +1,15 @@
+@media (min-width: 481px) {
+  .nav-inner {
+    display: flex !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    flex-direction: row !important;
+    right: 0 !important;
+  }
+}
+
 @media (max-width: 480px) {
   .nav-inner {
     display: flex;

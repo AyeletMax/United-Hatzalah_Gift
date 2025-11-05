@@ -34,6 +34,9 @@ export default function Nav() {
   useEffect(() => {
     const onResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 480) {
+        setIsOpen(false);
+      }
       calculateVisibleItems();
     };
     window.addEventListener('resize', onResize);
