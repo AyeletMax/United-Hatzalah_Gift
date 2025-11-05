@@ -11,23 +11,7 @@ export default function MobileDrawer({ open, items, onClose }) {
         <button className="drawer-close" onClick={onClose}>×</button>
         <nav className="drawer-links">
           {items.map(item => (
-            <Link 
-              key={item.label} 
-              to={item.path} 
-              className="drawer-link" 
-              onClick={(e) => {
-                if (item.path === '/') {
-                  e.preventDefault();
-                  onClose();
-                  window.scrollTo({ top: 0, behavior: 'auto' });
-                  if (window.location.pathname !== '/') {
-                    window.location.href = '/';
-                  }
-                } else {
-                  onClose();
-                }
-              }}
-            >
+            <Link key={item.label} to={item.path} className="drawer-link" onClick={onClose}>
               {item.label}
             </Link>
           ))}

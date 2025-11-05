@@ -521,6 +521,49 @@
   font-weight: bold;
 }
 
+/* Mobile-friendly tweaks for survey results */
+@media (max-width: 600px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .question-result h4 {
+    font-size: 15px;
+  }
+
+  .result-bar {
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .option-label {
+    width: 74px;
+    font-size: 12px;
+  }
+
+  .bar-container {
+    display: flex;
+    align-items: center;
+    overflow: visible; /* allow percentage to be visible outside the bar if needed */
+    height: 18px;
+  }
+
+  .bar-fill {
+    height: 100%;
+  }
+
+  .percentage {
+    position: static;
+    transform: none;
+    margin-inline-start: 8px;
+    min-width: 34px;
+    text-align: start;
+    font-size: 12px;
+    color: #111;
+  }
+}
+
 .survey-form {
   background: #fff;
   border: 1px solid #e9ecef;

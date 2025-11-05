@@ -1,0 +1,83 @@
+@media (max-width: 480px) {
+  .nav-inner {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 320px;
+    height: 100vh;
+    background: #000000;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 60px 0 20px;
+    gap: 0;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-left: 2px solid var(--uh-orange);
+  }
+  
+  .nav-inner.nav-open {
+    right: 0;
+  }
+  
+  .nav-link {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(243, 108, 33, 0.2);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    background: transparent;
+    transition: background 0.25s cubic-bezier(.4,0,.2,1), color 0.15s;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  
+  .nav-link:hover,
+  .nav-link:focus {
+    background: rgba(243, 108, 33, .12);
+    color: var(--uh-orange);
+  }
+  
+  .nav-arrow {
+    color: var(--uh-orange);
+    font-size: 16px;
+    line-height: 1;
+  }
+  
+  .nav-home-btn {
+    background: transparent;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: none;
+    transition: color .2s ease, transform .15s ease;
+  }
+  
+  .nav-home-btn:hover,
+  .nav-home-btn:focus {
+    background: transparent;
+    color: var(--uh-orange);
+  }
+  
+  .nav-home-btn .nav-arrow {
+    display: none;
+  }
+  
+  .nav-home-icon {
+    width: 26px;
+    height: 26px;
+    display: inline-block;
+  }
+}
