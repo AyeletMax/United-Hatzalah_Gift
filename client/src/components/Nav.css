@@ -187,18 +187,13 @@
   background: rgba(243, 108, 33, .12); /* soft UH orange */
   color: var(--uh-orange);
 }
-
-.nav-link.active {
-  background: rgba(243, 108, 33, .20);
+.nav-link:active {
+  background: rgba(243, 108, 33, 0.25);
   color: var(--uh-orange);
-  transform: scale(0.98);
+  transition: background 0.1s ease, color 0.1s ease;
 }
 
-.nav-link.current-page {
-  background: rgba(243, 108, 33, .25);
-  color: var(--uh-orange);
-  border: 1px solid rgba(243, 108, 33, 0.4);
-}
+
 
 .nav-arrow {
   color: var(--uh-orange);
@@ -628,10 +623,14 @@
   user-select: none;
 }
 .drawer-link:hover,
-.drawer-link:focus,
-.drawer-link:active {
+.drawer-link:focus {
   background: rgba(243, 108, 33, 0.12);
   color: var(--uh-orange);
+}
+.drawer-link:active {
+  background: rgba(243, 108, 33, 0.25);
+  color: var(--uh-orange);
+  transition: background 0.1s ease, color 0.1s ease;
 }
 .drawer-link .nav-arrow {
   color: var(--uh-orange);

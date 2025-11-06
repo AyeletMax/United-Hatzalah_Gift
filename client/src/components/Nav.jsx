@@ -167,12 +167,8 @@ export default function Nav() {
               <Link
                 key={item.label}
                 to={item.path}
-                className={`nav-link ${location.pathname === item.path ? 'current-page' : ''}`}
+                className="nav-link"
                 onClick={() => setIsOpen(false)}
-              onMouseDown={(e)=>{
-                e.currentTarget.classList.add('active');
-                setTimeout(() => e.currentTarget.classList.remove('active'), 150);
-              }}
               >
                 <span>{item.label}</span>
                 <span aria-hidden="true" className="nav-arrow">❯</span>
