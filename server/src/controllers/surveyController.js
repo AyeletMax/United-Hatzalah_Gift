@@ -78,6 +78,15 @@ const deleteSurveyResponse = async (req, res) => {
   }
 };
 
+const resetProductSurvey = async (req, res) => {
+  try {
+    const deletedCount = await surveyService.resetProductSurvey(req.params.productId);
+    res.json({ success: true, deletedCount });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export default {
   getAllSurveyResponses,
   getSurveyResponseById,
@@ -86,4 +95,5 @@ export default {
   createSurveyResponse,
   updateSurveyResponse,
   deleteSurveyResponse,
+  resetProductSurvey,
 };

@@ -12,6 +12,8 @@ export default function AllProductsList() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [showResetSurveyConfirm, setShowResetSurveyConfirm] = useState(false);
+  const [productToResetSurvey, setProductToResetSurvey] = useState(null);
 
   const [categories] = useState([
     { id: 1, name: "לרכב" },
@@ -95,6 +97,31 @@ export default function AllProductsList() {
     }
   };
 
+  const resetProductSurvey = async (productId, e) => {
+    e.stopPropagation();
+    setProductToResetSurvey(productId);
+    setShowResetSurveyConfirm(true);
+  };
+  
+  const handleResetSurveyConfirm = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      await fetch(`${apiUrl}/api/survey/reset/${productToResetSurvey}`, { method: 'DELETE' });
+      window.showToast && window.showToast('הסקר אופס בהצלחה!', 'success', 3000);
+    } catch (error) {
+      console.error('שגיאה באיפוס הסקר:', error);
+      window.showToast && window.showToast('שגיאה באיפוס הסקר', 'error');
+    } finally {
+      setShowResetSurveyConfirm(false);
+      setProductToResetSurvey(null);
+    }
+  };
+
 
 
 
@@ -148,6 +175,12 @@ export default function AllProductsList() {
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
               </button>
+              <button className="reset-survey-btn" onClick={(e) => resetProductSurvey(p.id, e)} title="אפס סקר">
+                <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M1 4v6h6"/>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                </svg>
+              </button>
               <button className="delete-btn" onClick={(e) => deleteProduct(p.id, e)} title="מחק">
                 <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="3 6 5 6 21 6"/>
@@ -179,6 +212,19 @@ export default function AllProductsList() {
           setProductToDelete(null);
         }}
         confirmText="מחק"
+        cancelText="ביטול"
+      />
+      
+      <ConfirmDialog
+        isOpen={showResetSurveyConfirm}
+        title="איפוס סקר מוצר"
+        message="האם אתה בטוח שברצונך לאפס את כל הסקרים של המוצר? פעולה זו תמחק את כל הדירוגים הקיימים."
+        onConfirm={handleResetSurveyConfirm}
+        onCancel={() => {
+          setShowResetSurveyConfirm(false);
+          setProductToResetSurvey(null);
+        }}
+        confirmText="אפס סקר"
         cancelText="ביטול"
       />
     </>

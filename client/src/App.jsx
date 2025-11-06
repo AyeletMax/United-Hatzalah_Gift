@@ -43,10 +43,15 @@ function CategoryPage() {
   const { slug, productName } = useParams();
   const category = categories.find((c) => c.slug === slug);
   const filteredProducts = category
-    ? products.filter((p) => String(p.category_id) === String(category.id))
-        .filter((product, index, self) => 
-          index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
-        )
+    ? category.id === 5 // מוצרים חדשים
+      ? products.filter((p) => p.is_new === true || p.is_new === 1)
+          .filter((product, index, self) => 
+            index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+          )
+      : products.filter((p) => String(p.category_id) === String(category.id))
+          .filter((product, index, self) => 
+            index === self.findIndex(p => p.name === product.name && p.unit_price_incl_vat === product.unit_price_incl_vat)
+          )
     : [];
   
   const selectedProduct = productName 
@@ -71,7 +76,7 @@ function CategoryPage() {
   return (
     <>
     {console.log("היי מה קורה")}
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: 20 }}>
         {category ? category.title : 'קטגוריה'}
       </h2>
       {loading ? (
@@ -114,7 +119,7 @@ function SearchPage() {
   
   return (
     <>
-      <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
+      <h2 style={{ textAlign: "center", marginTop: 0, marginBottom: 20 }}>
         תוצאות חיפוש עבור: "{query}"
       </h2>
       {loading ? (
@@ -156,7 +161,7 @@ function App() {
   return (
     <>
       <Nav />
-      <main style={{ paddingTop: '120px' }}>
+      <main style={{ paddingTop: '40px' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />

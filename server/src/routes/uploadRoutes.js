@@ -25,12 +25,24 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// אתחול ImageKit עם משתני סביבה
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY || '',
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || ''
-});
+// פונקציה שמאתחלת את ImageKit רק אם ה-ENV קיימים, כדי למנוע קריסה באתחול השרת
+function getImageKitOrError() {
+  const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+
+  if (!publicKey || !privateKey || !urlEndpoint) {
+    return { error: 'חסרים משתני סביבה ל-ImageKit (IMAGEKIT_PUBLIC_KEY/PRIVATE_KEY/URL_ENDPOINT)' };
+  }
+
+  return {
+    client: new ImageKit({
+      publicKey,
+      privateKey,
+      urlEndpoint
+    })
+  };
+}
 
 router.post('/image', upload.single('image'), async (req, res) => {
   try {
@@ -38,18 +50,19 @@ router.post('/image', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'לא נבחרה תמונה' });
     }
 
-    if (!imagekit.options || !imagekit.options.publicKey || !imagekit.options.privateKey || !imagekit.options.urlEndpoint) {
-      return res.status(500).json({ error: 'חסרים משתני סביבה ל-ImageKit' });
+    const { client, error } = getImageKitOrError();
+    if (error) {
+      return res.status(500).json({ error });
     }
 
     const ext = path.extname(req.file.originalname || '') || '';
     const base = path.basename(req.file.originalname || 'image', ext).slice(0, 80) || 'image';
     const fileName = `${base}-${Date.now()}${ext}`;
 
-    const uploadResult = await imagekit.upload({
+    const uploadResult = await client.upload({
       file: req.file.buffer, // Buffer
       fileName,
-      // אפשר להוסיף תיקיה ב-ImageKit אם רוצים: folder: '/products'
+      folder: '/products'
     });
 
     // החזרת URL ציבורי. ניתן להוסיף פרמטרי טרנספורמציה לפי צורך

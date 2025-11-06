@@ -96,6 +96,19 @@ const deleteSurveyResponse = async (id) => {
   return result.affectedRows > 0;
 };
 
+const resetProductSurvey = async (productId) => {
+  console.log(`Attempting to reset survey for product ID: ${productId}`);
+  
+  // First check if there are any responses for this product
+  const [checkResult] = await pool.query("SELECT COUNT(*) as count FROM product_survey_responses WHERE product_id = ?", [productId]);
+  console.log(`Found ${checkResult[0].count} survey responses for product ${productId}`);
+  
+  const [result] = await pool.query("DELETE FROM product_survey_responses WHERE product_id = ?", [productId]);
+  console.log(`Deleted ${result.affectedRows} survey responses for product ${productId}`);
+  
+  return result.affectedRows;
+};
+
 export default {
   getAllSurveyResponses,
   getSurveyResponseById,
@@ -104,4 +117,5 @@ export default {
   createSurveyResponse,
   updateSurveyResponse,
   deleteSurveyResponse,
+  resetProductSurvey,
 };

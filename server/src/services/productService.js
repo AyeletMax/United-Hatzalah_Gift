@@ -2,9 +2,20 @@ import { pool } from "../db.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import ImageKit from "imagekit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function getImageKitClient() {
+  const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+  if (!publicKey || !privateKey || !urlEndpoint) return null;
+  return new ImageKit({ publicKey, privateKey, urlEndpoint });
+}
+
+
 
 const getAllProducts = async (filters = {}) => {
   let query = `
@@ -71,7 +82,7 @@ const createProduct = async (product) => {
   console.log('[productService.createProduct] Description:', product.description);
   
   const [result] = await pool.query(
-    "INSERT INTO products (name, description, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score, displayed_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO products (name, description, category_id, brand_id, unit_price_incl_vat, delivery_time_days, last_ordered_by_name, image_url, brand, last_buyer, popularity_score, displayed_by, is_new) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       product.name,
       product.description,
@@ -84,7 +95,8 @@ const createProduct = async (product) => {
       product.brand || null,
       product.last_buyer || null,
       product.popularity_score || 0,
-      product.displayed_by || null
+      product.displayed_by || null,
+      product.is_new || false
     ]
   );
   
@@ -101,7 +113,7 @@ const updateProduct = async (id, product) => {
   console.log('[productService.updateProduct] Input product:', product);
   
   const [result] = await pool.query(
-    "UPDATE products SET name = ?, description = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ?, brand = ?, last_buyer = ?, popularity_score = ?, displayed_by = ? WHERE id = ?",
+    "UPDATE products SET name = ?, description = ?, category_id = ?, brand_id = ?, unit_price_incl_vat = ?, delivery_time_days = ?, last_ordered_by_name = ?, image_url = ?, brand = ?, last_buyer = ?, popularity_score = ?, displayed_by = ?, is_new = ? WHERE id = ?",
     [
       product.name,
       product.description || null,
@@ -115,6 +127,7 @@ const updateProduct = async (id, product) => {
       product.last_buyer || null,
       product.popularity_score || 0,
       product.displayed_by || null,
+      product.is_new || false,
       id
     ]
   );
@@ -138,67 +151,38 @@ const deleteProduct = async (id) => {
 
   if (!deleted) return false;
 
-  // Attempt to delete from ImageKit when the URL points to ImageKit
+  // Attempt to delete image from ImageKit or local storage
   try {
     const imageUrl = product?.image_url;
-    const { IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, IMAGEKIT_URL_ENDPOINT } = process.env || {};
+    if (!imageUrl) return true;
 
-    const looksLikeImageKit = !!(imageUrl && IMAGEKIT_URL_ENDPOINT && imageUrl.startsWith(IMAGEKIT_URL_ENDPOINT));
-    const hasCreds = !!(IMAGEKIT_PUBLIC_KEY && IMAGEKIT_PRIVATE_KEY && IMAGEKIT_URL_ENDPOINT);
-
-    if (looksLikeImageKit && hasCreds) {
-      // Dynamic import to avoid hard dependency when not configured
-      const { default: ImageKit } = await import('imagekit');
-      const ik = new ImageKit({
-        publicKey: IMAGEKIT_PUBLIC_KEY,
-        privateKey: IMAGEKIT_PRIVATE_KEY,
-        urlEndpoint: IMAGEKIT_URL_ENDPOINT
-      });
-
-      // Derive path and file name from URL to find fileId
-      // Example URL: `${IMAGEKIT_URL_ENDPOINT}/folder/sub/filename.jpg?tr=...`
-      const withoutEndpoint = imageUrl.replace(IMAGEKIT_URL_ENDPOINT, '');
-      const withoutQuery = withoutEndpoint.split('?')[0];
-      // Ensure leading slash removed for splitting
-      const cleanPath = withoutQuery.startsWith('/') ? withoutQuery.slice(1) : withoutQuery;
-      const parts = cleanPath.split('/');
-      const fileName = parts.pop();
-      const dirPath = '/' + parts.join('/'); // ImageKit paths start with '/'
-
-      try {
-        // Narrow search by both path and name to get exact fileId
-        const files = await ik.listFiles({
-          path: dirPath === '/' ? '' : dirPath,
-          name: fileName,
-          limit: 1
-        });
-        const file = Array.isArray(files) && files.length > 0 ? files[0] : null;
-        if (file?.fileId) {
-          await ik.deleteFile(file.fileId);
-        } else {
-          // Fallback: try searchQuery in case CDN transformations changed the path
-          const fallback = await ik.listFiles({
-            searchQuery: `name = \"${fileName}\"`,
+    // Check if it's an ImageKit URL
+    const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+    if (endpoint && imageUrl.startsWith(endpoint)) {
+      const ikClient = getImageKitClient();
+      if (ikClient) {
+        try {
+          // Extract filename from URL
+          const urlParts = imageUrl.split('/');
+          const filename = urlParts[urlParts.length - 1].split('?')[0];
+          
+          // Search for the file by name
+          const files = await ikClient.listFiles({
+            searchQuery: `name = "${filename}"`,
             limit: 1
           });
-          const fallbackFile = Array.isArray(fallback) && fallback.length > 0 ? fallback[0] : null;
-          if (fallbackFile?.fileId) {
-            await ik.deleteFile(fallbackFile.fileId);
+          
+          if (files && files.length > 0) {
+            await ikClient.deleteFile(files[0].fileId);
+            console.log('[productService.deleteProduct] ImageKit image deleted:', filename);
           }
+        } catch (ikErr) {
+          console.error('[productService.deleteProduct] ImageKit deletion failed:', ikErr.message);
         }
-      } catch (ikErr) {
-        console.error('[productService.deleteProduct] ImageKit deletion failed:', ikErr?.message || ikErr);
       }
     }
-  } catch (err) {
-    // Log but do not fail the request if ImageKit deletion fails
-    console.error('[productService.deleteProduct] Error during ImageKit deletion attempt:', err?.message || err);
-  }
-
-  // Attempt to remove local uploaded file if exists
-  try {
-    const imageUrl = product?.image_url;
-    if (imageUrl && imageUrl.includes('/uploads/')) {
+    // Check if it's a local upload
+    else if (imageUrl.includes('/uploads/')) {
       const afterUploads = imageUrl.split('/uploads/')[1];
       if (afterUploads) {
         const filename = afterUploads.split('?')[0];
@@ -206,12 +190,12 @@ const deleteProduct = async (id) => {
         const filePath = path.join(uploadsDir, filename);
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
+          console.log('[productService.deleteProduct] Local image deleted:', filePath);
         }
       }
     }
   } catch (err) {
-    // Log but do not fail the request if file deletion fails
-    console.error('[productService.deleteProduct] Failed to delete image file:', err.message);
+    console.error('[productService.deleteProduct] Failed to delete image:', err.message);
   }
 
   return true;

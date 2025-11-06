@@ -1,3 +1,12 @@
+/* Hide scrollbar for all browsers */
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
 /* ריווח עליון כדי שהתוכן לא יוסתר ע"י הניווט */
 body, .app-content {
 	padding-top: 100px;

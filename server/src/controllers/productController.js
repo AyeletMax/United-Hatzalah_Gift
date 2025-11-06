@@ -66,7 +66,8 @@ const createProduct = async (req, res) => {
       unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : parseFloat(req.body.unit_price_incl_vat),
       category_id: parseInt(req.body.category_id),
       brand_id: req.body.brand_id ? parseInt(req.body.brand_id) : null,
-      popularity_score: req.body.popularity_score ? parseInt(req.body.popularity_score) : 0
+      popularity_score: req.body.popularity_score ? parseInt(req.body.popularity_score) : 0,
+      is_new: req.body.is_new || false
     };
     
     console.log('[createProduct] Cleaned data:', JSON.stringify(cleanedData, null, 2));
@@ -114,7 +115,8 @@ const updateProduct = async (req, res) => {
       unit_price_incl_vat: req.body.unit_price_incl_vat === '' ? 0 : parseFloat(req.body.unit_price_incl_vat),
       category_id: parseInt(req.body.category_id),
       brand_id: req.body.brand_id ? parseInt(req.body.brand_id) : null,
-      popularity_score: req.body.popularity_score ? parseInt(req.body.popularity_score) : 0
+      popularity_score: req.body.popularity_score ? parseInt(req.body.popularity_score) : 0,
+      is_new: req.body.is_new || false
     };
     
     console.log('[updateProduct] Cleaned data:', cleanedData);
