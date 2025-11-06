@@ -463,7 +463,11 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
                 checked={formData.is_new}
                 onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
               />
-              מוצר חדש (יופיע בקטגוריית "מוצרים חדשים")
+              <span className="toggle-switch"></span>
+              <div className="checkbox-text">
+                <div className="main-text">מוצר חדש</div>
+                <div className="sub-text">יופיע בקטגוריית "מוצרים חדשים"</div>
+              </div>
             </label>
           </div>
           
