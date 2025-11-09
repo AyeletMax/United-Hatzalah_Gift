@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
 import ConfirmDialog from "./ConfirmDialog.jsx";
-import { useSurveyReset } from "../hooks/useSurveyReset.js";
+
 
 export default function ProductList({ products = [], categorySlug }) {
   const navigate = useNavigate();
@@ -14,7 +14,38 @@ export default function ProductList({ products = [], categorySlug }) {
   const [categories, setCategories] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const { isResetting, showResetConfirm, resetProductSurvey, handleResetConfirm, handleResetCancel } = useSurveyReset();
+  const [isResetting, setIsResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [productToReset, setProductToReset] = useState(null);
+
+  const resetProductSurvey = (productId, e) => {
+    e.stopPropagation();
+    setProductToReset(productId);
+    setShowResetConfirm(true);
+  };
+
+  const handleResetConfirm = () => {
+    if (productToReset) {
+      setIsResetting(true);
+      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
+      const filteredResponses = {};
+      Object.keys(userResponses).forEach(key => {
+        if (userResponses[key].productId !== productToReset) {
+          filteredResponses[key] = userResponses[key];
+        }
+      });
+      localStorage.setItem('userSurveyResponses', JSON.stringify(filteredResponses));
+      window.showToast && window.showToast('סקר המוצר אופס בהצלחה', 'success');
+      setIsResetting(false);
+    }
+    setShowResetConfirm(false);
+    setProductToReset(null);
+  };
+
+  const handleResetCancel = () => {
+    setShowResetConfirm(false);
+    setProductToReset(null);
+  };
 
   // טעינת קטגוריות מהשרת
   const loadCategories = async () => {
