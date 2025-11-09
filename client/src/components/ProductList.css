@@ -147,6 +147,14 @@
   color: #f39c12;
 }
 
+.product-card .edit-btn:hover {
+  color: #f39c12;
+}
+
+.product-card .delete-btn:hover {
+  color: #f39c12;
+}
+
 
 
 
