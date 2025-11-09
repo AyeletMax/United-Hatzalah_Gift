@@ -127,14 +127,28 @@ export default function ProductModal({ product, isOpen, onClose }) {
       if (response.ok) {
         const serverResponses = await response.json();
         // המר את תגובות השרת לפורמט הנדרש
-        const convertedResponses = serverResponses.map(sr => ({
-          productId: sr.product_id,
-          rating: sr.rating,
-          userName: sr.user_name,
-          userEmail: sr.user_email,
-          timestamp: sr.created_at,
-          answers: { 1: sr.rating, 2: sr.rating, 3: sr.rating }
-        }));
+        const convertedResponses = serverResponses.map(sr => {
+          let answers = { 1: sr.rating, 2: sr.rating, 3: sr.rating }; // ברירת מחדל
+          
+          // אם יש תשובות שמורות, השתמש בהן
+          if (sr.answers) {
+            try {
+              const parsedAnswers = typeof sr.answers === 'string' ? JSON.parse(sr.answers) : sr.answers;
+              answers = parsedAnswers;
+            } catch (e) {
+              console.warn('שגיאה בפרסור תשובות:', e);
+            }
+          }
+          
+          return {
+            productId: sr.product_id,
+            rating: sr.rating,
+            userName: sr.user_name,
+            userEmail: sr.user_email,
+            timestamp: sr.created_at,
+            answers: answers
+          };
+        });
         
         const results = calculateSurveyResults(convertedResponses);
         setSurveyResults(results);
@@ -229,7 +243,8 @@ export default function ProductModal({ product, isOpen, onClose }) {
           product_id: product.id,
           user_name: userName.trim(),
           user_email: userEmail.trim(),
-          rating: starRating
+          rating: starRating,
+          answers: surveyAnswers
         })
       });
       

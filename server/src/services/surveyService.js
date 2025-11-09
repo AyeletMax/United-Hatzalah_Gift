@@ -66,7 +66,7 @@ const checkUserResponse = async (productId, userName, userEmail) => {
 };
 
 const createSurveyResponse = async (surveyResponse) => {
-  const { product_id, user_name, user_email, rating } = surveyResponse;
+  const { product_id, user_name, user_email, rating, answers } = surveyResponse;
   
   // Check if user already responded
   const hasResponded = await checkUserResponse(product_id, user_name, user_email);
@@ -74,11 +74,14 @@ const createSurveyResponse = async (surveyResponse) => {
     throw new Error('משתמש זה כבר דירג את המוצר');
   }
   
+  // שמירת התגובה עם התשובות כ-JSON
+  const answersJson = answers ? JSON.stringify(answers) : null;
+  
   const [result] = await pool.query(
-    "INSERT INTO product_survey_responses (product_id, user_name, user_email, rating) VALUES (?, ?, ?, ?)",
-    [product_id, user_name, user_email, rating]
+    "INSERT INTO product_survey_responses (product_id, user_name, user_email, rating, answers) VALUES (?, ?, ?, ?, ?)",
+    [product_id, user_name, user_email, rating, answersJson]
   );
-  return { id: result.insertId, product_id, user_name, user_email, rating, created_at: new Date() };
+  return { id: result.insertId, product_id, user_name, user_email, rating, answers, created_at: new Date() };
 };
 
 const updateSurveyResponse = async (id, surveyResponse) => {
