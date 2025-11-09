@@ -25,8 +25,14 @@ export const useSurveyReset = () => {
         return;
       }
       
+      const apiUrl = baseUrl.includes("localhost")
+        ? baseUrl
+        : baseUrl.includes("onrender.com")
+        ? baseUrl
+        : `${baseUrl}.onrender.com`;
+      
       // איפוס רק בבסיס הנתונים
-      const response = await fetch(`${baseUrl}/api/survey/reset/${productToReset}`, { 
+      const response = await fetch(`${apiUrl}/api/survey/reset/${productToReset}`, { 
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

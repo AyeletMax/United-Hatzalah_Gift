@@ -5,8 +5,13 @@ const getApiUrl = () => {
   const baseUrl = import.meta.env.VITE_API_URL;
   if (!baseUrl) return null;
   
-  // החזר את ה-URL תמיד (גם בלוקל וגם בענן)
-  return baseUrl;
+  const apiUrl = baseUrl.includes("localhost")
+    ? baseUrl
+    : baseUrl.includes("onrender.com")
+    ? baseUrl
+    : `${baseUrl}.onrender.com`;
+  
+  return apiUrl;
 };
 
 const API_URL = getApiUrl();
