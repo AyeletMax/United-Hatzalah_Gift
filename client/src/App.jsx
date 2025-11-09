@@ -1,3 +1,4 @@
+import React from "react";
 import "./App.css";
 import "./theme.css";
 import "./responsive.css";
@@ -23,6 +24,7 @@ import ProductModal from "./components/ProductModal.jsx";
 import Nav from "./components/Nav.jsx";
 import Footer from "./components/Footer.jsx";
 import ToastManager from "./components/ToastManager.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9", image: carImg },
@@ -160,6 +162,7 @@ function HomePage() {
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Nav />
       <main style={{ paddingTop: '40px' }}>
         <Routes>
