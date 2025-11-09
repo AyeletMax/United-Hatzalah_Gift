@@ -94,6 +94,22 @@ app.use("/api/brands", brandRoutes);
 app.use("/api/catalogs", catalogRoutes);
 console.log('Registering survey routes at /api/survey');
 app.use("/api/survey", surveyRoutes);
+
+// Debug route to list all survey routes
+app.get('/api/survey-debug', (req, res) => {
+  res.json({
+    availableRoutes: [
+      'GET /api/survey/',
+      'GET /api/survey/check/:productId/:userName/:userEmail',
+      'GET /api/survey/product/:productId',
+      'GET /api/survey/:id',
+      'POST /api/survey/',
+      'PUT /api/survey/:id',
+      'DELETE /api/survey/reset/:productId',
+      'DELETE /api/survey/:id'
+    ]
+  });
+});
 app.use("/api/questions", questionRoutes);
 app.use("/api/upload", uploadRoutes);
 
@@ -102,18 +118,7 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is working' });
 });
 
-// Direct survey reset route
-app.delete('/api/survey/reset/:productId', async (req, res) => {
-  try {
-    console.log(`Direct reset survey for product: ${req.params.productId}`);
-    const [result] = await pool.query("DELETE FROM product_survey_responses WHERE product_id = ?", [req.params.productId]);
-    console.log(`Deleted ${result.affectedRows} survey responses`);
-    res.json({ success: true, deletedCount: result.affectedRows });
-  } catch (error) {
-    console.error('Error resetting survey:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+
 
 // Removed test upload route that conflicted with real upload route
 

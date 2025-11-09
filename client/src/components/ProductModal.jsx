@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './ProductModal.css';
 
-const API_URL = window.location.hostname === 'localhost' 
-  ? (import.meta.env.VITE_API_URL || 'http://localhost:3000')
-  : null; // בענן נשתמש רק ב-localStorage
+const getApiUrl = () => {
+  const baseUrl = import.meta.env.VITE_API_URL;
+  if (!baseUrl) return null;
+  
+  // החזר את ה-URL תמיד (גם בלוקל וגם בענן)
+  return baseUrl;
+};
+
+const API_URL = getApiUrl();
 
 export default function ProductModal({ product, isOpen, onClose }) {
   const [surveyAnswers, setSurveyAnswers] = useState({});
@@ -60,96 +66,80 @@ export default function ProductModal({ product, isOpen, onClose }) {
     }, 3000);
   };
 
-  const loadSurveyResults = async () => {
-    if (!API_URL) {
-      // בענן - טען מ-localStorage
-      const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-      const productResponses = Object.values(userResponses).filter(r => r.productId === product.id);
-      
-      if (productResponses.length > 0) {
-        const totalResponses = productResponses.length;
-        const totalRating = productResponses.reduce((sum, item) => sum + (item.rating || 0), 0);
-        const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
-        
-        const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        productResponses.forEach(item => {
-          if (item.rating >= 1 && item.rating <= 5) {
-            ratingCounts[item.rating]++;
-          }
-        });
-        
-        const questionResults = {};
-        surveyQuestions.forEach(question => {
-          const answerCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-          productResponses.forEach(item => {
-            if (item.answers && item.answers[question.id]) {
-              const answer = item.answers[question.id];
-              if (answer >= 1 && answer <= 5) {
-                answerCounts[answer]++;
-              }
-            }
-          });
-          
-          const percentages = {};
-          for (let answer = 1; answer <= 5; answer++) {
-            percentages[answer] = totalResponses > 0 ? Math.round((answerCounts[answer] / totalResponses) * 100) : 0;
-          }
-          questionResults[question.id] = percentages;
-        });
-        
-        setSurveyResults({
-          totalResponses,
-          averageRating: parseFloat(averageRating),
-          questions: questionResults
-        });
-      } else {
-        setSurveyResults({ totalResponses: 0, averageRating: 0, questions: { 1: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, 2: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, 3: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } } });
-      }
-      return;
+  const calculateSurveyResults = (productResponses) => {
+    if (productResponses.length === 0) {
+      return {
+        totalResponses: 0,
+        averageRating: 0,
+        questions: {
+          1: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+          2: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+          3: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        }
+      };
     }
+
+    const totalResponses = productResponses.length;
+    const totalRating = productResponses.reduce((sum, item) => sum + (item.rating || 0), 0);
+    const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
     
-    // localhost - השתמש ב-localStorage כמו בענן
-    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    const productResponses = Object.values(userResponses).filter(r => r.productId === product.id);
-    
-    if (productResponses.length > 0) {
-      const totalResponses = productResponses.length;
-      const totalRating = productResponses.reduce((sum, item) => sum + (item.rating || 0), 0);
-      const averageRating = totalResponses > 0 ? (totalRating / totalResponses).toFixed(1) : 0;
-      
-      const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const questionResults = {};
+    surveyQuestions.forEach(question => {
+      const answerCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
       productResponses.forEach(item => {
-        if (item.rating >= 1 && item.rating <= 5) {
-          ratingCounts[item.rating]++;
-        }
-      });
-      
-      const questionResults = {};
-      surveyQuestions.forEach(question => {
-        const answerCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        productResponses.forEach(item => {
-          if (item.answers && item.answers[question.id]) {
-            const answer = item.answers[question.id];
-            if (answer >= 1 && answer <= 5) {
-              answerCounts[answer]++;
-            }
+        if (item.answers && item.answers[question.id]) {
+          const answer = item.answers[question.id];
+          if (answer >= 1 && answer <= 5) {
+            answerCounts[answer]++;
           }
-        });
-        
-        const percentages = {};
-        for (let answer = 1; answer <= 5; answer++) {
-          percentages[answer] = totalResponses > 0 ? Math.round((answerCounts[answer] / totalResponses) * 100) : 0;
         }
-        questionResults[question.id] = percentages;
       });
       
-      setSurveyResults({
-        totalResponses,
-        averageRating: parseFloat(averageRating),
-        questions: questionResults
-      });
-    } else {
-      setSurveyResults({ totalResponses: 0, averageRating: 0, questions: { 1: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, 2: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, 3: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } } });
+      const percentages = {};
+      for (let answer = 1; answer <= 5; answer++) {
+        percentages[answer] = totalResponses > 0 ? Math.round((answerCounts[answer] / totalResponses) * 100) : 0;
+      }
+      questionResults[question.id] = percentages;
+    });
+    
+    return {
+      totalResponses,
+      averageRating: parseFloat(averageRating),
+      questions: questionResults
+    };
+  };
+
+  const loadSurveyResults = async () => {
+    try {
+      if (!API_URL) {
+        console.warn('אין חיבור לשרת - לא ניתן לטעון תוצאות סקר');
+        setSurveyResults(calculateSurveyResults([]));
+        return;
+      }
+      
+      // טען רק מבסיס הנתונים
+      const response = await fetch(`${API_URL}/api/survey/product/${product.id}`);
+      if (response.ok) {
+        const serverResponses = await response.json();
+        // המר את תגובות השרת לפורמט הנדרש
+        const convertedResponses = serverResponses.map(sr => ({
+          productId: sr.product_id,
+          rating: sr.rating,
+          userName: sr.user_name,
+          userEmail: sr.user_email,
+          timestamp: sr.created_at,
+          answers: { 1: sr.rating, 2: sr.rating, 3: sr.rating }
+        }));
+        
+        const results = calculateSurveyResults(convertedResponses);
+        setSurveyResults(results);
+      } else {
+        console.error('שגיאה בטעינת נתונים מהשרת');
+        setSurveyResults(calculateSurveyResults([]));
+      }
+    } catch (error) {
+      console.error('שגיאה בטעינת תוצאות הסקר:', error);
+      setSurveyResults(calculateSurveyResults([]));
     }
   };
 
@@ -163,98 +153,73 @@ export default function ProductModal({ product, isOpen, onClose }) {
       return;
     }
     
-    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-    
     if (!API_URL) {
-      // בענן - בדוק רק localStorage
-      if (userResponses[userKey]) {
-        setUserAlreadyAnswered(true);
-        setShowUserForm(false);
-      } else {
-        setUserAlreadyAnswered(false);
-        setShowUserForm(false);
-        setShowSurveyForm(true);
-      }
+      showMessage('אין חיבור לשרת - לא ניתן לבדוק סקרים', 'error');
       return;
     }
     
-    // localhost - נסה שרת
     try {
-      const response = await fetch(`${API_URL}/api/surveys/check/${product.id}/${encodeURIComponent(userName.trim())}/${encodeURIComponent(userEmail.trim())}`);
-      const data = await response.json();
+      // בדיקה רק בבסיס הנתונים
+      const response = await fetch(`${API_URL}/api/survey/check/${product.id}/${encodeURIComponent(userName.trim())}/${encodeURIComponent(userEmail.trim())}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      if (data.hasResponded) {
-        setUserAlreadyAnswered(true);
-        setShowUserForm(false);
-      } else {
-        setUserAlreadyAnswered(false);
-        setShowUserForm(false);
-        setShowSurveyForm(true);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.hasResponded) {
+          setUserAlreadyAnswered(true);
+          setShowUserForm(false);
+          return;
+        }
       }
+      
+      // אם לא נמצא דירוג - המשך לסקר
+      setUserAlreadyAnswered(false);
+      setShowUserForm(false);
+      setShowSurveyForm(true);
+      
     } catch (error) {
-      // Fallback to localStorage
-      if (userResponses[userKey]) {
-        setUserAlreadyAnswered(true);
-        setShowUserForm(false);
-      } else {
-        setUserAlreadyAnswered(false);
-        setShowUserForm(false);
-        setShowSurveyForm(true);
-      }
+      console.error('שגיאה בבדיקת משתמש:', error);
+      showMessage('שגיאה בבדיקת הנתונים - בדוק חיבור לאינטרנט', 'error');
     }
   };
   
   const submitSurvey = async () => {
-    // בדיקת שאלות חסרות
-    const unansweredQuestions = [];
-    surveyQuestions.forEach(question => {
-      if (!surveyAnswers[question.id]) {
-        unansweredQuestions.push(question.text);
-      }
-    });
-    
-    if (unansweredQuestions.length > 0) {
-      showMessage(`אנא ענה על השאלות הבאות:\n${unansweredQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`, 'warning');
-      return;
-    }
-    
-    // בדיקת דירוג כוכבים
-    if (starRating === 0) {
-      showMessage('אנא בחר דירוג כוכבים (מ 1 עד 5 כוכבים)', 'warning');
-      return;
-    }
-    
-
-    const userResponses = JSON.parse(localStorage.getItem('userSurveyResponses') || '{}');
-    const userKey = `${product.id}_${userName.trim()}_${userEmail.trim()}`;
-    userResponses[userKey] = {
-      productId: product.id,
-      answers: surveyAnswers,
-      rating: starRating,
-      userName: userName.trim(),
-      userEmail: userEmail.trim(),
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('userSurveyResponses', JSON.stringify(userResponses));
-    
-    if (!API_URL) {
-      // בענן - שמור רק מקומית ועדכן תוצאות
-      setShowSurveyForm(false);
-      setShowResults(true);
-      await loadSurveyResults();
-      showMessage('תודה רבה על הדירוג!', 'success');
-      if (window.showToast) {
-        window.showToast('הדירוג נשמר בהצלחה', 'success', 4000);
-      }
-      return;
-    }
-    
-    // localhost - נסה לשמור לשרת
     try {
-      const response = await fetch(`${API_URL}/api/surveys`, {
+      // בדיקת שאלות חסרות
+      const unansweredQuestions = [];
+      surveyQuestions.forEach(question => {
+        if (!surveyAnswers[question.id]) {
+          unansweredQuestions.push(question.text);
+        }
+      });
+      
+      if (unansweredQuestions.length > 0) {
+        showMessage(`אנא ענה על השאלות הבאות:\n${unansweredQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`, 'warning');
+        return;
+      }
+      
+      // בדיקת דירוג כוכבים
+      if (starRating === 0) {
+        showMessage('אנא בחר דירוג כוכבים (מ 1 עד 5 כוכבים)', 'warning');
+        return;
+      }
+
+      if (!API_URL) {
+        showMessage('אין חיבור לשרת - לא ניתן לשמור סקר', 'error');
+        return;
+      }
+      
+      // שמירה רק בבסיס הנתונים
+      const response = await fetch(`${API_URL}/api/survey`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         body: JSON.stringify({
           product_id: product.id,
           user_name: userName.trim(),
@@ -263,28 +228,29 @@ export default function ProductModal({ product, isOpen, onClose }) {
         })
       });
       
-      if (response.status === 409) {
+      if (response.ok) {
+        // סיום מוצלח
+        setShowSurveyForm(false);
+        setShowResults(true);
+        await loadSurveyResults();
+        
+        showMessage('תודה רבה על הדירוג!', 'success');
+        
+        if (window.showToast) {
+          window.showToast('הדירוג נשמר בבסיס הנתונים!', 'success', 4000);
+        }
+      } else if (response.status === 409) {
         showMessage('כבר דירגת את המוצר הזה', 'info');
         setUserAlreadyAnswered(true);
         setShowSurveyForm(false);
-        return;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        showMessage(errorData.error || 'שגיאה בשמירת הסקר', 'error');
       }
       
-      setShowSurveyForm(false);
-      setShowResults(true);
-      setTimeout(() => loadSurveyResults(), 100);
-      showMessage('תודה רבה על הדירוג!', 'success');
-      if (window.showToast) {
-        window.showToast('הדירוג נשמר בהצלחה', 'success', 4000);
-      }
     } catch (error) {
-      setShowSurveyForm(false);
-      setShowResults(true);
-      setTimeout(() => loadSurveyResults(), 100);
-      showMessage('הדירוג נשמר מקומית', 'success');
-      if (window.showToast) {
-        window.showToast('הדירוג נשמר מקומית', 'success', 4000);
-      }
+      console.error('שגיאה בשליחת הסקר:', error);
+      showMessage('שגיאה בחיבור לשרת - בדוק חיבור לאינטרנט', 'error');
     }
   };
 
