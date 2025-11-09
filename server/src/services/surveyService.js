@@ -97,16 +97,39 @@ const deleteSurveyResponse = async (id) => {
 };
 
 const resetProductSurvey = async (productId) => {
-  console.log(`Attempting to reset survey for product ID: ${productId}`);
-  
-  // First check if there are any responses for this product
-  const [checkResult] = await pool.query("SELECT COUNT(*) as count FROM product_survey_responses WHERE product_id = ?", [productId]);
-  console.log(`Found ${checkResult[0].count} survey responses for product ${productId}`);
-  
-  const [result] = await pool.query("DELETE FROM product_survey_responses WHERE product_id = ?", [productId]);
-  console.log(`Deleted ${result.affectedRows} survey responses for product ${productId}`);
-  
-  return result.affectedRows;
+  try {
+    console.log(`איפוס סקר למוצר ID: ${productId}`);
+    
+    // Validate productId
+    if (!productId || productId <= 0) {
+      throw new Error('מזהה מוצר לא תקין');
+    }
+    
+    // בדיקה מוקדמת של מספר התגובות למחיקה
+    const [countResult] = await pool.query(
+      "SELECT COUNT(*) as count FROM product_survey_responses WHERE product_id = ?", 
+      [productId]
+    );
+    const existingCount = countResult[0]?.count || 0;
+    
+    if (existingCount === 0) {
+      console.log(`אין סקרים למוצר ${productId} למחיקה`);
+      return 0;
+    }
+    
+    // מחיקת התגובות
+    const [result] = await pool.query(
+      "DELETE FROM product_survey_responses WHERE product_id = ?", 
+      [productId]
+    );
+    
+    console.log(`נמחקו ${result.affectedRows} סקרים למוצר ${productId}`);
+    
+    return result.affectedRows;
+  } catch (error) {
+    console.error(`שגיאה באיפוס סקר מוצר ${productId}:`, error.message);
+    throw error;
+  }
 };
 
 export default {

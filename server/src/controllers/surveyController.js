@@ -38,22 +38,62 @@ const getSurveyResponsesByProduct = async (req, res) => {
 const checkUserResponse = async (req, res) => {
   try {
     const { productId, userName, userEmail } = req.params;
+    
+    // וידוא פרמטרים
+    if (!productId || !userName || !userEmail) {
+      return res.status(400).json({ 
+        error: 'חסרים פרמטרים נדרשים',
+        hasResponded: false 
+      });
+    }
+    
+    console.log(`בדיקת תגובת משתמש - מוצר: ${productId}, משתמש: ${userName}`);
+    
     const hasResponded = await surveyService.checkUserResponse(productId, userName, userEmail);
+    
+    console.log(`תוצאת בדיקה - מוצר ${productId}: ${hasResponded ? 'כבר דירג' : 'לא דירג'}`);
+    
     res.json({ hasResponded });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`שגיאה בבדיקת תגובת משתמש - מוצר ${req.params.productId}:`, err.message);
+    res.status(500).json({ 
+      error: 'שגיאה פנימית בשרת',
+      hasResponded: false 
+    });
   }
 };
 
 const createSurveyResponse = async (req, res) => {
   try {
+    const { product_id, user_name, user_email, rating } = req.body;
+    
+    // וידוא נתונים
+    if (!product_id || !user_name || !user_email || !rating) {
+      return res.status(400).json({ 
+        error: 'חסרים נתונים נדרשים לסקר' 
+      });
+    }
+    
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ 
+        error: 'דירוג חייב להיות בין 1 ל-5' 
+      });
+    }
+    
+    console.log(`יצירת תגובת סקר - מוצר: ${product_id}, משתמש: ${user_name}, דירוג: ${rating}`);
+    
     const newResponse = await surveyService.createSurveyResponse(req.body);
+    
+    console.log(`תגובת סקר נוצרה בהצלחה - ID: ${newResponse.id}`);
+    
     res.status(201).json(newResponse);
   } catch (err) {
+    console.error(`שגיאה ביצירת תגובת סקר:`, err.message);
+    
     if (err.message.includes('כבר דירג')) {
       res.status(409).json({ error: err.message });
     } else {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: 'שגיאה פנימית בשרת' });
     }
   }
 };
@@ -79,11 +119,40 @@ const deleteSurveyResponse = async (req, res) => {
 };
 
 const resetProductSurvey = async (req, res) => {
+  console.log('resetProductSurvey controller called');
+  console.log('req.params:', req.params);
   try {
-    const deletedCount = await surveyService.resetProductSurvey(req.params.productId);
-    res.json({ success: true, deletedCount });
+    const { productId } = req.params;
+    console.log('productId extracted:', productId);
+    
+    // Validate productId
+    if (!productId || isNaN(parseInt(productId))) {
+      console.log('Invalid productId');
+      return res.status(400).json({ error: 'מזהה מוצר לא תקין' });
+    }
+    
+    console.log('Calling surveyService.resetProductSurvey with:', parseInt(productId));
+    const deletedCount = await surveyService.resetProductSurvey(parseInt(productId));
+    console.log('Service returned deletedCount:', deletedCount);
+    
+    if (deletedCount === 0) {
+      console.log('No surveys found, returning success with 0 count');
+      return res.json({ 
+        success: true, 
+        deletedCount: 0,
+        message: 'אין סקרים למוצר זה לאיפוס'
+      });
+    }
+    
+    console.log('Surveys deleted successfully, count:', deletedCount);
+    res.json({ 
+      success: true, 
+      deletedCount,
+      message: `נמחקו ${deletedCount} סקרים בהצלחה`
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('שגיאה באיפוס סקר מוצר:', err);
+    res.status(500).json({ error: 'שגיאה פנימית בשרת' });
   }
 };
 
