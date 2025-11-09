@@ -26,7 +26,7 @@ import ToastManager from "./components/ToastManager.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9", image: carImg },
-  { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff", image: clothesImg },
+  { id: 2, key: "textile", title: " ביגוד קיץ וחורף", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff", image: clothesImg },
   { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff", image: kitchenImg },
   { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0", image: judaicaImg },
   { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff", image: winterImg },
