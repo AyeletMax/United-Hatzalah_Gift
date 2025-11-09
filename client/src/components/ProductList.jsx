@@ -174,7 +174,7 @@ export default function ProductList({ products = [], categorySlug }) {
 
   return (
     <>
-      <div className={`product-list-grid ${editingProduct ? 'modal-open' : ''}`}>
+      <div className={`product-list-grid ${editingProduct ? 'modal-open' : ''} ${products.length <= 3 ? 'few-products' : ''}`}>
         {products.map((p) => (
           <div className="product-card" key={p.id} onClick={() => handleProductClick(p)}>
           {p.image_url && !p.image_url.includes('via.placeholder') && (
@@ -189,7 +189,7 @@ export default function ProductList({ products = [], categorySlug }) {
             />
           )}
           {(!p.image_url || p.image_url.includes('via.placeholder')) && (
-            <div className="product-placeholder" style={{ display: 'flex', width: '120px', height: '120px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '48px' }}>
+            <div className="product-placeholder" style={{ display: 'flex', width: '100px', height: '100px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '40px' }}>
               📦
             </div>
           )}
