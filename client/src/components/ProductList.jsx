@@ -457,21 +457,17 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             }}
           />
           
-          <input
-            type="text"
-            placeholder="מוצג על ידי"
-            value={formData.displayed_by}
-            onChange={(e) => setFormData({...formData, displayed_by: e.target.value})}
-          />
+
           
-          <div className="checkbox-field">
-            <label>
+          <div className="toggle-container">
+            <label className="toggle-label">מוצר חדש</label>
+            <label className="toggle-switch">
               <input
                 type="checkbox"
                 checked={formData.is_new}
                 onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
               />
-              מוצר חדש (יופיע בקטגוריית "מוצרים חדשים")
+              <span className="slider"></span>
             </label>
           </div>
           
