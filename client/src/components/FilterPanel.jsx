@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './FilterPanel.css';
 
-export default function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
+function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
   // סגירה בלחיצה על הרקע במובייל
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget && window.innerWidth <= 768) {
@@ -56,6 +56,18 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
   useEffect(() => {
     onFilterChange(filters);
   }, [filters, onFilterChange]);
+
+  // עדכון הסרגל הכתום
+  useEffect(() => {
+    const slider = document.querySelector('.price-slider');
+    if (slider && priceRange.max > priceRange.min) {
+      const minPercent = ((filters.priceRange.min - priceRange.min) / (priceRange.max - priceRange.min)) * 100;
+      const maxPercent = ((filters.priceRange.max - priceRange.min) / (priceRange.max - priceRange.min)) * 100;
+      
+      slider.style.setProperty('--range-left', `${minPercent}%`);
+      slider.style.setProperty('--range-width', `${maxPercent - minPercent}%`);
+    }
+  }, [filters.priceRange, priceRange]);
 
   // מאזין לאירוע איפוס סינונים
   useEffect(() => {
@@ -218,3 +230,5 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
     </div>
   );
 }
+
+export default FilterPanel;
