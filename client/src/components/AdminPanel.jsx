@@ -456,18 +456,15 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             }}
           />
           
-          <div className="checkbox-field">
-            <label>
+          <div className="toggle-container">
+            <label className="toggle-label">מוצר חדש</label>
+            <label className="toggle-switch">
               <input
                 type="checkbox"
                 checked={formData.is_new}
                 onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
               />
-              <span className="toggle-switch"></span>
-              <div className="checkbox-text">
-                <div className="main-text">מוצר חדש</div>
-                <div className="sub-text">יופיע בקטגוריית "מוצרים חדשים"</div>
-              </div>
+              <span className="slider"></span>
             </label>
           </div>
           

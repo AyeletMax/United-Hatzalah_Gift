@@ -1,3 +1,4 @@
+import React from "react";
 import "./App.css";
 import "./theme.css";
 import "./responsive.css";
@@ -23,10 +24,11 @@ import ProductModal from "./components/ProductModal.jsx";
 import Nav from "./components/Nav.jsx";
 import Footer from "./components/Footer.jsx";
 import ToastManager from "./components/ToastManager.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 const categories = [
   { id: 1, key: "car", title: "לרכב", slug: "לרכב", icon: "🚗", color: "#fff2e9", image: carImg },
-  { id: 2, key: "textile", title: "טקסטיל וביגוד", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff", image: clothesImg },
+  { id: 2, key: "textile", title: " ביגוד קיץ וחורף", slug: "טקסטיל-וביגוד", icon: "👕", color: "#e9f0ff", image: clothesImg },
   { id: 3, key: "home", title: "כלי בית", slug: "כלי-בית", icon: "🍽️", color: "#f1f7ff", image: kitchenImg },
   { id: 4, key: "judaica", title: "יודאיקה", slug: "יודאיקה", icon: "🕯️", color: "#fff7f0", image: judaicaImg },
   { id: 8, key: "winter", title: "מוצרי חורף", slug: "מוצרי-חורף", icon: "❄️", color: "#e9f5ff", image: winterImg },
@@ -160,6 +162,7 @@ function HomePage() {
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Nav />
       <main style={{ paddingTop: '40px' }}>
         <Routes>
