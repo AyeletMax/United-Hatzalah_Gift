@@ -674,3 +674,9 @@
   0% { right: -320px; }
   100% { right: 0; }
 }
+
+.drawer-link.current-page {
+  background: rgba(243, 108, 33, 0.2);
+  color: var(--uh-orange);
+  font-weight: 900;
+}

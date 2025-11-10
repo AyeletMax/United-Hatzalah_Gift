@@ -1,8 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Nav.css';
 
 export default function MobileDrawer({ open, items, onClose }) {
+  const location = useLocation();
+  
   const handleLinkClick = () => {
     if (navigator.vibrate) navigator.vibrate(50);
     setTimeout(onClose, 200);
