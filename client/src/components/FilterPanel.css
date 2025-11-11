@@ -373,9 +373,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
   
-  .main-content.filter-open {
-    padding-top: 140px;
-  }
+
 
   select {
     max-height: 60px !important;

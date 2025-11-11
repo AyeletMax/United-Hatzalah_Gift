@@ -155,8 +155,8 @@ export default function FilterPage() {
       />
       
       <div className={`main-content ${filterPanelOpen ? 'filter-open' : ''}`}>
-        <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
-        {currentCategory ? `סינון מוצרים - ${currentCategory.title}` : 'סינון מוצרים'}
+        <h2 style={{ textAlign: "center", marginTop: 10, marginBottom: 20 }}>
+        {currentCategory ? currentCategory.title : 'כל המוצרים'}
       </h2>
 
       {!hasFiltered ? (
