@@ -13,12 +13,14 @@
     margin-left: 0 !important;
     padding: 0 15px;
     transition: all 0.4s ease;
+    margin-top: 0;
   }
   
   .main-content.filter-open {
     margin-left: 0 !important;
-    opacity: 0.7;
-    pointer-events: none;
+    margin-top: 80px;
+    opacity: 1;
+    pointer-events: all;
   }
   
   .product-list-grid {
