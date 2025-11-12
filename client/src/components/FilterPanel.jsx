@@ -126,7 +126,7 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
         <div className="filter-content" onClick={(e) => e.stopPropagation()}>
           {/* סינון לפי מחיר */}
           <div className="filter-section">
-            <h4>טווח מחירים</h4>
+            <h4>מחיר</h4>
             <div className="price-range">
               <div className="price-slider">
                 <input
@@ -160,7 +160,7 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
 
           {/* מיון */}
           <div className="filter-section">
-            <h4>מיון לפי</h4>
+            <h4>מיון</h4>
             <select
               value={filters.sortBy}
               onChange={(e) => updateFilter('sortBy', e.target.value)}
@@ -177,7 +177,7 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
 
           {/* זמן אספקה */}
           <div className="filter-section">
-            <h4>זמן אספקה</h4>
+            <h4>אספקה</h4>
             <select
               value={filters.deliveryTime}
               onChange={(e) => updateFilter('deliveryTime', e.target.value)}
@@ -210,7 +210,7 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
 
           {/* שם מזמין אחרון */}
           <div className="filter-section">
-            <h4>חיפוש לפי שם</h4>
+            <h4>חיפוש</h4>
             <input
               type="text"
               placeholder="חפש לפי שם מזמין/מותג"
