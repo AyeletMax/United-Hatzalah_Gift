@@ -111,8 +111,8 @@
     direction: rtl !important;
     background: white !important;
     display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr !important;
-    grid-template-rows: auto auto !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto auto !important;
     gap: 6px !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -122,36 +122,36 @@
     box-sizing: border-box !important;
   }
   
-  /* שורה ראשונה: מיון, סינון מחיר, חיפוש */
-  .filter-content .filter-section:nth-child(2) { /* מיון */
+  /* עמודה ראשונה */
+  .filter-content .filter-section:nth-child(1) { /* סינון מחיר */
     grid-column: 1;
     grid-row: 1;
   }
   
-  .filter-content .filter-section:nth-child(1) { /* סינון מחיר */
+  .filter-content .filter-section:nth-child(2) { /* מיון */
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .filter-content .filter-section:nth-child(3) { /* זמן אספקה */
+    grid-column: 1;
+    grid-row: 3;
+  }
+  
+  /* עמודה שנייה */
+  .filter-content .filter-section:nth-child(4) { /* מותג */
     grid-column: 2;
     grid-row: 1;
   }
   
   .filter-content .filter-section:nth-child(5) { /* חיפוש לפי שם */
-    grid-column: 3;
-    grid-row: 1;
-  }
-  
-  /* שורה שנייה: זמן אספקה, מותג, איפוס */
-  .filter-content .filter-section:nth-child(3) { /* זמן אספקה */
-    grid-column: 1;
-    grid-row: 2;
-  }
-  
-  .filter-content .filter-section:nth-child(4) { /* מותג */
     grid-column: 2;
     grid-row: 2;
   }
   
   .filter-content .filter-actions { /* איפוס */
-    grid-column: 3;
-    grid-row: 2;
+    grid-column: 2;
+    grid-row: 3;
   }
 }
 
@@ -537,20 +537,16 @@
     margin-bottom: 0;
     background: transparent;
     padding: 0;
-    width: 100%;
+    width: 140px !important;
+    height: 50px !important;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
   }
 
   .filter-section h4 {
-    display: block;
-    margin: 0 0 3px 0;
-    color: #333;
-    font-size: 9px;
-    font-weight: 600;
-    text-align: center;
+    display: none;
   }
   
   .filter-section h4::after {
@@ -560,22 +556,26 @@
 
   /* תיקון מיוחד לשדות select במובייל */
   .filter-section select {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #f4a261;
-    border-radius: 4px;
-    font-size: 10px;
+    width: 120px !important;
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 11px;
     background: white;
     color: #333;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(244, 162, 97, 0.1);
+    box-shadow: none;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     cursor: pointer;
-    height: 28px;
+    height: 32px !important;
     font-weight: 500;
     text-align: center;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .filter-section select:focus {
@@ -586,18 +586,22 @@
 
   .filter-section input[type="text"],
   .filter-section input[type="number"] {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #f4a261;
-    border-radius: 4px;
-    font-size: 10px;
+    width: 120px !important;
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 11px;
     background: white;
     color: #333;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(244, 162, 97, 0.1);
-    height: 28px;
+    box-shadow: none;
+    height: 32px !important;
     font-weight: 500;
     text-align: center;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .filter-section input:focus {
@@ -659,32 +663,45 @@
   }
 
   .price-range {
+    display: none;
+  }
+  
+  .filter-section:nth-child(1) {
+    position: relative;
+  }
+  
+  .filter-section:nth-child(1)::after {
+    content: 'מחיר: 0-1000₪';
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    background: white;
-    padding: 4px;
-    border-radius: 4px;
-    border: 1px solid #f4a261;
-    width: 100%;
-    height: 28px;
+    align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(244, 162, 97, 0.1);
+    width: 120px;
+    height: 32px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
   }
 
   .price-display {
     text-align: center;
     font-weight: 600;
-    color: #f4a261;
-    font-size: 8px;
-    padding: 1px;
+    color: #333;
+    font-size: 10px;
+    padding: 2px;
     background: transparent;
     border: none;
     margin: 0;
+    display: block;
+    visibility: visible;
   }
 
   .filter-actions {
-    width: 100%;
+    width: 140px !important;
+    height: 50px !important;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -695,19 +712,22 @@
   }
   
   .reset-btn {
-    width: 100%;
-    padding: 6px;
+    width: 120px !important;
+    padding: 5px 8px;
     background: linear-gradient(135deg, #f4a261 0%, #e76f51 100%);
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 10px;
+    border-radius: 12px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     margin: 0;
-    height: 28px;
-    box-shadow: 0 1px 3px rgba(244, 162, 97, 0.2);
+    height: 32px !important;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .reset-btn:hover {
