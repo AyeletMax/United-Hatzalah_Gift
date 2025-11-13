@@ -18,9 +18,15 @@
   
   .main-content.filter-open {
     margin-left: 0 !important;
-    margin-top: 80px;
+    margin-top: 0;
+    padding-top: 120px;
     opacity: 1;
     pointer-events: all;
+  }
+  
+  .main-content.filter-open h2 {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
   }
   
   .product-list-grid {
