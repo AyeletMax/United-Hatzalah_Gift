@@ -54,11 +54,6 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
     onFilterChange(newFilters);
   };
 
-  // עדכון מיידי כשהסינונים משתנים
-  useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
-
 
   // מאזין לאירוע איפוס סינונים
   useEffect(() => {
@@ -71,11 +66,12 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
         lastBuyer: ''
       };
       setFilters(resetFilters);
+      onFilterChange(resetFilters);
     };
 
     window.addEventListener('resetFilters', handleResetFilters);
     return () => window.removeEventListener('resetFilters', handleResetFilters);
-  }, [priceRange]);
+  }, [priceRange, onFilterChange]);
 
   // איפוס הסינונים
   const resetFilters = () => {

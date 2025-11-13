@@ -13,7 +13,16 @@ export default function AllProductsList() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const { isResetting, showResetConfirm, resetProductSurvey, handleResetConfirm, handleResetCancel } = useSurveyReset();
+  const { isResetting, showResetConfirm, resetProductSurvey, handleResetConfirm: originalHandleResetConfirm, handleResetCancel } = useSurveyReset();
+
+  // Wrapper function to refresh products after reset
+  const handleResetConfirm = async () => {
+    await originalHandleResetConfirm();
+    // Refresh products after successful reset
+    if (refreshProducts) {
+      refreshProducts();
+    }
+  };
 
   const [categories] = useState([
     { id: 1, name: "לרכב" },
