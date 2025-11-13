@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import './FilterPanel.css';
 
 function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
@@ -57,17 +59,6 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
     onFilterChange(filters);
   }, [filters, onFilterChange]);
 
-  // עדכון הסרגל הכתום
-  useEffect(() => {
-    const slider = document.querySelector('.price-slider');
-    if (slider && priceRange.max > priceRange.min) {
-      const minPercent = ((filters.priceRange.min - priceRange.min) / (priceRange.max - priceRange.min)) * 100;
-      const maxPercent = ((filters.priceRange.max - priceRange.min) / (priceRange.max - priceRange.min)) * 100;
-      
-      slider.style.setProperty('--range-left', `${minPercent}%`);
-      slider.style.setProperty('--range-width', `${maxPercent - minPercent}%`);
-    }
-  }, [filters.priceRange, priceRange]);
 
   // מאזין לאירוע איפוס סינונים
   useEffect(() => {
@@ -128,30 +119,19 @@ function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
           <div className="filter-section">
             <h4>מחיר</h4>
             <div className="price-range">
-              <div className="price-slider">
-                <input
-                  type="range"
-                  min={priceRange.min}
-                  max={priceRange.max}
-                  value={filters.priceRange.min}
-                  onChange={(e) => updateFilter('priceRange', {
-                    ...filters.priceRange,
-                    min: parseInt(e.target.value)
-                  })}
-                  className="slider-min"
-                />
-                <input
-                  type="range"
-                  min={priceRange.min}
-                  max={priceRange.max}
-                  value={filters.priceRange.max}
-                  onChange={(e) => updateFilter('priceRange', {
-                    ...filters.priceRange,
-                    max: parseInt(e.target.value)
-                  })}
-                  className="slider-max"
-                />
-              </div>
+              <Slider
+                range
+                min={priceRange.min}
+                max={priceRange.max}
+                value={[filters.priceRange.min, filters.priceRange.max]}
+                onChange={(values) => {
+                  updateFilter('priceRange', {
+                    min: values[0],
+                    max: values[1]
+                  });
+                }}
+                className="price-slider-rc"
+              />
               <div className="price-display">
                 ₪{filters.priceRange.min} - ₪{filters.priceRange.max}
               </div>
