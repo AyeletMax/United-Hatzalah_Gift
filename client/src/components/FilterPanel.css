@@ -546,6 +546,17 @@
     align-items: center;
     justify-content: center;
   }
+  
+  .filter-section:focus,
+  .filter-section:active,
+  .filter-section:hover,
+  .filter-section:focus-within {
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-focus-ring-color: transparent !important;
+  }
 
   .filter-section h4 {
     display: none;
@@ -617,7 +628,13 @@
   .filter-section select:active,
   .filter-section input:active,
   .filter-section select:hover,
-  .filter-section input:hover {
+  .filter-section input:hover,
+  .price-slider input[type="range"]:focus,
+  .price-slider input[type="range"]:active,
+  .price-slider input[type="range"]:hover,
+  .price-range:focus,
+  .price-range:active,
+  .price-range:hover {
     outline: none !important;
     border: 1px solid #ddd !important;
     box-shadow: none !important;
@@ -626,6 +643,13 @@
     -webkit-tap-highlight-color: transparent !important;
     -webkit-focus-ring-color: transparent !important;
     -webkit-appearance: none !important;
+  }
+  
+  .price-slider input[type="range"]::-webkit-slider-thumb:focus,
+  .price-slider input[type="range"]::-webkit-slider-thumb:active {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   /* עיצוב אופציות select במובייל */
@@ -671,33 +695,35 @@
   .price-range {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    background: transparent;
-    padding: 0;
-    border: none;
+    gap: 2px;
+    background: white;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
     width: 120px !important;
     height: 32px !important;
     justify-content: center;
     align-items: center;
     box-shadow: none;
     margin: 0;
+    overflow: hidden;
   }
   
   .price-slider {
     position: relative;
-    height: 8px;
+    height: 4px;
     margin: 0;
     background: #e9ecef;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    border-radius: 2px;
     width: 100%;
+    border: none;
   }
   
   .price-display {
     text-align: center;
     font-weight: 600;
     color: #333;
-    font-size: 14px;
+    font-size: 9px;
     padding: 0;
     background: transparent;
     border: none;
