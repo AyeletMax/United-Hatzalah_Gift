@@ -155,8 +155,8 @@ export default function FilterPage() {
       />
       
       <div className={`main-content ${filterPanelOpen ? 'filter-open' : ''}`}>
-        <h2 style={{ textAlign: "center", marginTop: 40, marginBottom: 20 }}>
-        {currentCategory ? `סינון מוצרים - ${currentCategory.title}` : 'סינון מוצרים'}
+        <h2 style={{ textAlign: "center", marginTop: 10, marginBottom: 20 }}>
+        {currentCategory ? currentCategory.title : 'כל המוצרים'}
       </h2>
 
       {!hasFiltered ? (
@@ -210,9 +210,22 @@ export default function FilterPage() {
               <button 
                 className="reset-filters-btn"
                 onClick={() => {
+                  // חישוב טווח המחירים מהמוצרים
+                  const prices = products
+                    .map(p => parseFloat(p.unit_price_incl_vat))
+                    .filter(price => !isNaN(price));
+                  
+                  let minPrice = 0;
+                  let maxPrice = 1000;
+                  
+                  if (prices.length > 0) {
+                    minPrice = Math.floor(Math.min(...prices));
+                    maxPrice = Math.ceil(Math.max(...prices));
+                  }
+                  
                   // איפוס מלא של כל הסינונים
                   const resetFilters = {
-                    priceRange: { min: 0, max: 1000 },
+                    priceRange: { min: minPrice, max: maxPrice },
                     sortBy: '',
                     deliveryTime: '',
                     brand: '',

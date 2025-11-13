@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import './FilterPanel.css';
 
-export default function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
+function FilterPanel({ products, onFilterChange, isOpen, onToggle }) {
   // סגירה בלחיצה על הרקע במובייל
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget && window.innerWidth <= 768) {
@@ -52,10 +54,6 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
     onFilterChange(newFilters);
   };
 
-  // עדכון מיידי כשהסינונים משתנים
-  useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
 
   // מאזין לאירוע איפוס סינונים
   useEffect(() => {
@@ -68,11 +66,12 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
         lastBuyer: ''
       };
       setFilters(resetFilters);
+      onFilterChange(resetFilters);
     };
 
     window.addEventListener('resetFilters', handleResetFilters);
     return () => window.removeEventListener('resetFilters', handleResetFilters);
-  }, [priceRange]);
+  }, [priceRange, onFilterChange]);
 
   // איפוס הסינונים
   const resetFilters = () => {
@@ -114,32 +113,21 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
         <div className="filter-content" onClick={(e) => e.stopPropagation()}>
           {/* סינון לפי מחיר */}
           <div className="filter-section">
-            <h4>טווח מחירים</h4>
+            <h4>מחיר</h4>
             <div className="price-range">
-              <div className="price-slider">
-                <input
-                  type="range"
-                  min={priceRange.min}
-                  max={priceRange.max}
-                  value={filters.priceRange.min}
-                  onChange={(e) => updateFilter('priceRange', {
-                    ...filters.priceRange,
-                    min: parseInt(e.target.value)
-                  })}
-                  className="slider-min"
-                />
-                <input
-                  type="range"
-                  min={priceRange.min}
-                  max={priceRange.max}
-                  value={filters.priceRange.max}
-                  onChange={(e) => updateFilter('priceRange', {
-                    ...filters.priceRange,
-                    max: parseInt(e.target.value)
-                  })}
-                  className="slider-max"
-                />
-              </div>
+              <Slider
+                range
+                min={priceRange.min}
+                max={priceRange.max}
+                value={[filters.priceRange.min, filters.priceRange.max]}
+                onChange={(values) => {
+                  updateFilter('priceRange', {
+                    min: values[0],
+                    max: values[1]
+                  });
+                }}
+                className="price-slider-rc"
+              />
               <div className="price-display">
                 ₪{filters.priceRange.min} - ₪{filters.priceRange.max}
               </div>
@@ -148,7 +136,7 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
 
           {/* מיון */}
           <div className="filter-section">
-            <h4>מיון לפי</h4>
+            <h4>מיון</h4>
             <select
               value={filters.sortBy}
               onChange={(e) => updateFilter('sortBy', e.target.value)}
@@ -165,7 +153,7 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
 
           {/* זמן אספקה */}
           <div className="filter-section">
-            <h4>זמן אספקה</h4>
+            <h4>אספקה</h4>
             <select
               value={filters.deliveryTime}
               onChange={(e) => updateFilter('deliveryTime', e.target.value)}
@@ -198,7 +186,7 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
 
           {/* שם מזמין אחרון */}
           <div className="filter-section">
-            <h4>חיפוש לפי שם</h4>
+            <h4>חיפוש</h4>
             <input
               type="text"
               placeholder="חפש לפי שם מזמין/מותג"
@@ -218,3 +206,5 @@ export default function FilterPanel({ products, onFilterChange, isOpen, onToggle
     </div>
   );
 }
+
+export default FilterPanel;

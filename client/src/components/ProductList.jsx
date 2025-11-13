@@ -3,8 +3,9 @@ import "./ProductList.css";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "./AdminContext.jsx";
 import { useProducts } from "./ProductsContext.jsx";
-import ConfirmDialog from "./ConfirmDialog.jsx";
 import { useSurveyReset } from "../hooks/useSurveyReset.js";
+import ConfirmDialog from "./ConfirmDialog.jsx";
+
 
 export default function ProductList({ products = [], categorySlug }) {
   const navigate = useNavigate();
@@ -14,7 +15,16 @@ export default function ProductList({ products = [], categorySlug }) {
   const [categories, setCategories] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-  const { isResetting, showResetConfirm, resetProductSurvey, handleResetConfirm, handleResetCancel } = useSurveyReset();
+  const { isResetting, showResetConfirm, resetProductSurvey, handleResetConfirm: originalHandleResetConfirm, handleResetCancel } = useSurveyReset();
+
+  // Wrapper function to refresh products after reset
+  const handleResetConfirm = async () => {
+    await originalHandleResetConfirm();
+    // Refresh products after successful reset
+    if (refreshProducts) {
+      refreshProducts();
+    }
+  };
 
   // טעינת קטגוריות מהשרת
   const loadCategories = async () => {
@@ -174,7 +184,7 @@ export default function ProductList({ products = [], categorySlug }) {
 
   return (
     <>
-      <div className={`product-list-grid ${editingProduct ? 'modal-open' : ''}`}>
+      <div className={`product-list-grid ${editingProduct ? 'modal-open' : ''} ${products.length <= 3 ? 'few-products' : ''}`}>
         {products.map((p) => (
           <div className="product-card" key={p.id} onClick={() => handleProductClick(p)}>
           {p.image_url && !p.image_url.includes('via.placeholder') && (
@@ -189,7 +199,7 @@ export default function ProductList({ products = [], categorySlug }) {
             />
           )}
           {(!p.image_url || p.image_url.includes('via.placeholder')) && (
-            <div className="product-placeholder" style={{ display: 'flex', width: '120px', height: '120px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '48px' }}>
+            <div className="product-placeholder" style={{ display: 'flex', width: '100px', height: '100px', background: '#f0f0f0', borderRadius: '8px', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '40px' }}>
               📦
             </div>
           )}
@@ -457,21 +467,17 @@ const ProductForm = ({ product, categories, onSave, onClose }) => {
             }}
           />
           
-          <input
-            type="text"
-            placeholder="מוצג על ידי"
-            value={formData.displayed_by}
-            onChange={(e) => setFormData({...formData, displayed_by: e.target.value})}
-          />
+
           
-          <div className="checkbox-field">
-            <label>
+          <div className="toggle-container">
+            <label className="toggle-label">מוצר חדש</label>
+            <label className="toggle-switch">
               <input
                 type="checkbox"
                 checked={formData.is_new}
                 onChange={(e) => setFormData({...formData, is_new: e.target.checked})}
               />
-              מוצר חדש (יופיע בקטגוריית "מוצרים חדשים")
+              <span className="slider"></span>
             </label>
           </div>
           
