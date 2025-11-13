@@ -663,27 +663,42 @@
   }
 
   .price-range {
-    display: none;
-  }
-  
-  .filter-section:nth-child(1) {
-    position: relative;
-  }
-  
-  .filter-section:nth-child(1)::after {
-    content: 'מחיר: 0-1000₪';
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    padding: 0;
+    border: none;
+    width: 120px !important;
+    height: 32px !important;
     justify-content: center;
-    width: 120px;
-    height: 32px;
-    background: white;
+    align-items: center;
+    box-shadow: none;
+    margin: 0;
+  }
+  
+  .price-slider {
+    position: relative;
+    height: 8px;
+    margin: 0;
+    background: #e9ecef;
+    border-radius: 4px;
     border: 1px solid #ddd;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 500;
-    color: #333;
+    width: 100%;
+  }
+  
+  .price-display {
     text-align: center;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    margin: 0;
+    display: block;
+    visibility: visible;
+    line-height: 1;
   }
 
   .price-display {
