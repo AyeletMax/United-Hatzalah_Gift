@@ -428,13 +428,15 @@
 
 
   select {
-    max-height: 60px !important;
+    max-height: 120px !important;
+    overflow-y: auto !important;
   }
 
   select option {
-    padding: 3px 5px !important;
-    font-size: 11px !important;
-    line-height: 1 !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    min-height: 36px !important;
   }
 
   /* תיקון נוסף לרשימות נפתחות */
@@ -611,15 +613,19 @@
   }
 
   .filter-section select:focus,
-  .filter-section input:focus {
+  .filter-section input:focus,
+  .filter-section select:active,
+  .filter-section input:active,
+  .filter-section select:hover,
+  .filter-section input:hover {
     outline: none !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), inset 0 2px 4px rgba(0,0,0,0.2) !important;
-    background-color: rgba(0, 0, 0, 0.4) !important;
-  }
-
-  .filter-section select:active {
-    background-color: rgba(0, 0, 0, 0.9) !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: #333 !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-focus-ring-color: transparent !important;
+    -webkit-appearance: none !important;
   }
 
   /* עיצוב אופציות select במובייל */
